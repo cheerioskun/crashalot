@@ -15,5 +15,8 @@ Run `uv sync` to prepare the Python environment. The npm package is a placeholde
 
 - `docs/`: project context and design decisions
 - `data/`: data documentation; raw and generated data are ignored by default
+- `.agents/skills/`: shared agent guidance for editorial experience design and interactive chart implementation
+
+See [experience research](docs/experience-research.md) for references, skill assessments, and possible design directions.
 
 No dataset or website implementation is included yet.
