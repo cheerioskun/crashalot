@@ -2,5 +2,13 @@
   "name": "crashalot",
   "version": "0.1.0",
   "private": true,
-  "description": "Interactive aviation safety experience for the 6730 group project"
+  "description": "Interactive aviation safety experience for the 6730 group project",
+  "devDependencies": {
+    "vite": "^8.3.5"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  }
 }
