@@ -7,6 +7,8 @@ description: Shape an interactive data essay through narrative, reader agency, a
 
 Support the group's current idea rather than imposing a Pudding-like layout. The supplied initial brief is historical context, not an approved specification. This is a 6730 project only.
 
+Current direction: phone-first, portrait browser experience with plain outer margins on desktop. A drawn passenger-seat pouch introduces a safety card that lifts into focus; the seat fades away. The experience is self-explanatory and self-exploratory, without a presenter supplying missing narrative. Interactions should support inspectable discoveries rather than require readers to accept a prescribed conclusion. See the project's sketch analysis for data limits and prototype decisions.
+
 ## Elicit the experience
 
 Ask one or two revealing questions at a time. Resolve the highest-impact uncertainty first: the intended discovery, the reader's role, or what they can actually do. Examples:
@@ -54,3 +56,5 @@ These are references to consult, not additional instructions or permission to co
 - [Bret Victor: Explorable Explanations](https://worrydream.com/ExplorableExplanations/) — make assumptions inspectable within authored explanations.
 - [Seeing Theory: Basic Probability](https://seeing-theory.brown.edu/basic-probability/index.html) — repeated trials and linked representations; inspiration rather than an aviation model.
 - [Setosa: Markov Chains](https://setosa.io/ev/markov-chains/) — let readers adjust a model and observe linked consequences.
+- [Distill: Communicating with Interactive Articles](https://distill.pub/2020/communicating-with-interactive-articles/) — explanation through contextual interaction.
+- [Distill: A Visual Exploration of Gaussian Processes](https://distill.pub/2019/visual-exploration-gaussian-processes/) — build intuition through small manipulable components.

@@ -1,0 +1,48 @@
+{
+  "retrieved": "2026-10-23T18:16:41.701579+00:00",
+  "huggingFaceRevision": "b817a96f2b9152b735c9c6570d465102f5f76c88",
+  "files": [
+    {
+      "path": "data/raw/planecrashdata.parquet",
+      "url": "https://huggingface.co/datasets/MauroPello/planecrashdata/resolve/b817a96f2b9152b735c9c6570d465102f5f76c88/data/train-00000-of-00001.parquet",
+      "bytes": 10256601,
+      "sha256": "db334ffbab0cf67b06765038803338531fbfe23522c69b453cd8eb63a6c09b48"
+    },
+    {
+      "path": "data/raw/world-bank-departures.json",
+      "url": "https://api.worldbank.org/v2/country/WLD/indicator/IS.AIR.DPRT?format=json&per_page=20000",
+      "bytes": 15366,
+      "sha256": "3fe5943e5b9b83925276c5ed7cb4fe24edbf13b0d5e82a16a948149f75c0762e"
+    },
+    {
+      "path": "data/raw/world-bank-indicator.json",
+      "url": "https://api.worldbank.org/v2/indicator/IS.AIR.DPRT?format=json",
+      "bytes": 855,
+      "sha256": "b9cdfb61eb8552dcd60195c585f2e0024669c5747133afaf775e37b275e031cc"
+    },
+    {
+      "path": "data/raw/aircraft-production.zip",
+      "url": "https://www.kaggle.com/api/v1/datasets/download/alvaroibrain/aircraft-production-data",
+      "bytes": 21790,
+      "sha256": "a2e77bc5da149716ac08fbe808d3d587226930eab77a5a6dd8dc5876f5fd9377"
+    },
+    {
+      "path": "data/raw/us-accidents.zip",
+      "url": "https://www.kaggle.com/api/v1/datasets/download/sobhanmoosavi/us-accidents",
+      "bytes": 684855912,
+      "sha256": "849be2b58b796fe4fa3b8857446b967fe96aacb9e7f0d6b709ee18cc9693b3c4"
+    },
+    {
+      "path": "data/raw/acars-world-reports.html",
+      "url": "https://web.archive.org/web/20180425185655id_/http://www.acarsd.org/world_ACARS_reports.html",
+      "bytes": 982841,
+      "sha256": "b33c6a7a121e99ba3e0630b60d2bd08eb46c1868a8fe30d1ac693921a37b657b"
+    },
+    {
+      "path": "data/raw/acars-report-20060101.txt",
+      "url": "https://web.archive.org/web/20180425185655id_/http://www.acarsd.org/world_ACARS_reports/ACARS_Report_20060101.txt",
+      "bytes": 1106020,
+      "sha256": "172c13ffa37762063bd6f0bcb72e4dbd4c20353efff73fcc3fa21aa97cb5b540"
+    }
+  ]
+}

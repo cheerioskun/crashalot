@@ -11,7 +11,7 @@ The experience is still being shaped. A static placeholder introduces three sepa
 
 Run `uv sync` to prepare the Python environment.
 
-The website uses plain HTML/CSS and Vite, with no UI framework or runtime JavaScript:
+The website uses plain HTML/CSS, JavaScript, D3, and Vite, with no UI framework:
 
 ```sh
 npm ci
@@ -19,6 +19,8 @@ npm run dev
 ```
 
 Run `npm run build` to generate `dist/`, and `npm run preview` to preview that production build.
+
+Open `/sketches/` for eight interactive D3 prototypes based on the group's drawings. The gallery uses a portrait layout on phones and a narrow reading surface with plain margins on desktop. Observed records and constructed interaction examples are labeled separately. See [the sketch analysis](docs/sketch-analysis.md) for reasoning and [data documentation](data/README.md) for downloaded sources, licenses, and reproducibility.
 
 For Cloudflare Workers, import this repository, use `npm run build` as the build command and `npx wrangler deploy` as the deploy command. The included `wrangler.jsonc` serves `dist/` as static assets. Hosting has not been deployed as part of this setup.
 
@@ -32,4 +34,4 @@ For Cloudflare Workers, import this repository, use `npm run build` as the build
 
 See [experience research](docs/experience-research.md) for references, skill assessments, and possible design directions.
 
-No dataset or data visualizations are included yet. The route illustration is decorative and does not represent flight data.
+Raw datasets are stored locally and ignored by Git; the small reviewed chart inputs are tracked under `public/data/`. The opening-page route illustration is decorative and does not represent flight data.
