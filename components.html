@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A living component and theme study for an aviation data presentation." />
+    <title>Components — Crashalot</title>
+    <link id="component-theme" rel="stylesheet" />
+  </head>
+  <body>
+    <a class="visually-hidden-focusable skip-link" href="#study">Skip to component study</a>
+    <main id="study" class="study-shell">
+      <header class="study-header">
+        <div class="header-topline">
+          <p class="eyebrow mb-0">Crashalot / Component study 01</p>
+          <span class="status-label">A working conversation</span>
+        </div>
+        <div class="header-body">
+          <h1>A shared visual language.</h1>
+          <p class="header-intro">The same story, in different themes.</p>
+          <p class="text-body-secondary header-note">Try the parts together. Change their appearance. Keep the evidence and its meaning intact.</p>
+        </div>
+      </header>
+      <div class="study-toolbar bg-body">
+        <nav class="study-index" aria-label="Component sections">
+          <a href="#page"><span>01</span> Page</a>
+          <a href="#chart"><span>02</span> Evidence</a>
+          <a href="#controls"><span>03</span> Interaction</a>
+          <a href="#themes"><span>04</span> Theme roles</a>
+        </nav>
+        <form class="theme-picker" onsubmit="return false">
+          <label for="theme-select" class="form-label">Theme</label>
+          <div class="theme-field">
+            <select id="theme-select" class="form-select form-select-sm" aria-describedby="theme-description">
+              <option value="default">Bootstrap · Default</option>
+              <option value="sandstone">Bootswatch · Sandstone</option>
+              <option value="darkly">Bootswatch · Darkly</option>
+            </select>
+            <p class="form-text mb-0" id="theme-description">A neutral baseline for comparison.</p>
+            <p class="small mb-0" id="theme-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+
+      <section id="page" class="study-section" aria-labelledby="page-heading">
+        <div class="section-heading">
+          <p class="section-number">01</p>
+          <div><h2 id="page-heading">A page, before a page</h2><p class="text-body-secondary mb-0">Hierarchy, scope, and a definition that stays close to the story.</p></div>
+          <span class="specimen-label">Opening specimen</span>
+        </div>
+        <div class="opening-specimen">
+          <div class="opening-main">
+            <p class="eyebrow">Aviation safety / A question of perspective</p>
+            <h3>A closer look<br />at flying.</h3>
+            <p class="opening-deck">What can we learn when we look at the journeys that go right?</p>
+          </div>
+          <aside class="definition-note" aria-label="Working definition">
+            <span class="badge text-bg-secondary mb-3">Working definition</span>
+            <p class="definition-title">What do we mean by “safe”?</p>
+            <p>For this story, a safe flight means <strong>a flight with no fatal accident.</strong></p>
+            <p class="small text-body-secondary mb-0">This is a flight-level definition. It does not measure passenger survival or the absence of every incident.</p>
+          </aside>
+          <div class="specimen-footnote"><span>Scope is stated beside each graph.</span><span>Definition / context / evidence</span></div>
+        </div>
+      </section>
+
+      <section id="chart" class="study-section" aria-labelledby="chart-heading">
+        <div class="section-heading">
+          <p class="section-number">02</p>
+          <div><h2 id="chart-heading">Evidence in context</h2><p class="text-body-secondary mb-0">A real-data specimen for testing chart language, annotation, and scale.</p></div>
+          <span class="specimen-label">D3 specimen</span>
+        </div>
+        <div id="safety-chart-specimen" aria-busy="true"><p class="chart-loading text-body-secondary" role="status">Loading the evidence specimen…</p></div>
+        <p class="study-caption">Study population: U.S. Part 121 air carriers, passenger and cargo, 2005–2024. This is a component study; the final narrative population is still open.</p>
+      </section>
+
+      <section id="controls" class="study-section" aria-labelledby="controls-heading">
+        <div class="section-heading">
+          <p class="section-number">03</p>
+          <div><h2 id="controls-heading">Actions, states &amp; navigation</h2><p class="text-body-secondary mb-0">Familiar controls, with a clear reason to use them.</p></div>
+        </div>
+        <div class="interaction-layout">
+          <div class="interaction-specimen">
+            <p class="eyebrow">Reading modes</p>
+            <ul class="nav nav-pills gap-2 mb-4" id="reading-tabs" role="tablist" aria-label="Reading mode specimen">
+              <li class="nav-item" role="presentation"><button class="nav-link active" id="overview-tab" data-bs-toggle="pill" data-bs-target="#overview-panel" type="button" role="tab" aria-controls="overview-panel" aria-selected="true">Overview</button></li>
+              <li class="nav-item" role="presentation"><button class="nav-link" id="inspect-tab" data-bs-toggle="pill" data-bs-target="#inspect-panel" type="button" role="tab" aria-controls="inspect-panel" aria-selected="false">Inspect</button></li>
+            </ul>
+            <div class="tab-content reading-content">
+              <div class="tab-pane active" id="overview-panel" role="tabpanel" aria-labelledby="overview-tab" tabindex="0"><h3>Begin with the whole picture.</h3><p class="text-body-secondary">Show the full scale first. Give the reader a reference before asking them to inspect a small difference.</p></div>
+              <div class="tab-pane" id="inspect-panel" role="tabpanel" aria-labelledby="inspect-tab" tabindex="0"><h3>Make room for a closer look.</h3><p class="text-body-secondary">Magnify a clearly marked range while keeping the original scale available. Greater detail should preserve context.</p></div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button id="reset-reading" class="btn btn-outline-secondary" type="button">Reset view</button>
+              <button class="btn btn-outline-secondary" type="button" disabled>Next chapter</button>
+            </div>
+            <p class="form-text mt-3 mb-0">Navigation specimen. The next chapter becomes available when there is a chapter to visit.</p>
+          </div>
+          <div class="interaction-support">
+            <div class="accordion" id="source-accordion">
+              <div class="accordion-item">
+                <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#source-note" aria-expanded="false" aria-controls="source-note">Sources should be within reach</button></h3>
+                <div id="source-note" class="accordion-collapse collapse" data-bs-parent="#source-accordion"><div class="accordion-body">The evidence specimen uses <a href="https://www.ntsb.gov/safety/Pages/research.aspx" target="_blank" rel="noopener noreferrer">NTSB aviation accident statistics</a>. Its own source note explains the population, denominator, and limitations. A citation belongs beside the claim it supports.</div></div>
+              </div>
+            </div>
+            <div class="empty-state mt-4" role="note">
+              <p class="eyebrow mb-2">Missing-data state specimen</p>
+              <h3>No matching records</h3>
+              <p class="text-body-secondary mb-0">Explain what is missing and how to continue. An empty result is not a measured zero.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="themes" class="study-section" aria-labelledby="themes-heading">
+        <div class="section-heading">
+          <p class="section-number">04</p>
+          <div><h2 id="themes-heading">Change the theme. Keep the meaning.</h2><p class="text-body-secondary mb-0">Colors have roles. The roles travel with the presentation.</p></div>
+        </div>
+        <h3 class="palette-subheading">Four colors reserved for data</h3>
+        <p class="palette-note">An established ColorBrewer palette, supplied by D3. Blue, green, purple, and warm tones retain their roles across themes. Labels, line styles, and point shapes keep the key readable without color alone.</p>
+        <div class="role-swatches data-swatches" aria-label="Four visualization color roles and static key specimens">
+          <div class="data-role-a"><span class="role-swatch swatch-data" aria-hidden="true"></span><strong>A · Blue</strong><span>Solid line / circle</span><svg class="data-key" viewBox="0 0 180 36" aria-label="Series A key: solid blue line with circle" role="img"><line x1="4" y1="18" x2="176" y2="18"/><circle class="data-point" cx="90" cy="18" r="6"/></svg></div>
+          <div class="data-role-b"><span class="role-swatch swatch-data" aria-hidden="true"></span><strong>B · Green</strong><span>Dashed line / square</span><svg class="data-key" viewBox="0 0 180 36" aria-label="Series B key: dashed green line with square" role="img"><line x1="4" y1="18" x2="176" y2="18" stroke-dasharray="10 6"/><rect class="data-point" x="84" y="12" width="12" height="12"/></svg></div>
+          <div class="data-role-c"><span class="role-swatch swatch-data" aria-hidden="true"></span><strong>C · Purple</strong><span>Dotted line / triangle</span><svg class="data-key" viewBox="0 0 180 36" aria-label="Series C key: dotted purple line with triangle" role="img"><line x1="4" y1="18" x2="176" y2="18" stroke-dasharray="2 6" stroke-linecap="round"/><path class="data-point" d="M90 10 L98 24 L82 24 Z"/></svg></div>
+          <div class="data-role-d"><span class="role-swatch swatch-data" aria-hidden="true"></span><strong>D · Warm</strong><span>Dash-dot line / diamond</span><svg class="data-key" viewBox="0 0 180 36" aria-label="Series D key: warm dash-dot line with diamond" role="img"><line x1="4" y1="18" x2="176" y2="18" stroke-dasharray="10 5 2 5"/><path class="data-point" d="M90 10 L98 18 L90 26 L82 18 Z"/></svg></div>
+        </div>
+        <p class="palette-note mt-3 mb-0">Static legend specimens, not aviation observations. The graph above uses series A; the other colors are available when a comparison needs them.</p>
+        <div class="palette-interface">
+          <h3 class="palette-subheading">Neutral and interface roles</h3>
+          <p class="palette-note">Text, surfaces, reference marks, and controls support the evidence. Their colors are independent of the data palette.</p>
+          <div class="role-swatches" aria-label="Neutral and interface theme color roles">
+            <div><span class="role-swatch swatch-surface"></span><strong>Surface</strong><span>The page beneath the story</span></div>
+            <div><span class="role-swatch swatch-text"></span><strong>Text</strong><span>Primary reading and labels</span></div>
+            <div><span class="role-swatch swatch-reference"></span><strong>Reference</strong><span>The comparison anchor</span></div>
+            <div><span class="role-swatch swatch-grid"></span><strong>Structure</strong><span>Axes, rules, and boundaries</span></div>
+          </div>
+        </div>
+        <div class="theme-principle"><p class="mb-0">A theme may change surfaces, type treatment, and colors. <strong>It does not change the data, the scales, or what a mark means.</strong></p><p class="small text-body-secondary mb-0">These are library themes to compare, not a finished visual identity. All three use local assets and the same system typeface.</p></div>
+      </section>
+      <footer class="study-footer"><p class="mb-0">Built from existing parts, composed for this story.</p><p class="mb-0"><a href="https://getbootstrap.com/docs/5.3/" target="_blank" rel="noopener noreferrer">Bootstrap 5.3</a><span aria-hidden="true"> / </span><a href="https://bootswatch.com/" target="_blank" rel="noopener noreferrer">Bootswatch</a><span aria-hidden="true"> / </span><a href="https://d3js.org/" target="_blank" rel="noopener noreferrer">D3</a></p></footer>
+    </main>
+    <script type="module" src="/src/component-study.js"></script>
+  </body>
+</html>

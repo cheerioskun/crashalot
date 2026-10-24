@@ -1,6 +1,8 @@
 # Data
 
-Downloaded October 23, 2026. Raw source files stay local in `data/raw/`, which is ignored by Git. [sources.json](sources.json) records download URLs, byte sizes, hashes, and the Hugging Face revision.
+The original datasets below were downloaded October 23, 2026. References to chart usage describe historical prototypes removed in the October 24 reset. Raw source files stay local in `data/raw/`, which is ignored by Git. [sources.json](sources.json) records download URLs, byte sizes, hashes, and the Hugging Face revision.
+
+**Current instruction: use existing project datasets exclusively, with no new downloads.** Prefer ad hoc queries (including DuckDB) to newly authored inspection scripts. Existing files, including the later retained NTSB workbook and audit outputs, are preserved. See the [NTSB source notes](../docs/safety-trend-source.md) for their provenance and limitations.
 
 | Source | Local copy | Scope / license / use |
 | --- | --- | --- |
@@ -12,7 +14,9 @@ Downloaded October 23, 2026. Raw source files stay local in `data/raw/`, which i
 
 The Kaggle archives were extracted locally. The restore script downloads the original archives without extracting them. Do not commit the multi-gigabyte road file or raw archives.
 
-## Restore and prepare
+## Historical restore and preparation tooling
+
+The following commands document retained project tooling, not the current workflow. Do not run the fetch command under the current no-new-download instruction.
 
 ```sh
 uv sync
@@ -22,6 +26,6 @@ uv run python scripts/prepare_data.py
 
 `fetch_data.py` streams downloads and checks each downloaded file against the manifest hash. Unversioned sources can change; a mismatch stops for review. The ACARS restore covers the archived index and the selected daily report only.
 
-`prepare_data.py` generates `public/data/sketch-data.json` and records the local source hashes. It checks unique IDs, cohort total conservation, cause and phase reconciliation, and valid onboard fatality numerators. The small derived JSON is tracked so the static website builds without downloading raw data or installing Python in Cloudflare.
+`prepare_data.py` generates `public/data/sketch-data.json` and records the local source hashes. It checks unique IDs, cohort total conservation, cause and phase reconciliation, and valid onboard fatality numerators. This is historical gallery preparation tooling. Its generated JSON was removed in the reset and is not used by the new page; running this command recreates the old payload. The new page builds without raw data or Python.
 
-Derived aviation aggregates and limited narrative excerpts are attributed to MauroPello's PlaneCrashData (CC BY 4.0); departures are attributed to World Bank / ICAO (CC BY 4.0). Transformations: period/cohort filtering, aggregation, occupancy consistency checks, broad phase mapping, and explicit keyword matching. See [the sketch analysis](../docs/sketch-analysis.md) and the gallery's definitions for limitations. The source datasets' rights are not relicensed by this repository.
+Derived aviation aggregates and limited narrative excerpts are attributed to MauroPello's PlaneCrashData (CC BY 4.0); departures are attributed to World Bank / ICAO (CC BY 4.0). Transformations: period/cohort filtering, aggregation, occupancy consistency checks, broad phase mapping, and explicit keyword matching. See [the sketch analysis](../docs/sketch-analysis.md) for the historical prototype limitations. The source datasets' rights are not relicensed by this repository.

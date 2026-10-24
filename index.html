@@ -1,86 +1,35 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#edf3f7" />
-    <meta name="description" content="An interactive aviation data experience in the making. A 6730 group project." />
-    <title>crashalot — a 6730 group project</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/src/styles.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A different view of flying — Team Eyecandy</title>
+    <meta name="description" content="A closer look at aviation safety, risk, and perspective. A presentation by Team Eyecandy." />
+    <link id="presentation-theme" rel="stylesheet" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <a class="wordmark" href="#opening">crashalot<span aria-hidden="true">.</span></a>
-      <nav aria-label="Views">
-        <a href="#opening">01 <span>Opening</span></a>
-        <a href="#explore">02 <span>Explore</span></a>
-        <a href="#perspective">03 <span>Perspective</span></a>
-      </nav>
-      <span class="course">6730 · Group project</span>
+    <header class="presentation-header">
+      <a class="presentation-brand" href="#/welcome">Team Eyecandy</a>
+      <div class="presentation-theme-picker">
+        <label for="presentation-theme-select">Theme</label>
+        <select id="presentation-theme-select" class="form-select form-select-sm" aria-label="Presentation theme">
+          <option value="default">Bootstrap Default</option>
+          <option value="sandstone">Sandstone</option>
+          <option value="darkly">Darkly</option>
+        </select>
+        <span id="presentation-theme-status" class="visually-hidden" role="status"></span>
+      </div>
     </header>
-
-    <main id="main">
-      <section class="view opening" id="opening" aria-labelledby="opening-title">
-        <div class="opening-copy">
-          <p class="status"><span aria-hidden="true"></span> Work in progress</p>
-          <h1 id="opening-title">A different view<br />of flying.</h1>
-          <p class="intro">An interactive exploration of aviation accidents, safety, and how we understand risk.</p>
-          <p class="note">We’re building the experience. This is the first placeholder.</p>
-          <a class="next-link" href="/sketches/">Try the interactive sketches <span aria-hidden="true">↗</span></a>
-        </div>
-
-        <div class="sky" aria-hidden="true">
-          <div class="window">
-            <svg class="flight-path" viewBox="0 0 440 560" fill="none">
-              <path class="route-shadow" d="M-40 480 C160 480 84 306 242 304 S398 200 368 118" />
-              <path class="route" d="M-40 480 C160 480 84 306 242 304 S398 200 368 118" />
-              <circle cx="242" cy="304" r="6" fill="currentColor" />
-              <g transform="translate(368 118) rotate(-16)">
-                <path d="M0-30 5-8 27 5 27 11 5 4 4 23 12 29 12 33 0 29-12 33-12 29-4 23-5 4-27 11-27 5-5-8Z" fill="currentColor" />
-              </g>
-              <circle cx="368" cy="118" r="50" stroke="currentColor" stroke-opacity=".16" />
-            </svg>
-            <div class="cloud cloud-one"></div>
-            <div class="cloud cloud-two"></div>
-          </div>
-          <p class="window-caption">Room for a new perspective.</p>
-        </div>
-        <div class="view-footer"><span>01 / 03</span><span>The beginning</span></div>
-      </section>
-
-      <section class="view explore" id="explore" aria-labelledby="explore-title">
-        <div class="section-copy">
-          <p class="view-label">02 · Explore</p>
-          <h2 id="explore-title">Space to ask<br />better questions.</h2>
-          <p class="intro">This view will hold the data and the interactions that help us investigate it.</p>
-          <p class="note">The questions, charts, and datasets are still taking shape.</p>
-          <a class="next-link" href="#perspective">Next view <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="empty-stage">
-          <span class="stage-corner" aria-hidden="true">+</span>
-          <p>Visualization space</p>
-          <span>Data and interactions to come</span>
-        </div>
-        <div class="view-footer"><span>02 / 03</span><a href="#opening">Previous view ↑</a></div>
-      </section>
-
-      <section class="view perspective" id="perspective" aria-labelledby="perspective-title">
-        <div class="section-copy">
-          <p class="view-label">03 · Perspective</p>
-          <h2 id="perspective-title">What will we<br />see differently?</h2>
-          <p class="intro">A place to connect what we discover—and leave room for what the evidence can’t yet tell us.</p>
-          <p class="note">The story is in development. These views are a starting structure.</p>
-          <a class="next-link" href="#opening">Back to the beginning <span aria-hidden="true">↑</span></a>
-        </div>
-        <div class="project-note">
-          <span class="project-number">6730</span>
-          <p>A group project in progress.</p>
-          <a href="https://github.com/cheerioskun/crashalot">Follow the project on GitHub <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="view-footer"><span>03 / 03</span><a href="#explore">Previous view ↑</a></div>
-      </section>
-    </main>
+    <div class="reveal" aria-label="A different view of flying presentation">
+      <div class="slides"></div>
+      <footer class="presentation-footer">
+        <span class="presentation-keyboard-hint">Use the arrow keys to explore</span>
+        <nav aria-label="Presentation navigation">
+          <button type="button" class="btn btn-sm presentation-nav navigate-prev" aria-label="Previous page">← <span>Previous</span></button>
+          <button type="button" class="btn btn-sm presentation-nav navigate-next" aria-label="Next page"><span>Next</span> →</button>
+        </nav>
+      </footer>
+    </div>
+    <script type="module" src="/src/presentation.js"></script>
   </body>
 </html>

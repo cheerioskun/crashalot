@@ -1,0 +1,290 @@
+{
+  "meta": {
+    "title": "U.S. air-carrier fatal accidents and departures",
+    "status": "Verified component specimen; final narrative population remains provisional",
+    "population": "U.S. air carriers operating under 14 CFR Part 121, scheduled and nonscheduled service; passenger and cargo",
+    "geography": "U.S. operators worldwide, not all flights occurring in U.S. airspace",
+    "period": [
+      2005,
+      2024
+    ],
+    "unit": "Fatal accidents per million departures",
+    "sourceName": "National Transportation Safety Board, 2005\u20132024 U.S. Civil Aviation Accident Statistics",
+    "sourceUrl": "https://www.ntsb.gov/safety/Documents/AviationAccidentStatistics_2005-2024_20260112.xlsx",
+    "sourcePageUrl": "https://www.ntsb.gov/safety/Pages/research.aspx",
+    "sourceTables": [
+      "Table 5, A6:O25",
+      "Table 29, accident-aircraft detail",
+      "Table 12, intentional acts"
+    ],
+    "sourceWorkbookSha256": "83c00410f2004fbb9457cec8d01eef2b2c69badc2b3a0e21ed90d9366bbeb284",
+    "retrieved": "2026-10-24",
+    "sourcePageUpdated": "2026-04-21",
+    "definition": "Fatal accidents involving Part 121 air carriers, including accidents with fatalities on the ground. Flight exposure is departures compiled by the FAA.",
+    "formula": "ratePerMillion = fatalAccidents / departures \u00d7 1,000,000",
+    "complementFormula": "rateComplementPercent = 100 \u00d7 (1 - fatalAccidents / departures)",
+    "safeShareIdentified": false,
+    "limitations": [
+      "This is a U.S.-operator passenger-and-cargo series, not global passenger flights.",
+      "Fatal accidents include ground-handling fatalities; this is not a series of crashes or passenger deaths.",
+      "The source reports accident events and departures, not a census of completed flights linked to accident outcomes. The rate complement is computable, but an exact observed safe-flight percentage is not identified. safePercent is deliberately null.",
+      "The aircraft-detail audit finds one eligible aircraft in every fatal event in 2005\u20132024. There is no multiple-eligible-aircraft fatal collision adjustment in this period.",
+      "The observation window ends in 2024. It excludes 2025 events and must not be represented as current 2026 risk.",
+      "Zero observed fatal accidents is not proof of zero underlying risk.",
+      "Annual rates fluctuate; the series does not show an uninterrupted decline.",
+      "NTSB includes intentional acts in counts but excludes them from published rates. Table 12 lists none for scheduled Part 121 in this window, and direct count/departure rates reconcile with every annual published rate."
+    ],
+    "notes": [
+      "flights is a compatibility alias for departures; use the label departures.",
+      "No smoothing, interpolation, cross-source denominator join, or inferred passenger survival probability is used."
+    ]
+  },
+  "rows": [
+    {
+      "year": 2005,
+      "flights": 11130407,
+      "departures": 11130407,
+      "allAccidents": 40,
+      "fatalAccidents": 3,
+      "fatalAccidentAircraft": 3,
+      "ratePerMillion": 0.2695319227769479,
+      "rateComplementPercent": 99.99997304680772,
+      "safePercent": null,
+      "sourceRow": 6
+    },
+    {
+      "year": 2006,
+      "flights": 10820915,
+      "departures": 10820915,
+      "allAccidents": 33,
+      "fatalAccidents": 2,
+      "fatalAccidentAircraft": 2,
+      "ratePerMillion": 0.1848272535178402,
+      "rateComplementPercent": 99.99998151727465,
+      "safePercent": null,
+      "sourceRow": 7
+    },
+    {
+      "year": 2007,
+      "flights": 10928432,
+      "departures": 10928432,
+      "allAccidents": 28,
+      "fatalAccidents": 1,
+      "fatalAccidentAircraft": 1,
+      "ratePerMillion": 0.09150443540299286,
+      "rateComplementPercent": 99.99999084955647,
+      "safePercent": null,
+      "sourceRow": 8
+    },
+    {
+      "year": 2008,
+      "flights": 10448133,
+      "departures": 10448133,
+      "allAccidents": 27,
+      "fatalAccidents": 2,
+      "fatalAccidentAircraft": 2,
+      "ratePerMillion": 0.19142175927507812,
+      "rateComplementPercent": 99.99998085782408,
+      "safePercent": null,
+      "sourceRow": 9
+    },
+    {
+      "year": 2009,
+      "flights": 9705056,
+      "departures": 9705056,
+      "allAccidents": 30,
+      "fatalAccidents": 2,
+      "fatalAccidentAircraft": 2,
+      "ratePerMillion": 0.2060781514295229,
+      "rateComplementPercent": 99.99997939218485,
+      "safePercent": null,
+      "sourceRow": 10
+    },
+    {
+      "year": 2010,
+      "flights": 9633846,
+      "departures": 9633846,
+      "allAccidents": 30,
+      "fatalAccidents": 1,
+      "fatalAccidentAircraft": 1,
+      "ratePerMillion": 0.10380070430853887,
+      "rateComplementPercent": 99.99998961992958,
+      "safePercent": null,
+      "sourceRow": 11
+    },
+    {
+      "year": 2011,
+      "flights": 9583947,
+      "departures": 9583947,
+      "allAccidents": 33,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 12
+    },
+    {
+      "year": 2012,
+      "flights": 9390678,
+      "departures": 9390678,
+      "allAccidents": 28,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 13
+    },
+    {
+      "year": 2013,
+      "flights": 9401896,
+      "departures": 9401896,
+      "allAccidents": 22,
+      "fatalAccidents": 2,
+      "fatalAccidentAircraft": 2,
+      "ratePerMillion": 0.21272305075486903,
+      "rateComplementPercent": 99.99997872769492,
+      "safePercent": null,
+      "sourceRow": 14
+    },
+    {
+      "year": 2014,
+      "flights": 9178736,
+      "departures": 9178736,
+      "allAccidents": 31,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 15
+    },
+    {
+      "year": 2015,
+      "flights": 9107171,
+      "departures": 9107171,
+      "allAccidents": 28,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 16
+    },
+    {
+      "year": 2016,
+      "flights": 9242998,
+      "departures": 9242998,
+      "allAccidents": 30,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 17
+    },
+    {
+      "year": 2017,
+      "flights": 9274238,
+      "departures": 9274238,
+      "allAccidents": 33,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 18
+    },
+    {
+      "year": 2018,
+      "flights": 9526159,
+      "departures": 9526159,
+      "allAccidents": 31,
+      "fatalAccidents": 1,
+      "fatalAccidentAircraft": 1,
+      "ratePerMillion": 0.1049741034135584,
+      "rateComplementPercent": 99.99998950258966,
+      "safePercent": null,
+      "sourceRow": 19
+    },
+    {
+      "year": 2019,
+      "flights": 9751837,
+      "departures": 9751837,
+      "allAccidents": 40,
+      "fatalAccidents": 2,
+      "fatalAccidentAircraft": 2,
+      "ratePerMillion": 0.2050895641508364,
+      "rateComplementPercent": 99.99997949104359,
+      "safePercent": null,
+      "sourceRow": 20
+    },
+    {
+      "year": 2020,
+      "flights": 5997318,
+      "departures": 5997318,
+      "allAccidents": 15,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 21
+    },
+    {
+      "year": 2021,
+      "flights": 7726629,
+      "departures": 7726629,
+      "allAccidents": 23,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 22
+    },
+    {
+      "year": 2022,
+      "flights": 8525275,
+      "departures": 8525275,
+      "allAccidents": 20,
+      "fatalAccidents": 1,
+      "fatalAccidentAircraft": 1,
+      "ratePerMillion": 0.11729826897079566,
+      "rateComplementPercent": 99.9999882701731,
+      "safePercent": null,
+      "sourceRow": 23
+    },
+    {
+      "year": 2023,
+      "flights": 8960378,
+      "departures": 8960378,
+      "allAccidents": 32,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 24
+    },
+    {
+      "year": 2024,
+      "flights": 9274699,
+      "departures": 9274699,
+      "allAccidents": 34,
+      "fatalAccidents": 0,
+      "fatalAccidentAircraft": 0,
+      "ratePerMillion": 0.0,
+      "rateComplementPercent": 100.0,
+      "safePercent": null,
+      "sourceRow": 25
+    }
+  ],
+  "summary": {
+    "departures": 187608748,
+    "fatalAccidents": 17,
+    "ratePerMillion": 0.09061411144857702,
+    "rateComplementPercent": 99.99999093858885
+  }
+}

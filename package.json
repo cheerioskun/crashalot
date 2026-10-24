@@ -10,10 +10,14 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "data:prepare": "uv run python scripts/prepare_data.py"
+    "data:prepare": "uv run python scripts/prepare_data.py",
+    "themes:prepare": "node scripts/prepare_themes.mjs"
   },
+  "type": "module",
   "dependencies": {
-    "d3": "^7.9.0"
-  },
-  "type": "module"
+    "bootstrap": "^5.3.8",
+    "bootswatch": "^5.3.8",
+    "d3": "^7.9.0",
+    "reveal.js": "^6.0.2"
+  }
 }

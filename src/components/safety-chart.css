@@ -1,0 +1,66 @@
+.safety-chart {
+  --chart-series: var(--viz-series, var(--bs-primary));
+  --chart-reference: var(--viz-reference, var(--bs-body-color));
+  --chart-grid: var(--viz-grid, var(--bs-border-color));
+  --chart-muted: var(--viz-muted, var(--bs-secondary-color));
+  --chart-surface: var(--viz-surface, var(--bs-body-bg));
+  --chart-focus: var(--viz-focus, var(--bs-primary));
+  color: var(--bs-body-color);
+  width: 100%;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.safety-chart__heading { margin: 0 0 .25rem; font-size: clamp(1.65rem, 3vw, 2rem); letter-spacing: -.025em; }
+.safety-chart__scope { color: var(--chart-muted); margin: 0 0 1rem; }
+.safety-chart__controls { margin: 0 0 1rem; min-width: 0; }
+.safety-chart__controls .btn { font-size: .9rem; }
+.safety-chart__controls .btn-outline-primary {
+  --bs-btn-color: var(--bs-primary-text-emphasis);
+  --bs-btn-border-color: var(--bs-primary-text-emphasis);
+  --bs-btn-hover-color: var(--bs-body-bg);
+  --bs-btn-hover-bg: var(--bs-primary-text-emphasis);
+  --bs-btn-hover-border-color: var(--bs-primary-text-emphasis);
+  --bs-btn-active-color: var(--bs-body-bg);
+  --bs-btn-active-bg: var(--bs-primary-text-emphasis);
+  --bs-btn-active-border-color: var(--bs-primary-text-emphasis);
+}
+.safety-chart__controls .btn-check:focus-visible + .btn {
+  outline: 3px solid var(--chart-focus);
+  outline-offset: 3px;
+}
+.safety-chart__plot { width: 100%; min-width: 0; }
+.safety-chart__unit { font-size: .875rem; font-weight: 600; margin: 0 0 .6rem; }
+.safety-chart__svg { display: block; width: 100%; overflow: visible; }
+.safety-chart__axis { font-family: inherit; font-size: 14px; color: var(--chart-muted); }
+.safety-chart__axis--x .domain { stroke: var(--chart-reference); stroke-opacity: .5; }
+.safety-chart__grid line { stroke: var(--chart-grid); stroke-opacity: .65; }
+.safety-chart__line { fill: none; stroke: var(--chart-series); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.safety-chart__dot { fill: var(--chart-surface); stroke: var(--chart-series); stroke-width: 1.75; }
+.safety-chart__crosshair { stroke: var(--chart-reference); stroke-width: 1; stroke-dasharray: 3 5; stroke-opacity: .45; pointer-events: none; }
+.safety-chart__focus { fill: var(--chart-series); stroke: var(--chart-surface); stroke-width: 2.5; pointer-events: none; }
+.safety-chart__hit-area { fill: transparent; cursor: crosshair; touch-action: pan-y; }
+.safety-chart__inspection { display: grid; grid-template-columns: minmax(160px, .7fr) minmax(0, 1.3fr); gap: 2.5rem; align-items: center; margin-top: .65rem; padding-top: .65rem; border-top: 1px solid var(--chart-grid); }
+.safety-chart__year-label { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .35rem; width: 100%; }
+.safety-chart__year-label span { font-size: .875rem; color: var(--chart-muted); }
+.safety-chart__year-label strong { font-size: 1.5rem; font-weight: 600; }
+.safety-chart__readout-main { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600; margin: 0 0 .25rem; }
+.safety-chart__readout-detail { color: var(--chart-muted); font-size: .875rem; margin: 0; }
+.safety-chart__observation { margin: .65rem 0 .5rem; font-size: .875rem; color: var(--chart-muted); }
+.safety-chart__source { font-size: .8rem; color: var(--chart-muted); margin-bottom: .75rem; }
+.safety-chart__details { font-size: .875rem; border-top: 1px solid var(--chart-grid); padding-top: .65rem; }
+.safety-chart__details summary { cursor: pointer; font-weight: 600; width: fit-content; }
+.safety-chart__details[open] summary { margin-bottom: 1rem; }
+.safety-chart__details p { max-width: 80ch; }
+.safety-chart__table { font-size: .875rem; }
+.safety-chart__table th:not(:first-child), .safety-chart__table td { text-align: right; }
+.safety-chart__table th { font-weight: 600; }
+.safety-chart__table caption { color: var(--chart-muted); }
+.safety-chart :focus-visible { outline: 3px solid var(--chart-focus); outline-offset: 4px; }
+
+@media (max-width: 600px) {
+  .safety-chart__controls .btn { font-size: .75rem; padding: .65rem .55rem; }
+  .safety-chart__inspection { grid-template-columns: 1fr; gap: .9rem; }
+  .safety-chart__observation { min-height: 0; }
+  .safety-chart__table { min-width: 520px; }
+}

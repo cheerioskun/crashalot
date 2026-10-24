@@ -1,8 +1,8 @@
-# Sketch analysis and prototype decisions
+# Sketch analysis and prototype decisions — historical reference
 
-October 23, 2026. The supplied sketches are exploration proposals, not evidence that their drawn trends or numeric examples hold. Originals are retained in [sketches](sketches/). The eight working experiments are at `/sketches/`.
+Written October 23, 2026; retained after the October 24 reset for its evidence and reasoning. The gallery and its implementation have been removed; Git history retains them. References below to prototypes describe those historical experiments. The phone-first direction is superseded by a desktop-first, collaboratively designed HTML presentation hosted by Reveal.js. The supplied sketches are exploration proposals, not evidence that their drawn trends or numeric examples hold. Originals are retained in [sketches](sketches/).
 
-## Current experience direction
+## Historical experience direction
 
 The audience encounters this on a phone, plausibly via a QR code. Design a portrait browser experience first, with plain outer margins on larger screens. A passenger sees a **drawn**, not photographic, seatback pouch. Picking up the safety card brings it into focus and transitions out of the seat. Later views inherit the card's illustration language without necessarily retaining a fixed paper rectangle.
 

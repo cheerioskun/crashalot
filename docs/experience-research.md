@@ -1,6 +1,6 @@
-# Interactive data experience: references and skills
+# Interactive data experience: references and skills — historical reference
 
-Researched October 22, 2026. This is a resource assessment, not a product specification or framework decision. Sources are primary author/project resources. The skills below are original synthesis, not copied tutorials.
+Researched October 22, 2026. Retained after the October 24 reset as historical research; its implementation guidance is not the current specification. This is a resource assessment, not a product specification or framework decision. Sources are primary author/project resources. The skills below are original synthesis, not copied tutorials.
 
 ## Main finding
 
@@ -35,10 +35,10 @@ Used `npx --yes skills find scrollytelling` and `npx --yes skills find d3`, then
 
 No third-party skill was installed. The CLI was used for discovery. Two project-local skills were synthesized instead:
 
-- [editorial-data-experience](../.agents/skills/editorial-data-experience/SKILL.md): elicit the intended discovery, compare narrative forms, design meaningful interactions, and keep claims inspectable.
-- [d3-story-scenes](../.agents/skills/d3-story-scenes/SKILL.md): choose Plot versus D3 by behavior; implement complete scene state, stable identity, native scrolling, responsive layouts, and accessible controls.
+- `editorial-data-experience` (removed; available in Git history): elicit the intended discovery, compare narrative forms, design meaningful interactions, and keep claims inspectable.
+- `d3-story-scenes` (removed; available in Git history): choose Plot versus D3 by behavior; implement complete scene state, stable identity, native scrolling, responsive layouts, and accessible controls.
 
-These are stored under `.agents/skills/` so the group can share them with the repository. They add no website dependencies and make no hosting or framework choice. Skill metadata validation checks structure, not whether future output will be good; review the skills against actual project work as the concept evolves.
+These were stored under `.agents/skills/` and were removed in the October 24 reset as superseded guidance. Their descriptions above document the earlier exploration, not instructions for the new presentation.
 
 ## What this suggests, without settling the design
 
