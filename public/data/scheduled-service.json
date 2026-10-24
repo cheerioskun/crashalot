@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "population": "U.S. Part 121 scheduled service",
+    "period": [
+      2005,
+      2024
+    ],
+    "sourceName": "NTSB 2005\u20132024 U.S. Civil Aviation Accident Statistics",
+    "sourceTable": "Table 6, A6:O25; D = fatal accidents; I = departures",
+    "sourceUrl": "https://www.ntsb.gov/safety/Documents/AviationAccidentStatistics_2005-2024_20260112.xlsx",
+    "sourceWorkbookSha256": "83c00410f2004fbb9457cec8d01eef2b2c69badc2b3a0e21ed90d9366bbeb284",
+    "revenueOnlyVerified": false,
+    "notes": [
+      "Scheduled service is the source classification. A separate revenue-only filter is not identified in this table.",
+      "Fatal accidents include ground fatalities. Counts are not necessarily aircraft crashes.",
+      "This changes the opening comparison only. Later slides still use their existing, explicitly scoped datasets."
+    ]
+  },
+  "rows": [
+    {
+      "year": 2005,
+      "fatalAccidents": 3,
+      "departures": 10910460,
+      "sourceRow": 6
+    },
+    {
+      "year": 2006,
+      "fatalAccidents": 2,
+      "departures": 10627481,
+      "sourceRow": 7
+    },
+    {
+      "year": 2007,
+      "fatalAccidents": 0,
+      "departures": 10734170,
+      "sourceRow": 8
+    },
+    {
+      "year": 2008,
+      "fatalAccidents": 0,
+      "departures": 10282575,
+      "sourceRow": 9
+    },
+    {
+      "year": 2009,
+      "fatalAccidents": 1,
+      "departures": 9564891,
+      "sourceRow": 10
+    },
+    {
+      "year": 2010,
+      "fatalAccidents": 0,
+      "departures": 9467282,
+      "sourceRow": 11
+    },
+    {
+      "year": 2011,
+      "fatalAccidents": 0,
+      "departures": 9419064,
+      "sourceRow": 12
+    },
+    {
+      "year": 2012,
+      "fatalAccidents": 0,
+      "departures": 9241935,
+      "sourceRow": 13
+    },
+    {
+      "year": 2013,
+      "fatalAccidents": 0,
+      "departures": 9268061,
+      "sourceRow": 14
+    },
+    {
+      "year": 2014,
+      "fatalAccidents": 0,
+      "departures": 9049491,
+      "sourceRow": 15
+    },
+    {
+      "year": 2015,
+      "fatalAccidents": 0,
+      "departures": 8975795,
+      "sourceRow": 16
+    },
+    {
+      "year": 2016,
+      "fatalAccidents": 0,
+      "departures": 9107454,
+      "sourceRow": 17
+    },
+    {
+      "year": 2017,
+      "fatalAccidents": 0,
+      "departures": 9124174,
+      "sourceRow": 18
+    },
+    {
+      "year": 2018,
+      "fatalAccidents": 1,
+      "departures": 9353814,
+      "sourceRow": 19
+    },
+    {
+      "year": 2019,
+      "fatalAccidents": 1,
+      "departures": 9575941,
+      "sourceRow": 20
+    },
+    {
+      "year": 2020,
+      "fatalAccidents": 0,
+      "departures": 5785066,
+      "sourceRow": 21
+    },
+    {
+      "year": 2021,
+      "fatalAccidents": 0,
+      "departures": 7491648,
+      "sourceRow": 22
+    },
+    {
+      "year": 2022,
+      "fatalAccidents": 1,
+      "departures": 8301283,
+      "sourceRow": 23
+    },
+    {
+      "year": 2023,
+      "fatalAccidents": 0,
+      "departures": 8740250,
+      "sourceRow": 24
+    },
+    {
+      "year": 2024,
+      "fatalAccidents": 0,
+      "departures": 9061967,
+      "sourceRow": 25
+    }
+  ],
+  "summary": {
+    "fatalAccidents": 9,
+    "departures": 184082802
+  }
+}

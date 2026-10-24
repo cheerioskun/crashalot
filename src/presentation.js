@@ -8,7 +8,8 @@ import cover from './views/cover.html?raw';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
-import { mountCrashCounts, mountCountRateComparison } from './components/narrative-counts.js';
+import { mountCountRateComparison } from './components/narrative-counts.js';
+import { mountScaleComparison } from './components/scale-comparison.js';
 import { mountPhaseSankey } from './components/phase-sankey.js';
 
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${chapters}`;
@@ -17,11 +18,16 @@ const chartInstances = [];
 async function mountChart(id, mount) {
   const host = document.getElementById(id);
   host.replaceChildren();
-  try { chartInstances.push(await mount(host)); }
+  try {
+    const chart = await mount(host);
+    chart.slide = host.closest('section');
+    chartInstances.push(chart);
+    chart.setActive?.(chart.slide.classList.contains('present'));
+  }
   catch { host.innerHTML = '<p role="status">The source data could not load. Reload the page to try again.</p>'; }
 }
 Promise.all([
-  mountChart('crash-count-chart', mountCrashCounts),
+  mountChart('scale-comparison-chart', mountScaleComparison),
   mountChart('count-rate-chart', mountCountRateComparison),
   mountChart('phase-sankey-chart', mountPhaseSankey),
 ]);
@@ -106,7 +112,10 @@ function updateChrome() {
     if (link.dataset.stage === stage) link.setAttribute('aria-current', 'step');
     else link.removeAttribute('aria-current');
   });
-  chartInstances.forEach(chart => chart.resize?.());
+  chartInstances.forEach(chart => {
+    chart.resize?.();
+    chart.setActive?.(chart.slide === presentation.getCurrentSlide());
+  });
 }
 presentation.on('ready', updateChrome);
 presentation.on('slidechanged', updateChrome);

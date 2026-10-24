@@ -19,6 +19,13 @@
     "bootswatch": "^5.3.8",
     "d3": "^7.9.0",
     "d3-sankey": "^0.12.3",
+    "d3-svg-annotation": "^2.5.1",
+    "number-flow": "^0.6.2",
     "reveal.js": "^6.0.2"
+  },
+  "overrides": {
+    "d3-svg-annotation": {
+      "d3-color": "^3.1.0"
+    }
   }
 }
