@@ -9,7 +9,9 @@ npm ci
 npm run dev
 ```
 
-`npm run build` produces `dist/`; `npm run preview` serves that production build. Vite provides the development and build tooling. The existing `wrangler.jsonc` can serve `dist/` as Cloudflare static assets; this reset does not deploy anything.
+`npm run build` produces `dist/`; `npm run preview` serves that production build. Vite provides the development and build tooling. The `wrangler.jsonc` serves `dist/` as Cloudflare static assets and runs `npm run build` before Wrangler deployment.
+
+For Cloudflare Workers Builds (Git integration), set the dashboard **Build command** to `npm run build` and **Deploy command** to `npx wrangler deploy`. Workers Builds does not honor Wrangler custom build settings, so the dashboard build command is required to generate the ignored `dist/` directory on a fresh checkout.
 
 ## Design and implementation
 
