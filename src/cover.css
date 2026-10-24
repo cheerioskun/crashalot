@@ -1,17 +1,32 @@
-.cover-view { display:flex; flex-direction:column; padding:25px var(--presentation-gutter) 24px; }
-.cover-topline { display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:.12em; border-top:2px solid var(--bs-body-color); padding-top:16px; }
+.cover-view { --cover-blue:#168fd0; display:flex; flex-direction:column; padding:clamp(28px,5vh,60px) var(--presentation-gutter) 32px; }
 .cover-body { flex:1; display:grid; grid-template-columns:1fr 310px; align-items:center; gap:5vw; padding:30px 0; }
-.cover-story h1 { font-size:clamp(68px,7.8vw,128px); letter-spacing:-.065em; line-height:.98; font-weight:600; margin:0 0 36px; }
+.cover-story h1 { font-size:clamp(68px,7.8vw,128px); letter-spacing:-.065em; line-height:.98; font-weight:600; margin:0 0 28px; }
 .cover-story h1 em { font-family:Georgia,serif; font-weight:400; letter-spacing:-.07em; padding-right:.08em; }
-.cover-entry { display:flex; gap:42px; align-items:center; }
-.cover-entry p { font-size:16px; line-height:1.6; color:var(--bs-secondary-color); margin:0; }
-.window-frame { border:1px solid var(--bs-body-color); outline:1px solid var(--bs-border-color); outline-offset:10px; border-radius:150px; min-height:400px; padding:45px 32px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; text-align:center; }
-.window-label,.window-foot { font-size:10px; text-transform:uppercase; letter-spacing:.12em; }
-.window-foot { color:var(--bs-secondary-color); }
-.window-frame p { margin:22px 0; font-size:30px; line-height:1.2; letter-spacing:-.035em; }
-.window-frame em { font-family:Georgia,serif; font-size:86px; font-weight:400; line-height:1.1; }
-.cover-team { display:grid; grid-template-columns:150px 1fr auto; gap:24px; align-items:start; padding-top:20px; border-top:1px solid var(--bs-border-color); font-size:12px; }
-.cover-team strong { font-weight:650; }.cover-team p { line-height:1.6; margin:0; }.cover-team>span { color:var(--bs-secondary-color); }
-@media (max-width:1050px) { .cover-body { grid-template-columns:1fr 240px; gap:40px; }.window-frame{min-height:340px;padding:35px 18px}.cover-entry{align-items:flex-start;flex-direction:column;gap:22px}.cover-team{grid-template-columns:125px 1fr}.cover-team>span{display:none}.cover-story h1{font-size:clamp(56px,7.4vw,90px)} }
-@media (max-width:700px) { .cover-body{grid-template-columns:1fr}.window-frame{display:none}.cover-story h1{font-size:clamp(52px,10vw,76px)}.cover-team{grid-template-columns:1fr;gap:8px}.cover-topline{font-size:9px}.cover-entry p{font-size:15px}.team-break{display:none} }
-@media (max-height:760px) and (min-width:1051px) { .cover-body{padding:18px 0}.window-frame{min-height:310px;padding:28px 22px}.window-frame em{font-size:68px}.window-frame p{font-size:26px;margin:12px 0}.cover-story h1{font-size:clamp(70px,7.5vw,105px);margin-bottom:28px}.cover-team{padding-top:14px} }
+.cover-entry { display:flex; align-items:center; }
+.window-frame { position:relative; isolation:isolate; height:400px; border:1px solid var(--bs-body-color); outline:1px solid var(--bs-border-color); outline-offset:10px; border-radius:150px; overflow:hidden; background:#218bce; }
+.window-sky { position:absolute; inset:0; overflow:hidden; border-radius:inherit; background:#2abce5; }
+.window-sky::after { content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit; box-shadow:inset 3px 2px 9px #123d6015; }
+.sky-sun { position:absolute; width:160px; height:160px; top:-76px; right:-65px; border-radius:50%; background:radial-gradient(circle,#fff8daaa,transparent 70%); }
+.sky-wobble { position:absolute; inset:-12px; animation:sky-bob 6s ease-in-out infinite; }
+.cloud-layer { position:absolute; width:200%; height:100%; left:0; top:0; display:flex; max-width:none; }
+.cloud-layer svg { display:block; width:50%; height:100%; flex:none; overflow:visible; }
+.cloud-layer-far { opacity:.65; animation:cloud-pass 38s linear infinite; }
+.cloud-layer-near { animation:cloud-pass 22s linear infinite; }
+@keyframes cloud-pass { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+@keyframes sky-bob { 0%,100% { transform:translateY(-5px) rotate(-.6deg); } 50% { transform:translateY(5px) rotate(.6deg); } }
+.cover-first-line { white-space:nowrap; }
+.cover-plane { display:inline-block; width:.66em; height:.66em; margin-left:.28em; vertical-align:.04em; color:var(--cover-blue); transform:rotate(35deg); }
+.cover-entry .editorial-button { border-radius:999px; background:var(--cover-blue); border-color:var(--cover-blue); color:#fff; padding:17px 30px; font-size:14px; }
+.cover-entry .editorial-button:hover { background:#087bb9; border-color:#087bb9; opacity:1; }
+/* Stop the scenery when the cover is off screen. */
+#welcome:not(.present) .sky-wobble, #welcome:not(.present) .cloud-layer { animation-play-state:paused; }
+.cover-team { display:flex; flex-direction:column; gap:9px; margin:0 0 34px; font-size:15px; }
+.cover-team strong { font-weight:650; font-size:19px; }.cover-team p { line-height:1.65; margin:0; color:var(--bs-secondary-color); }
+/* The opener has one action; presentation controls return on the next slide. */
+body.presentation-cover { --presentation-header-height:0px; --presentation-footer-height:0px; }
+.presentation-cover .presentation-header,.presentation-cover .presentation-footer,.presentation-cover .reveal .progress { display:none; }
+.presentation-cover .reveal .slide-number { display:none !important; }
+@media (max-width:1050px) { .cover-body { grid-template-columns:1fr 240px; gap:40px; }.window-frame{height:340px}.cover-story h1{font-size:clamp(56px,7.4vw,90px)} }
+@media (max-width:700px) { .cover-view{padding-top:30px;padding-bottom:24px}.cover-body{grid-template-columns:1fr;gap:30px;padding:20px 0 36px}.cover-story h1{font-size:clamp(48px,10vw,70px);margin-bottom:24px}.window-frame{width:155px;height:205px;justify-self:center;grid-row:1}.cover-team{gap:8px;font-size:13px;margin-bottom:26px}.team-break{display:none} }
+@media (max-height:760px) and (min-width:1051px) { .cover-body{padding:18px 0 36px}.window-frame{height:340px}.cover-story h1{font-size:clamp(70px,7.5vw,105px);margin-bottom:36px} }
+@media (prefers-reduced-motion:reduce) { .sky-wobble,.cloud-layer{animation:none} }
