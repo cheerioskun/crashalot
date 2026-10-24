@@ -1,0 +1,57 @@
+.phase-sankey {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  color: var(--bs-body-color);
+  text-align: left;
+  font-family: inherit;
+}
+.phase-sankey p { margin: 0; }
+.phase-sankey__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 8px; font-size: 13px; }
+.phase-sankey__cohort { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.phase-sankey__cohort > span { color: var(--bs-secondary-color); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.phase-sankey select { color: var(--bs-body-color); background: var(--bs-body-bg); border: 0; border-bottom: 1px solid var(--bs-border-color); border-radius: 0; padding: 5px 20px 5px 0; font: inherit; cursor: pointer; }
+.phase-sankey__scope { color: var(--bs-secondary-color); }
+.phase-sankey__plot { min-height: 180px; flex: 1 1 auto; }
+.phase-sankey__plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.phase-sankey__headers text { fill: var(--bs-secondary-color); font-size: 10px; font-weight: 650; letter-spacing: .13em; }
+.phase-sankey__links path { stroke-opacity: 1; cursor: pointer; transition: stroke-opacity 140ms; }
+.phase-sankey__links path.is-active, .phase-sankey__links path:focus { stroke-opacity: 1; outline: none; }
+.phase-sankey__links path.is-muted { stroke-opacity: .15; }
+.phase-sankey__links path:focus-visible { outline: none; filter: drop-shadow(0 0 1px var(--bs-body-color)); }
+.phase-sankey__nodes g { transition: opacity 140ms; }
+.phase-sankey__nodes g.is-muted { opacity: .35; }
+.phase-sankey__nodes text { fill: var(--bs-body-color); font-size: 13px; font-weight: 550; }
+.phase-sankey__unknown { stroke: var(--bs-body-bg); stroke-dasharray: 2 2; stroke-width: 2px; }
+.phase-sankey__inspection { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 18px; min-height: 56px; border-top: 1px solid var(--bs-border-color); padding: 8px 0; }
+.phase-sankey .phase-sankey__primary { font-size: 15px; font-weight: 650; line-height: 1.35; }
+.phase-sankey .phase-sankey__secondary { font-size: 11px; line-height: 1.5; color: var(--bs-secondary-color); padding-top: 3px; }
+.phase-sankey__reset { background: transparent; color: var(--bs-body-color); border: 0; padding: 6px 0 6px 10px; font: inherit; font-size: 11px; text-decoration: underline; white-space: nowrap; cursor: pointer; }
+.phase-sankey__reset:disabled { opacity: .35; cursor: default; }
+.phase-sankey .phase-sankey__boundary { font-size: 11px; line-height: 1.5; color: var(--bs-secondary-color); }
+.phase-sankey__details { font-size: 11px; margin-top: 5px; }
+.phase-sankey__details summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.phase-sankey__detail-body { position: absolute; left: 0; right: 0; bottom: 27px; z-index: 4; background: var(--bs-body-bg); border-top: 2px solid var(--bs-body-color); border-bottom: 1px solid var(--bs-border-color); padding: 18px 22px; max-height: 290px; overflow: auto; box-shadow: 0 -12px 32px color-mix(in srgb, var(--bs-body-bg), transparent 10%); }
+.phase-sankey .phase-sankey__detail-body p { max-width: 100ch; margin-bottom: 10px; line-height: 1.5; font-size: 12px; }
+.phase-sankey a { color: var(--bs-body-color); }
+.phase-sankey table { width: 100%; margin: 10px 0 0; border-collapse: collapse; font-size: 11px; }
+.phase-sankey table caption { color: var(--bs-secondary-color); text-align: left; caption-side: top; padding: 5px 0; }
+.phase-sankey th, .phase-sankey td { padding: 6px 9px; border-bottom: 1px solid var(--bs-border-color); text-align: left; }
+.phase-sankey th:nth-child(n+3), .phase-sankey td:nth-child(n+3) { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-height: 760px) {
+  .phase-sankey__toolbar { padding-bottom: 3px; }
+  .phase-sankey__inspection { min-height: 48px; padding: 5px 0; }
+  .phase-sankey .phase-sankey__primary { font-size: 14px; }
+}
+@media (max-width: 760px) {
+  .phase-sankey__toolbar { gap: 8px; align-items: flex-start; }
+  .phase-sankey__scope { max-width: 170px; text-align: right; }
+  .phase-sankey__cohort { gap: 5px; }
+  .phase-sankey .phase-sankey__primary { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phase-sankey__links path, .phase-sankey__nodes g { transition: none; }
+}

@@ -1,0 +1,330 @@
+{
+  "period": "1970–2025",
+  "total": 13193,
+  "source": {
+    "name": "MauroPello · PlaneCrashData",
+    "url": "https://huggingface.co/datasets/MauroPello/planecrashdata",
+    "license": "CC BY 4.0",
+    "retrieved": "2026-10-23",
+    "revision": "b817a96f2b9152b735c9c6570d465102f5f76c88",
+    "sha256": "db334ffbab0cf67b06765038803338531fbfe23522c69b453cd8eb63a6c09b48"
+  },
+  "types": [
+    {
+      "id": "scheduled",
+      "label": "Scheduled revenue",
+      "raw": [
+        "Scheduled Revenue Flight"
+      ]
+    },
+    {
+      "id": "cargo",
+      "label": "Cargo",
+      "raw": [
+        "Cargo"
+      ]
+    },
+    {
+      "id": "private",
+      "label": "Private",
+      "raw": [
+        "Private"
+      ]
+    },
+    {
+      "id": "charter",
+      "label": "Charter / air taxi",
+      "raw": [
+        "Charter/Taxi (Non Scheduled Revenue Flight)"
+      ]
+    },
+    {
+      "id": "other",
+      "label": "Other / unknown",
+      "raw": [
+        "Aerial photography",
+        "Aerobatic",
+        "Agricultural",
+        "Ambulance",
+        "Bombing",
+        "Calibration",
+        "Cinematography",
+        "Delivery",
+        "Demonstration",
+        "Executive",
+        "Executive/Corporate/Business",
+        "Ferry",
+        "Ferry/positioning",
+        "Fire fighting",
+        "Geographical / Geophysical / Scientific",
+        "Government",
+        "Humanitarian",
+        "Illegal (smuggling)",
+        "Meteorological / Weather",
+        "Military",
+        "Parachuting",
+        "Passenger",
+        "Passenger - Non-Scheduled/charter/Air Taxi",
+        "Passenger - Scheduled",
+        "Positioning",
+        "Postal (mail)",
+        "Refuelling",
+        "Skydiving / Paratroopers",
+        "Spraying (Agricultural)",
+        "Supply",
+        "Survey / Patrol / Reconnaissance",
+        "Test",
+        "Topographic",
+        "Training",
+        null
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "id": "takeoff",
+      "label": "Takeoff / climb",
+      "color": 1,
+      "raw": [
+        "Takeoff (climb)",
+        "Take off",
+        "Initial climb"
+      ]
+    },
+    {
+      "id": "route",
+      "label": "En route",
+      "color": 2,
+      "raw": [
+        "Flight",
+        "En route"
+      ]
+    },
+    {
+      "id": "landing",
+      "label": "Approach / landing",
+      "color": 3,
+      "raw": [
+        "Landing (descent or approach)",
+        "Landing",
+        "Approach"
+      ]
+    },
+    {
+      "id": "ground",
+      "label": "Ground",
+      "color": 4,
+      "raw": [
+        "Taxiing",
+        "Taxi",
+        "Parking",
+        "Standing",
+        "Pushback / towing"
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "Unknown / other",
+      "color": 4,
+      "raw": [
+        null,
+        "Manoeuvring",
+        "Manoeuvring (airshow, firefighting, ag.ops.)"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "source": "scheduled",
+      "target": "takeoff",
+      "value": 612
+    },
+    {
+      "source": "scheduled",
+      "target": "route",
+      "value": 657
+    },
+    {
+      "source": "scheduled",
+      "target": "landing",
+      "value": 1532
+    },
+    {
+      "source": "scheduled",
+      "target": "ground",
+      "value": 83
+    },
+    {
+      "source": "scheduled",
+      "target": "unknown",
+      "value": 62
+    },
+    {
+      "source": "cargo",
+      "target": "takeoff",
+      "value": 484
+    },
+    {
+      "source": "cargo",
+      "target": "route",
+      "value": 336
+    },
+    {
+      "source": "cargo",
+      "target": "landing",
+      "value": 900
+    },
+    {
+      "source": "cargo",
+      "target": "ground",
+      "value": 33
+    },
+    {
+      "source": "cargo",
+      "target": "unknown",
+      "value": 11
+    },
+    {
+      "source": "private",
+      "target": "takeoff",
+      "value": 485
+    },
+    {
+      "source": "private",
+      "target": "route",
+      "value": 521
+    },
+    {
+      "source": "private",
+      "target": "landing",
+      "value": 668
+    },
+    {
+      "source": "private",
+      "target": "ground",
+      "value": 7
+    },
+    {
+      "source": "private",
+      "target": "unknown",
+      "value": 18
+    },
+    {
+      "source": "charter",
+      "target": "takeoff",
+      "value": 374
+    },
+    {
+      "source": "charter",
+      "target": "route",
+      "value": 369
+    },
+    {
+      "source": "charter",
+      "target": "landing",
+      "value": 603
+    },
+    {
+      "source": "charter",
+      "target": "ground",
+      "value": 6
+    },
+    {
+      "source": "charter",
+      "target": "unknown",
+      "value": 9
+    },
+    {
+      "source": "other",
+      "target": "takeoff",
+      "value": 1184
+    },
+    {
+      "source": "other",
+      "target": "route",
+      "value": 1967
+    },
+    {
+      "source": "other",
+      "target": "landing",
+      "value": 2097
+    },
+    {
+      "source": "other",
+      "target": "ground",
+      "value": 76
+    },
+    {
+      "source": "other",
+      "target": "unknown",
+      "value": 99
+    }
+  ],
+  "scopeNote": "Recorded accidents, grouped by operation and recorded phase. This is a classification flow, not flights progressing through a journey. Scheduled revenue is not verified passenger-only service.",
+  "phaseRawCounts": [
+    {
+      "raw": "Takeoff (climb)",
+      "count": 3134
+    },
+    {
+      "raw": "Landing (descent or approach)",
+      "count": 5778
+    },
+    {
+      "raw": "Flight",
+      "count": 3836
+    },
+    {
+      "raw": null,
+      "count": 197
+    },
+    {
+      "raw": "Taxiing",
+      "count": 127
+    },
+    {
+      "raw": "Parking",
+      "count": 70
+    },
+    {
+      "raw": "En route",
+      "count": 14
+    },
+    {
+      "raw": "Approach",
+      "count": 7
+    },
+    {
+      "raw": "Standing",
+      "count": 3
+    },
+    {
+      "raw": "Landing",
+      "count": 15
+    },
+    {
+      "raw": "Initial climb",
+      "count": 1
+    },
+    {
+      "raw": "Take off",
+      "count": 4
+    },
+    {
+      "raw": "Pushback / towing",
+      "count": 1
+    },
+    {
+      "raw": "Manoeuvring",
+      "count": 1
+    },
+    {
+      "raw": "Taxi",
+      "count": 4
+    },
+    {
+      "raw": "Manoeuvring (airshow, firefighting, ag.ops.)",
+      "count": 1
+    }
+  ]
+}

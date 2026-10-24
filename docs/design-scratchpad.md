@@ -12,13 +12,17 @@ Develop purpose, narrative, evidence, graphs, and meaningful interactions before
 
 The substrate is a new desktop-first HTML page hosted by Reveal.js, not Paper. **D3 is the agreed visualization engine.** Views should remain independent of the Reveal API. Scrollytelling remains possible; switching hosts may involve lifecycle and state handling as well as transitions. No theme is selected. Historical `d3-story-scenes` guidance remains in Git; its old renderer preferences are superseded, not restored wholesale.
 
-## Current state: first page and placeholders implemented
+## Current state: narrative redesign and requested graphs implemented
 
-The user's draft 1 targets remain: finalize a first set of graphs and flow; create the landing page and placeholder pages; fully implement and polish the first visualization.
+The user requested a more distinctive presentation, thought about its arc before implementation, a climax in the middle or right of the middle, and agents to implement interactive count/rate charts and an inspectable flight-phase Sankey.
 
-The component study came first. The authorized first presentation page and six question-led chapter previews are now implemented as seven Reveal-hosted pages, using standalone cover and chapter HTML fragments. This completes the page shell, not the final graph selection or first polished narrative visualization. `components.html` remains the place to inspect composed components, chart states, and theme alternatives together. Bootstrap components with prebuilt Bootswatch treatments and semantic chart roles remain candidate treatments, not a selected final aesthetic.
+The local review draft now has seven beats: invitation → annual fatal-accident counts → aligned counts/rates → a perspective hinge → count/exposure reveal → phase exploration → quiet return to the passenger. The working climax is page 5 of 7. The [draft 1 plan](draft-1-plan.md) records composition, interaction, evidence boundaries, and alternatives.
 
-The [draft 1 plan](draft-1-plan.md) records a proposed first set of views. Its order, inclusion, and visual treatments remain open to revision after component review. Future placeholders should state the question they will answer, rather than invent chart shapes or findings.
+The design uses typographic scale, serif emphasis, a neutral window motif, and distinct page densities while preserving existing theme/data-color roles. No new theme is declared final. Bootstrap components and the earlier component showcase remain available.
+
+The count chart and absolute/relative comparison share the verified NTSB cohort. The Sankey classifies the existing worldwide accident archive by operation and recorded phase; it does not fabricate an all-flight journey. Hover/focus and pin/reset reveal exact values; tables retain inspectable data. The supplied two-passenger reference is now included in the local draft's hinge page under public/assets/.
+
+The original near-100% safe-flight concept remains unresolved by the retained data. The implementation uses the supported 17 fatal accidents / 187,608,748 departures contrast as a provisional working climax instead of presenting the arithmetic complement as an observed safe-flight share. This design choice is a reviewable proposal, not user agreement to abandon the original concept.
 
 ## Agreed data workflow
 
@@ -57,7 +61,7 @@ The [D3 inspiration notes](d3-inspiration.md) separate observed library capabili
 ## Still open
 
 - Eligible flight population, geography, period, and compatible numerator/denominator sources.
-- Exact narrative order, graphs, and interaction behavior.
+- User review of the implemented narrative order, editorial treatment, and interactions.
 - Whether the tested Bootstrap/Bootswatch compositions fit, plus visual language and theme choice.
 
 ## Provisional evidence for the component specimen
@@ -66,4 +70,4 @@ The [NTSB source audit](safety-trend-source.md) establishes a matched 2005–202
 
 Fatal accidents include ground fatalities. An aircraft-level audit resolves fatal-event versus eligible-aircraft multiplicity in this window, but the source does not directly enumerate completed flights linked to outcomes. Therefore an exact observed safe-flight share is not yet established: `safePercent` remains unset, and the mathematical rate complement must not silently acquire that label. This measurement question does **not** change the user's agreed meaning of safe or discard the planned 100% reveal.
 
-No final narrative dataset or finished visual treatment is committed. This scratchpad carries our emerging intuition forward without freezing it.
+The source-backed graph implementations and visual treatment are now reviewable locally. Final narrative scope, the near-100% measurement, and final theme choice remain open.

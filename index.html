@@ -9,8 +9,9 @@
   </head>
   <body>
     <header class="presentation-header">
-      <a class="presentation-brand" href="#/welcome">Team Eyecandy</a>
-      <div class="presentation-theme-picker">
+      <a class="presentation-brand" href="#/welcome">Eyecandy <span>/ Flying</span></a>
+      <nav class="story-stages" aria-label="Story chapters"><a href="#/change-over-time" data-stage="notice">Notice</a><span aria-hidden="true">/</span><a href="#/another-perspective" data-stage="reconsider">Reconsider</a><span aria-hidden="true">/</span><a href="#/flight-phase" data-stage="inspect">Inspect</a></nav>
+      <details class="appearance-menu"><summary>Appearance</summary><div class="presentation-theme-picker">
         <label for="presentation-theme-select">Theme</label>
         <select id="presentation-theme-select" class="form-select form-select-sm" aria-label="Presentation theme">
           <option value="default">Bootstrap Default</option>
@@ -18,7 +19,7 @@
           <option value="darkly">Darkly</option>
         </select>
         <span id="presentation-theme-status" class="visually-hidden" role="status"></span>
-      </div>
+      </div></details>
     </header>
     <div class="reveal" aria-label="A different view of flying presentation">
       <div class="slides"></div>

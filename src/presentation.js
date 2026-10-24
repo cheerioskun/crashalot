@@ -8,8 +8,36 @@ import cover from './views/cover.html?raw';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
+import { mountCrashCounts, mountCountRateComparison } from './components/narrative-counts.js';
+import { mountPhaseSankey } from './components/phase-sankey.js';
 
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${chapters}`;
+
+const chartInstances = [];
+async function mountChart(id, mount) {
+  const host = document.getElementById(id);
+  host.replaceChildren();
+  try { chartInstances.push(await mount(host)); }
+  catch { host.innerHTML = '<p role="status">The source data could not load. Reload the page to try again.</p>'; }
+}
+Promise.all([
+  mountChart('crash-count-chart', mountCrashCounts),
+  mountChart('count-rate-chart', mountCountRateComparison),
+  mountChart('phase-sankey-chart', mountPhaseSankey),
+]);
+
+const revealButton = document.getElementById('reveal-denominator');
+const resetButton = document.getElementById('reset-denominator');
+function revealExposure(show) {
+  document.getElementById('exposure-total').hidden = !show;
+  document.getElementById('reveal-resolution').hidden = !show;
+  document.getElementById('denominator-stage').classList.toggle('is-revealed', show);
+  revealButton.hidden = show;
+  revealButton.setAttribute('aria-expanded', String(show));
+  (show ? resetButton : revealButton).focus({preventScroll:true});
+}
+revealButton.addEventListener('click', () => revealExposure(true));
+resetButton.addEventListener('click', () => revealExposure(false));
 
 const themeOptions = {
   default: { url: baselineUrl, mode: 'light' },
@@ -71,7 +99,14 @@ setTheme(savedTheme);
 const presentation = new Reveal(document.querySelector('.reveal'));
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 function updateChrome() {
-  document.body.classList.toggle('presentation-cover', presentation.getIndices().h === 0);
+  const index = presentation.getIndices().h;
+  document.body.classList.toggle('presentation-cover', index === 0);
+  const stage = index <= 2 ? 'notice' : index <= 4 ? 'reconsider' : 'inspect';
+  document.querySelectorAll('[data-stage]').forEach(link => {
+    if (link.dataset.stage === stage) link.setAttribute('aria-current', 'step');
+    else link.removeAttribute('aria-current');
+  });
+  chartInstances.forEach(chart => chart.resize?.());
 }
 presentation.on('ready', updateChrome);
 presentation.on('slidechanged', updateChrome);

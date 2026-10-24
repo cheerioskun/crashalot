@@ -1,0 +1,49 @@
+.narrative-counts {
+  width: 100%;
+  min-width: 0;
+  color: var(--bs-body-color);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+.narrative-counts p { margin: 0; }
+.narrative-counts__scope { color: var(--bs-secondary-color); font-size: 12px; letter-spacing: .025em; padding-bottom: 12px; }
+.narrative-counts__svg { display: block; width: 100%; overflow: visible; }
+.narrative-counts__unit { fill: var(--bs-secondary-color); font-family: inherit; font-size: 11px; font-weight: 650; letter-spacing: .08em; }
+.narrative-counts__axis { color: var(--bs-secondary-color); font-family: inherit; font-size: 12px; }
+.narrative-counts__grid line { stroke: var(--bs-border-color); stroke-opacity: .65; }
+.narrative-counts__stem { stroke: var(--count-series); stroke-width: 4; }
+.narrative-counts__dot { fill: var(--count-series); stroke: var(--bs-body-bg); stroke-width: 1.5; }
+.narrative-counts__dot.is-zero { fill: var(--bs-body-bg); stroke: var(--count-series); }
+.narrative-counts__line { fill: none; stroke: var(--count-series); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.narrative-counts__value { fill: var(--bs-secondary-color); text-anchor: middle; font-size: 14px; font-family: inherit; }
+.narrative-counts__value.is-selected { fill: var(--bs-body-color); font-weight: 750; }
+.narrative-counts__guide { stroke: var(--bs-body-color); stroke-opacity: .25; stroke-width: 1; stroke-dasharray: 3 5; }
+.narrative-counts__focus { fill: var(--count-series); stroke: var(--bs-body-bg); stroke-width: 2; pointer-events: none; }
+.narrative-counts__hit { fill: transparent; cursor: crosshair; touch-action: pan-y; }
+.narrative-counts__inspection { display: grid; grid-template-columns: minmax(150px, 1.15fr) .8fr 1.1fr 1.1fr; align-items: center; gap: 28px; border-top: 1px solid var(--bs-border-color); padding: 12px 0 9px; margin-top: 3px; }
+.narrative-counts__year-control label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 11px; color: var(--bs-secondary-color); }
+.narrative-counts__year-control label strong { font-size: 21px; letter-spacing: -.04em; color: var(--bs-body-color); font-weight: 550; }
+.narrative-counts__year-control input { display: block; width: 100%; height: 18px; margin: 4px 0 0; accent-color: var(--bs-body-color); cursor: pointer; }
+.narrative-counts__metric strong { display: block; font-size: clamp(22px, 2.3vw, 30px); font-weight: 500; letter-spacing: -.05em; line-height: 1.15; }
+.narrative-counts__metric span { display: block; font-size: 11px; color: var(--bs-secondary-color); padding-top: 3px; }
+.narrative-counts__metric--fatalAccidents strong { color: var(--viz-series-1); }
+.narrative-counts--comparison .narrative-counts__metric--ratePerMillion strong { color: var(--viz-series-2); }
+.narrative-counts .narrative-counts__note { font-size: 11px; line-height: 1.45; color: var(--bs-secondary-color); padding: 0 0 8px; }
+.narrative-counts__details { font-size: 12px; color: var(--bs-secondary-color); line-height: 1.5; }
+.narrative-counts__details summary { cursor: pointer; width: fit-content; }
+.narrative-counts__details[open] summary { margin-bottom: 12px; color: var(--bs-body-color); }
+.narrative-counts__details[open] { padding-bottom: 36px; }
+.narrative-counts__details p { max-width: 100ch; margin: 0 0 12px; }
+.narrative-counts__details a { color: inherit; text-underline-offset: 3px; }
+.narrative-counts__table-wrap { overflow: auto; max-height: 260px; margin-top: 12px; }
+.narrative-counts__details table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.narrative-counts__details caption { text-align: left; padding: 8px 0; }
+.narrative-counts__details th, .narrative-counts__details td { text-align: right; padding: 7px 12px; border-bottom: 1px solid var(--bs-border-color); }
+.narrative-counts__details tr > :first-child { text-align: left; padding-left: 0; }
+.narrative-counts :focus-visible { outline: 2px solid var(--bs-body-color); outline-offset: 4px; }
+@media (max-width: 650px) {
+  .narrative-counts__inspection { grid-template-columns: 1fr 1fr; gap: 12px 22px; }
+  .narrative-counts__metric strong { font-size: 24px; }
+  .narrative-counts__scope { font-size: 10px; }
+  .narrative-counts__details table { min-width: 540px; }
+}

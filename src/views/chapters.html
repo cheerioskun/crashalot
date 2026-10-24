@@ -1,48 +1,45 @@
-<section id="change-over-time">
-  <main class="view chapter-view" aria-labelledby="change-title">
-    <p class="chapter-preview-label"><span>01 / 06</span>Chapter preview</p>
-    <h1 id="change-title">How has flying changed?</h1>
-    <p class="chapter-preview-copy">Look at fatal accidents alongside the amount of flying, and see what changes when we put the two in context.</p>
+<section id="change-over-time" data-beat="The count">
+  <main class="view evidence-view" aria-labelledby="change-title">
+    <header class="evidence-heading"><div><p class="eyebrow">01 / The events we notice</p><h1 id="change-title">Start with what<br><em>went wrong.</em></h1></div><p class="evidence-deck">Each mark is one year.<br>Inspect the count. Keep the uneventful journeys in mind.</p></header>
+    <div id="crash-count-chart" class="narrative-chart" aria-label="Annual fatal-accident counts"><p class="loading-note" role="status">Loading the annual observations…</p></div>
   </main>
-  <aside class="notes">Planned: annual line of fatal accidents per million departures, with aligned count and departure context and year inspection. NTSB 2005–2024 counts and exposure are verified. Scope is U.S. Part 121 passenger and cargo operations; final narrative population remains provisional. No uninterrupted-decline claim.</aside>
+  <aside class="notes">NTSB Part 121 passenger and cargo, 2005–2024. Fatal accidents include fatalities on the ground. Not synonymous with crashes or passenger deaths. Annual counts fluctuate.</aside>
 </section>
-<section id="everyday-risk">
-  <main class="view chapter-view" aria-labelledby="risk-title">
-    <p class="chapter-preview-label"><span>02 / 06</span>Chapter preview</p>
-    <h1 id="risk-title">How small is the risk?</h1>
-    <p class="chapter-preview-copy">Put flying beside familiar choices, with comparisons that count the same outcome over a comparable amount of exposure.</p>
+<section id="counts-in-context" data-beat="The context">
+  <main class="view evidence-view" aria-labelledby="context-title">
+    <header class="evidence-heading"><div><p class="eyebrow">02 / A count needs context</p><h1 id="context-title">How much<br><em>flying?</em></h1></div><p class="evidence-deck">The same events, two measures.<br>Follow a year through the count and the rate.</p></header>
+    <div id="count-rate-chart" class="narrative-chart" aria-label="Absolute and relative fatal-accident counts"><p class="loading-note" role="status">Loading the comparison…</p></div>
   </main>
-  <aside class="notes">Planned: common-unit dot comparison. Compatible outcomes and exposure remain unverified; no comparison values accepted. Do not compare an accident per flight with lifetime mortality, or accident events with passenger death probability.</aside>
 </section>
-<section id="flight-types">
-  <main class="view chapter-view" aria-labelledby="types-title">
-    <p class="chapter-preview-label"><span>03 / 06</span>Chapter preview</p>
-    <h1 id="types-title">Which flights are we talking about?</h1>
-    <p class="chapter-preview-copy">A passenger flight, a private aircraft, a cargo service. Explore why the kind of flying matters to the question we ask.</p>
+<section id="another-perspective" data-beat="Another view">
+  <main class="view hinge-view" aria-labelledby="perspective-title">
+    <div class="hinge-copy"><p class="eyebrow">03 / A change of perspective</p><h1 id="perspective-title">Same journey.<br><em>Different view.</em></h1><p>So far, the events have filled the frame.<br>What happens when we bring the departures into view?</p><a class="editorial-button" href="#/the-whole-picture">Look through the other window <span aria-hidden="true">↗</span></a></div>
+    <figure class="perspective-image"><img src="/assets/same-journey-different-view.png" alt="Two passengers on the same bus look through opposite windows: one faces a rock wall, the other an open landscape."><figcaption>Two windows. One journey.</figcaption></figure>
   </main>
-  <aside class="notes">Planned: aligned rates by clearly defined operation type using one denominator. Comparable populations and exposure are still needed. Accident-record proportions cannot establish relative operational risk.</aside>
 </section>
-<section id="technical-safety">
-  <main class="view chapter-view" aria-labelledby="safety-title">
-    <p class="chapter-preview-label"><span>04 / 06</span>Chapter preview</p>
-    <h1 id="safety-title">How did flying become safer?</h1>
-    <p class="chapter-preview-copy">Examine the changes in engineering, training, and operations that help prevent a failure from becoming a catastrophe.</p>
+<section id="the-whole-picture" data-beat="The whole picture">
+  <main class="view reveal-view" aria-labelledby="whole-title">
+    <header class="reveal-intro"><p class="eyebrow">04 / The whole picture</p><h1 id="whole-title">Keep the events.<br><em>Widen the frame.</em></h1><p>U.S. air carriers, passenger and cargo. 2005–2024.</p></header>
+    <div class="denominator-stage" id="denominator-stage">
+      <div class="event-total"><strong>17</strong><span>fatal accidents</span></div>
+      <div class="exposure-total" id="exposure-total" hidden><span>alongside</span><strong>187,608,748</strong><span>departures in the same twenty years</span></div>
+      <button class="editorial-button" id="reveal-denominator" aria-controls="exposure-total" aria-expanded="false">Bring the departures into view <span aria-hidden="true">↗</span></button>
+    </div>
+    <div class="reveal-resolution" id="reveal-resolution" hidden><p><strong>0.091</strong> fatal accidents per million departures across the period.</p><p>The events still matter. Now their scale is visible.</p><button class="text-button" id="reset-denominator">Return to the count</button></div>
+    <details class="evidence-source"><summary>What these numbers mean</summary><p>Source: NTSB Table 5, 2005–2024. Rate = 17 ÷ 187,608,748 × 1,000,000. This is the pooled rate, not the mean of annual rates. Includes U.S. Part 121 passenger and cargo operations and fatalities on the ground. It describes recorded events per departure, not passenger survival probability. The source does not directly count completed safe journeys.</p><a href="/data/safety-trend.json" target="_blank" rel="noopener">Inspect the annual source values</a></details>
   </main>
-  <aside class="notes">Planned: sourced intervention timeline and concise explanations. Evidence for particular interventions is pending. Temporal coincidence does not establish causality. Do not claim that all technical failure modes have been conquered.</aside>
+  <aside class="notes">Draft evidence-supported climax at page 5 of 7. Intended later reveal: near-100% flights without a fatal accident, with overview and magnification. Exact safe-flight share remains unresolved; do not label the arithmetic event-rate complement as counted safe flights.</aside>
 </section>
-<section id="flight-phase">
-  <main class="view chapter-view" aria-labelledby="phase-title">
-    <p class="chapter-preview-label"><span>05 / 06</span>Chapter preview</p>
-    <h1 id="phase-title">Where does risk sit along a flight?</h1>
-    <p class="chapter-preview-copy">Follow a journey from departure to arrival, and examine how recorded accidents are distributed across its stages.</p>
+<section id="flight-phase" data-beat="A closer look">
+  <main class="view evidence-view phase-view" aria-labelledby="phase-title">
+    <header class="evidence-heading"><div><p class="eyebrow">05 / A closer look</p><h1 id="phase-title">Where in<br><em>the journey?</em></h1></div><p class="evidence-deck">Explore the recorded accidents by flight phase.<br>Select a ribbon to hold it in view.</p></header>
+    <div id="phase-sankey-chart" class="narrative-chart" aria-label="Flight-phase Sankey"><p class="loading-note" role="status">Loading the flight-phase records…</p></div>
   </main>
-  <aside class="notes">Optional chapter. Planned: aligned accident-share bars by flight phase with counts and definitions. Source pending. Accident share is not time-normalized hazard. Short- and long-haul similarity remains unestablished. Drop if it adds too little understanding or interrupts the main argument.</aside>
+  <aside class="notes">Separate archive and population from the NTSB time series. Sankey categorizes accident records, not successful flight trajectories. No per-phase hazard or short-/long-haul equivalence inferred.</aside>
 </section>
-<section id="another-perspective">
-  <main class="view chapter-view" aria-labelledby="perspective-title">
-    <p class="chapter-preview-label"><span>06 / 06</span>Chapter preview</p>
-    <h1 id="perspective-title">What if we look at the journeys that go right?</h1>
-    <p class="chapter-preview-copy">Same journey. Different view. Turn our attention to flights without a fatal accident, while keeping the remaining risk in sight.</p>
+<section id="arrival" data-beat="Your perspective">
+  <main class="view arrival-view" aria-labelledby="arrival-title">
+    <div><p class="eyebrow">06 / Back to your seat</p><h1 id="arrival-title">A wider<br><em>view of flying.</em></h1><p class="arrival-copy">A count tells us what happened.<br>A rate gives it scale.<br>You can return to either view.</p><div class="arrival-links"><a href="#/counts-in-context">Revisit the evidence <span aria-hidden="true">↗</span></a><a href="#/flight-phase">Explore the phases <span aria-hidden="true">↗</span></a></div></div>
+    <aside class="closing-note"><span class="eyebrow">The question we started with</span><p>What does<br><em>safe</em><br>look like?</p><div>In this story, “safe” means a flight without a fatal accident. The evidence gives us counts and rates to inspect, with their limits in view.</div></aside>
   </main>
-  <aside class="notes">Planned climax: supplied two-passenger meme, complementary line near 100%, full-scale context, and explicit zoom of the residual gap. Concept accepted; exact safe-flight share still needs an appropriate numerator, denominator, and source decision. NTSB event-rate complement is not established as a counted safe-flight share. No percentage is asserted in this preview.</aside>
 </section>
