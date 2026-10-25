@@ -10,9 +10,7 @@ import './opening.css';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
-import { mountCountRateComparison } from './components/narrative-counts.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
-import { mountPhaseSankey } from './components/phase-sankey.js';
 
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${opening}${chapters}`;
 
@@ -25,27 +23,11 @@ async function mountChart(id, mount) {
     chart.slide = host.closest('section');
     chartInstances.push(chart);
     chart.setActive?.(chart.slide.classList.contains('present'));
+    updateNavigation();
   }
   catch { host.innerHTML = '<p role="status">The source data could not load. Reload the page to try again.</p>'; }
 }
-Promise.all([
-  mountChart('scale-comparison-chart', mountScaleComparison),
-  mountChart('count-rate-chart', mountCountRateComparison),
-  mountChart('phase-sankey-chart', mountPhaseSankey),
-]);
-
-const revealButton = document.getElementById('reveal-denominator');
-const resetButton = document.getElementById('reset-denominator');
-function revealExposure(show) {
-  document.getElementById('exposure-total').hidden = !show;
-  document.getElementById('reveal-resolution').hidden = !show;
-  document.getElementById('denominator-stage').classList.toggle('is-revealed', show);
-  revealButton.hidden = show;
-  revealButton.setAttribute('aria-expanded', String(show));
-  (show ? resetButton : revealButton).focus({preventScroll:true});
-}
-revealButton.addEventListener('click', () => revealExposure(true));
-resetButton.addEventListener('click', () => revealExposure(false));
+mountChart('scale-comparison-chart', mountScaleComparison);
 
 const themeOptions = {
   default: { url: baselineUrl, mode: 'light' },
@@ -106,6 +88,43 @@ setTheme(savedTheme);
 
 const presentation = new Reveal(document.querySelector('.reveal'));
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const storyNext = document.querySelector('[data-story-next]');
+const storyBack = document.querySelector('[data-story-back]');
+const storyPosition = document.querySelector('[data-story-position]');
+function updateNavigation() {
+  const slide = presentation.getCurrentSlide();
+  if (!slide) return;
+  const chart = chartInstances.find(chart => chart.slide === slide);
+  const state = chart?.getNavigationState?.();
+  const cover = slide.id === 'welcome';
+  const hookStep = Number(document.getElementById('flight-1282').dataset.hookStep || 0);
+  let position = `${presentation.getIndices().h + 1} / ${presentation.getTotalSlides()} · ${slide.dataset.beat || 'The journey'}`;
+  if (cover) position = 'An invitation to look closer';
+  if (slide.id === 'flight-1282') position = `Flight 1282 · Beat ${hookStep + 1} of 5`;
+  if (slide.id === 'change-over-time') position = state ? `Beat ${state.step} of ${state.total} · ${state.action}` : 'Loading the comparison…';
+  if (storyPosition.textContent !== position) storyPosition.textContent = position;
+  storyBack.hidden = cover;
+  storyNext.querySelector('[data-next-label]').textContent = cover ? 'Start the journey' : 'Next';
+  storyNext.disabled = presentation.isLastSlide() || !!state?.running || (slide.id === 'change-over-time' && !chart);
+  storyNext.setAttribute('aria-label', cover ? 'Start the journey' : state ? `Next: ${state.action.toLowerCase()}` : 'Next');
+}
+function previousBeat() {
+  const chart = chartInstances.find(chart => chart.slide === presentation.getCurrentSlide());
+  if (chart?.previousBeat?.()) return;
+  presentation.prev();
+  chartInstances.find(chart => chart.slide === presentation.getCurrentSlide())?.showLastBeat?.();
+}
+function nextBeat() {
+  const slide = presentation.getCurrentSlide();
+  const chart = chartInstances.find(chart => chart.slide === slide);
+  if (chart?.nextBeat?.()) return;
+  // Wait for the comparison to mount rather than skipping its opening beat.
+  if (slide?.id === 'change-over-time' && !chart) return;
+  presentation.next();
+}
+storyNext.addEventListener('click', nextBeat);
+storyBack.addEventListener('click', previousBeat);
+document.addEventListener('storybeat', updateNavigation);
 function updateChrome() {
   const index = presentation.getIndices().h;
   document.body.classList.toggle('presentation-cover', index === 0);
@@ -119,19 +138,17 @@ function updateChrome() {
     chart.resize?.();
     chart.setActive?.(chart.slide === presentation.getCurrentSlide());
   });
+  updateNavigation();
 }
 const hook = document.getElementById('flight-1282');
-const hookNext = hook.querySelector('[data-hook-next]');
 function updateHook() {
   const shown = [...hook.querySelectorAll('.fragment.visible')];
   const step = shown.length ? Math.max(...shown.map(node => Number(node.dataset.fragmentIndex))) + 1 : 0;
   hook.dataset.hookStep = step;
   hook.querySelector('.hook-event').setAttribute('aria-hidden', String(step === 4));
-  hookNext.textContent = step === 4 ? 'Start with one year' : 'Continue';
+  updateNavigation();
 }
 hook.addEventListener('keydown', event => { if (event.target.closest('button, a') && (event.key === 'Enter' || event.key === ' ')) event.stopPropagation(); });
-hookNext.addEventListener('click', () => presentation.next());
-hook.querySelector('[data-hook-back]').addEventListener('click', () => presentation.prev());
 presentation.on('fragmentshown', updateHook);
 presentation.on('fragmenthidden', updateHook);
 presentation.on('slidechanged', updateHook);
@@ -142,11 +159,11 @@ presentation.initialize({
   disableLayout: true,
   center: false,
   hash: true,
-  controls: false, // Footer buttons use Reveal's built-in navigate-prev/next controller.
+  controls: false,
   progress: true,
-  slideNumber: 'c/t',
+  slideNumber: false,
   showSlideNumber: 'all',
-  keyboard: true,
+  keyboard: { 32: nextBeat, 34: nextBeat, 39: nextBeat, 40: nextBeat, 78: nextBeat, 37: previousBeat, 33: previousBeat, 80: previousBeat },
   navigationMode: 'linear',
   transition: reducedMotion.matches ? 'none' : 'fade',
   transitionSpeed: 'fast',

@@ -16,4 +16,8 @@ The comparison then waits for explicit actions: count 2005 fatal accidents, coun
 
 ## Review questions
 
-Does the photograph leave enough room to absorb the outcome? Does the question invite curiosity without prescribing reassurance? Does the move from a 2024 nonfatal event to historical fatal accidents feel sufficiently explicit? The remaining slides retain their earlier draft narrative and broader cohort; they are outside this opening demo.
+Does the photograph leave enough room to absorb the outcome? Does the question invite curiosity without prescribing reassurance? Does the move from a 2024 nonfatal event to historical fatal accidents feel sufficiently explicit? The remaining slides are story placeholders describing their purpose and proposed visual treatment. The earlier count/rate chart, denominator reveal, and phase Sankey are no longer mounted in the presentation; their component source files remain available for future iteration.
+
+## Navigation revision
+
+The cover, story fragments, chart beats, and placeholders now share one neutral footer with Back/Next and arrow-key navigation. The footer identifies the current beat and next chart action. Separate blue calls to action have been removed. Next waits for a chart animation to finish; Back retraces count beats, and returning from the following slide restores the completed comparison. Pause and Replay remain secondary controls under the graph.

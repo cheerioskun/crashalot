@@ -31,9 +31,9 @@
 .scale-comparison__year-intro[aria-hidden="true"] { visibility:hidden; }
 
 .scale-comparison__transport { justify-content:space-between; min-height:48px; gap:24px; }
-.scale-comparison__advance[hidden] { display:none; }
-.scale-comparison__advance { padding:13px 22px; font-size:13px; }
 .scale-comparison__conclusion { font-size:clamp(24px,2.7vw,40px); }
 .scale-comparison-view .evidence-heading h1 { font-size:clamp(34px,3.8vw,58px); }
 @media(max-height:780px) and (min-width:1000px) { .scale-comparison-view .evidence-heading h1{font-size:36px}.scale-comparison__conclusion{font-size:30px;margin-top:8px}.scale-comparison-view .evidence-heading{margin-bottom:10px;padding-bottom:12px} }
 @media(max-width:600px) { .scale-comparison__transport { gap:16px; align-items:flex-start; }.scale-comparison__year-intro{font-size:16px} }
+
+.scale-comparison__transport { justify-content:flex-end; min-height:32px; }

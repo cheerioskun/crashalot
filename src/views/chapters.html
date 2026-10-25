@@ -5,41 +5,43 @@
   </main>
   <aside class="notes">NTSB Table 6 scheduled service, 2005–2024: 9 fatal accidents and 184,082,802 departures. Scheduled revenue is the requested target population; revenue-only status is not separately identified in the retained table. See docs/scheduled-service-source.md. Counts are illustrative during animation, not historical time. Fatal accidents include ground fatalities.</aside>
 </section>
-<section id="counts-in-context" data-beat="The context">
-  <main class="view evidence-view" aria-labelledby="context-title">
-    <header class="evidence-heading"><div><p class="eyebrow">02 / A count needs context</p><h1 id="context-title">How much<br><em>flying?</em></h1></div><p class="evidence-deck">The same events, two measures.<br>Follow a year through the count and the rate.</p></header>
-    <div id="count-rate-chart" class="narrative-chart" aria-label="Absolute and relative fatal-accident counts"><p class="loading-note" role="status">Loading the comparison…</p></div>
+<section id="counts-in-context" data-beat="Put the years in context">
+  <main class="view storyboard-view" aria-labelledby="counts-in-context-title">
+    <header class="storyboard-heading"><p class="eyebrow">Story placeholder / Put the years in context</p><h1 id="counts-in-context-title">How has the risk changed as flying has changed?</h1><p>Move from the accumulated totals to individual years, so we can distinguish changes in accident counts from changes in how much flying took place.</p></header>
+    <aside class="storyboard-placeholder" aria-label="Planned visualization">
+      <span class="eyebrow">Planned treatment</span><h2>Aligned annual charts</h2><p>Fatal-accident counts and fatal accidents per million departures, with a shared year axis and linked highlighting. Keep the same scheduled-service population as the opening comparison.</p>
+    </aside>
   </main>
 </section>
-<section id="another-perspective" data-beat="Another view">
-  <main class="view hinge-view" aria-labelledby="perspective-title">
-    <div class="hinge-copy"><p class="eyebrow">03 / A change of perspective</p><h1 id="perspective-title">Same journey.<br><em>Different view.</em></h1><p>So far, the events have filled the frame.<br>What happens when we bring the departures into view?</p><a class="editorial-button" href="#/the-whole-picture">Look through the other window <span aria-hidden="true">↗</span></a></div>
-    <figure class="perspective-image"><img src="/assets/same-journey-different-view.png" alt="Two passengers on the same bus look through opposite windows: one faces a rock wall, the other an open landscape."><figcaption>Two windows. One journey.</figcaption></figure>
+<section id="another-perspective" data-beat="Change the question">
+  <main class="view storyboard-view" aria-labelledby="another-perspective-title">
+    <header class="storyboard-heading"><p class="eyebrow">Story placeholder / Change the question</p><h1 id="another-perspective-title">We have been looking at the accidents, but what would the same evidence look like from the other side?</h1><p>Give the reader a moment to change perspective before the central reveal. The framing changes; the underlying population and time interval stay the same.</p></header>
+    <aside class="storyboard-placeholder" aria-label="Planned visualization">
+      <span class="eyebrow">Planned treatment</span><h2>A visual transition between two views</h2><p>A window or framing interaction that carries the same evidence into the next beat. This is a narrative bridge rather than another numerical comparison.</p>
+    </aside>
   </main>
 </section>
-<section id="the-whole-picture" data-beat="The whole picture">
-  <main class="view reveal-view" aria-labelledby="whole-title">
-    <header class="reveal-intro"><p class="eyebrow">04 / The whole picture</p><h1 id="whole-title">Keep the events.<br><em>Widen the frame.</em></h1><p>U.S. air carriers, passenger and cargo. 2005–2024.</p></header>
-    <div class="denominator-stage" id="denominator-stage">
-      <div class="event-total"><strong>17</strong><span>fatal accidents</span></div>
-      <div class="exposure-total" id="exposure-total" hidden><span>alongside</span><strong>187,608,748</strong><span>departures in the same twenty years</span></div>
-      <button class="editorial-button" id="reveal-denominator" aria-controls="exposure-total" aria-expanded="false">Bring the departures into view <span aria-hidden="true">↗</span></button>
-    </div>
-    <div class="reveal-resolution" id="reveal-resolution" hidden><p><strong>0.091</strong> fatal accidents per million departures across the period.</p><p>The events still matter. Now their scale is visible.</p><button class="text-button" id="reset-denominator">Return to the count</button></div>
-    <details class="evidence-source"><summary>What these numbers mean</summary><p>Source: NTSB Table 5, 2005–2024. Rate = 17 ÷ 187,608,748 × 1,000,000. This is the pooled rate, not the mean of annual rates. Includes U.S. Part 121 passenger and cargo operations and fatalities on the ground. It describes recorded events per departure, not passenger survival probability. The source does not directly count completed safe journeys.</p><a href="/data/safety-trend.json" target="_blank" rel="noopener">Inspect the annual source values</a></details>
+<section id="the-whole-picture" data-beat="The central reveal">
+  <main class="view storyboard-view" aria-labelledby="the-whole-picture-title">
+    <header class="storyboard-heading"><p class="eyebrow">Story placeholder / The central reveal</p><h1 id="the-whole-picture-title">What share of flights had no fatal accident?</h1><p>Show the whole first, then let the reader inspect the small gap. The reveal should earn its reassurance while keeping the remaining risk visible.</p></header>
+    <aside class="storyboard-placeholder" aria-label="Planned visualization">
+      <span class="eyebrow">Planned treatment</span><h2>A full-scale proportion with a magnified inset</h2><p>A 0–100% view paired with a close-up of the gap to 100%. Both views must refer to the same flights, period, and definition. The source must establish the flight-based numerator before we show an exact percentage.</p>
+    </aside>
   </main>
-  <aside class="notes">Draft evidence-supported climax at page 5 of 7. Intended later reveal: near-100% flights without a fatal accident, with overview and magnification. Exact safe-flight share remains unresolved; do not label the arithmetic event-rate complement as counted safe flights.</aside>
 </section>
-<section id="flight-phase" data-beat="A closer look">
-  <main class="view evidence-view phase-view" aria-labelledby="phase-title">
-    <header class="evidence-heading"><div><p class="eyebrow">05 / A closer look</p><h1 id="phase-title">Where in<br><em>the journey?</em></h1></div><p class="evidence-deck">Explore the recorded accidents by flight phase.<br>Select a ribbon to hold it in view.</p></header>
-    <div id="phase-sankey-chart" class="narrative-chart" aria-label="Flight-phase Sankey"><p class="loading-note" role="status">Loading the flight-phase records…</p></div>
+<section id="flight-phase" data-beat="Look more closely">
+  <main class="view storyboard-view" aria-labelledby="flight-phase-title">
+    <header class="storyboard-heading"><p class="eyebrow">Story placeholder / Look more closely</p><h1 id="flight-phase-title">Does the picture change when we look at different parts of a flight?</h1><p>After establishing the overall scale, let the reader explore where recorded accidents occur without mistaking an accident distribution for the risk of each phase.</p></header>
+    <aside class="storyboard-placeholder" aria-label="Planned visualization">
+      <span class="eyebrow">Planned treatment</span><h2>A flight-phase distribution</h2><p>An ordered bar chart by flight phase, with selectable categories. A Sankey is an alternative if the story needs flows between categories; phase-specific risk would require matching exposure data.</p>
+    </aside>
   </main>
-  <aside class="notes">Separate archive and population from the NTSB time series. Sankey categorizes accident records, not successful flight trajectories. No per-phase hazard or short-/long-haul equivalence inferred.</aside>
 </section>
-<section id="arrival" data-beat="Your perspective">
-  <main class="view arrival-view" aria-labelledby="arrival-title">
-    <div><p class="eyebrow">06 / Back to your seat</p><h1 id="arrival-title">A wider<br><em>view of flying.</em></h1><p class="arrival-copy">A count tells us what happened.<br>A rate gives it scale.<br>You can return to either view.</p><div class="arrival-links"><a href="#/counts-in-context">Revisit the evidence <span aria-hidden="true">↗</span></a><a href="#/flight-phase">Explore the phases <span aria-hidden="true">↗</span></a></div></div>
-    <aside class="closing-note"><span class="eyebrow">The question we started with</span><p>What does<br><em>safe</em><br>look like?</p><div>In this story, “safe” means a flight without a fatal accident. The evidence gives us counts and rates to inspect, with their limits in view.</div></aside>
+<section id="arrival" data-beat="Return to the opening question">
+  <main class="view storyboard-view" aria-labelledby="arrival-title">
+    <header class="storyboard-heading"><p class="eyebrow">Story placeholder / Return to the opening question</p><h1 id="arrival-title">When you think about your next flight, what belongs in the picture?</h1><p>Return to the feeling raised by Flight 1282 and invite the reader to reflect on what the evidence changed, and what it did not answer.</p></header>
+    <aside class="storyboard-placeholder" aria-label="Planned visualization">
+      <span class="eyebrow">Planned treatment</span><h2>A closing callback</h2><p>Revisit the opening window or photograph alongside the reader’s chosen view. No new chart is planned here; connect the conclusion to evidence they can revisit.</p>
+    </aside>
   </main>
 </section>

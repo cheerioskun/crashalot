@@ -79,7 +79,6 @@ export async function mountScaleComparison(container) {
   const makeCallout = annotation().type(annotationCalloutElbow).editMode(false);
   let calloutKey = '';
   const transport = root.append('div').attr('class', 'scale-comparison__transport');
-  const advance = transport.append('button').attr('type', 'button').attr('class', 'journey-button scale-comparison__advance').text('Count the fatal accidents').on('click', advanceStage);
   const controls = transport.append('div');
   const pause = controls.append('button').attr('type', 'button').attr('class', 'text-button').text('Pause').on('click', () => {
     if (running) stop(); else play();
@@ -87,13 +86,15 @@ export async function mountScaleComparison(container) {
   controls.append('button').attr('type', 'button').attr('class', 'text-button').text('Replay').on('click', restart);
   const yearIntro = root.append('p').attr('class', 'scale-comparison__year-intro').attr('aria-hidden', 'true')
     .text('To see whether that picture holds beyond 2005, let’s add the following years.');
-  root.on('keydown', event => { if (event.target.closest('button')) event.stopPropagation(); });
+  root.on('keydown', event => {
+    if (event.target.closest('button') && (event.key === 'Enter' || event.key === ' ')) event.stopPropagation();
+  });
 
   let elapsed = 0, clock, running = false, active = false, destroyed = false;
   const accidentEnd = ACCIDENT_START + ACCIDENT_MS;
   const departureEnd = IMPACT_END + 700;
   let stageLimit = accidentEnd;
-  let phase = '', lastFrame = null, wasRunning = false;
+  let phase = '', lastFrame = null, wasRunning = false, lastNavigationKey = '';
   let geometry;
   let displayedYear = first.year;
   const tickOpacity = new Map();
@@ -209,8 +210,11 @@ export async function mountScaleComparison(container) {
     if (pause.text() !== label) pause.text(label);
     pause.property('disabled', atBoundary || reducedMotion.matches);
     const action = elapsed < accidentEnd ? 'Count the fatal accidents' : elapsed < departureEnd ? 'Count the departures' : 'Move through the years';
-    if (advance.text() !== action) advance.text(action);
-    advance.property('disabled', running).attr('hidden', elapsed >= END ? true : null);
+    const navigationKey = `${action}:${running}:${atBoundary}:${elapsed >= END}`;
+    if (navigationKey !== lastNavigationKey) {
+      lastNavigationKey = navigationKey;
+      container.dispatchEvent(new CustomEvent('storybeat', { bubbles: true }));
+    }
     root.attr('data-awaiting-action', String(!running && atBoundary && elapsed < END));
   }
   function stop() { clock?.stop(); running = false; render(); }
@@ -249,6 +253,35 @@ export async function mountScaleComparison(container) {
   layout();
   return {
     resize: layout,
+    showLastBeat() {
+      stop();
+      elapsed = END;
+      stageLimit = END;
+      lastFrame = null;
+      tickOpacity.clear();
+      render();
+    },
+    getNavigationState() {
+      const step = elapsed >= END ? 4 : elapsed >= departureEnd ? 3 : elapsed >= accidentEnd ? 2 : 1;
+      const action = running ? (elapsed < accidentEnd ? 'Counting fatal accidents' : elapsed < departureEnd ? 'Counting departures' : 'Adding the years') : ['Count fatal accidents', 'Count departures', 'Add the following years', 'Continue the story'][step - 1];
+      return { step, total: 4, running, action };
+    },
+    previousBeat() {
+      if (!active || elapsed === 0) return false;
+      const target = elapsed > departureEnd ? departureEnd : elapsed > accidentEnd ? accidentEnd : 0;
+      stop();
+      elapsed = target;
+      stageLimit = target === departureEnd ? departureEnd : accidentEnd;
+      lastFrame = null;
+      tickOpacity.clear();
+      render();
+      return true;
+    },
+    nextBeat() {
+      if (!active || elapsed >= END) return false;
+      advanceStage();
+      return true;
+    },
     setActive(value) { if (value === active) return; active = value; if (active) restart(); else stop(); },
     destroy() { stop(); destroyed = true; observer.disconnect(); window.removeEventListener('resize', layout); document.removeEventListener('visibilitychange', onVisibility); reducedMotion.removeEventListener('change', onMotion); root.remove(); },
   };
