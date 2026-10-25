@@ -79,16 +79,20 @@ export async function mountScaleComparison(container) {
   const makeCallout = annotation().type(annotationCalloutElbow).editMode(false);
   let calloutKey = '';
   const transport = root.append('div').attr('class', 'scale-comparison__transport');
+  const advance = transport.append('button').attr('type', 'button').attr('class', 'journey-button scale-comparison__advance').text('Count the fatal accidents').on('click', advanceStage);
   const controls = transport.append('div');
   const pause = controls.append('button').attr('type', 'button').attr('class', 'text-button').text('Pause').on('click', () => {
     if (running) stop(); else play();
   });
   controls.append('button').attr('type', 'button').attr('class', 'text-button').text('Replay').on('click', restart);
   const yearIntro = root.append('p').attr('class', 'scale-comparison__year-intro').attr('aria-hidden', 'true')
-    .text('Now let’s move through the years.');
+    .text('To see whether that picture holds beyond 2005, let’s add the following years.');
   root.on('keydown', event => { if (event.target.closest('button')) event.stopPropagation(); });
 
   let elapsed = 0, clock, running = false, active = false, destroyed = false;
+  const accidentEnd = ACCIDENT_START + ACCIDENT_MS;
+  const departureEnd = IMPACT_END + 700;
+  let stageLimit = accidentEnd;
   let phase = '', lastFrame = null, wasRunning = false;
   let geometry;
   let displayedYear = first.year;
@@ -153,7 +157,7 @@ export async function mountScaleComparison(container) {
       }
       row.bar.attr('width', scale(values[row.key]) - scale(0));
     });
-    const targetTicks = new Set(scale.ticks(geometry.width < 600 ? 4 : 6));
+    const targetTicks = new Set(scale.ticks(geometry.width < 600 ? 4 : 6).filter(Number.isInteger));
     const dt = lastFrame === null ? 0 : Math.max(0, elapsed - lastFrame);
     const fade = 1 - Math.exp(-dt / 95);
     // Keep tick identity through rescaling. Positions follow the same frame clock
@@ -183,7 +187,7 @@ export async function mountScaleComparison(container) {
       yearIntro.attr('aria-hidden', String(elapsed < IMPACT_END));
       phase = nextPhase;
     }
-    conclusion.style('opacity', smooth((elapsed - (IMPACT_END - 1200)) / 1200));
+    conclusion.style('opacity', smooth((elapsed - DEPARTURE_START) / 600));
     calloutGroup.style('opacity', smooth((elapsed - IMPACT_END) / 400));
     const introProgress = smooth((elapsed - IMPACT_END) / 600);
     yearIntro.style('opacity', introProgress).style('transform', `translateY(${6 * (1 - introProgress)}px)`);
@@ -200,30 +204,43 @@ export async function mountScaleComparison(container) {
         calloutKey = key;
       }
     }
-    const label = running ? 'Pause' : elapsed >= END ? 'Pause' : 'Resume';
+    const atBoundary = elapsed === 0 || elapsed >= stageLimit;
+    const label = running || atBoundary ? 'Pause' : 'Resume';
     if (pause.text() !== label) pause.text(label);
-    pause.property('disabled', elapsed >= END || reducedMotion.matches);
+    pause.property('disabled', atBoundary || reducedMotion.matches);
+    const action = elapsed < accidentEnd ? 'Count the fatal accidents' : elapsed < departureEnd ? 'Count the departures' : 'Move through the years';
+    if (advance.text() !== action) advance.text(action);
+    advance.property('disabled', running).attr('hidden', elapsed >= END ? true : null);
+    root.attr('data-awaiting-action', String(!running && atBoundary && elapsed < END));
   }
   function stop() { clock?.stop(); running = false; render(); }
   function play() {
-    if (!active || destroyed || running || elapsed >= END || document.hidden) return;
-    if (reducedMotion.matches) { elapsed = END; lastFrame = null; tickOpacity.clear(); render(); return; }
+    if (!active || destroyed || running || elapsed >= stageLimit || document.hidden) return;
+    if (reducedMotion.matches) { elapsed = stageLimit; lastFrame = null; tickOpacity.clear(); render(); return; }
     running = true;
     const from = elapsed;
     clock = timer(time => {
-      elapsed = Math.min(END, from + time);
-      if (elapsed === END) { clock.stop(); running = false; }
+      elapsed = Math.min(stageLimit, from + time);
+      if (elapsed === stageLimit) { clock.stop(); running = false; }
       render();
     });
     render();
   }
-  function restart() {
-    stop(); elapsed = reducedMotion.matches ? END : 0; phase = ''; lastFrame = null; tickOpacity.clear();
-    rows.forEach(row => { row.lastValueTime = -Infinity; });
-    render(); play();
+  function advanceStage() {
+    if (running) return;
+    if (elapsed < accidentEnd) stageLimit = accidentEnd;
+    else if (elapsed < departureEnd) { elapsed = Math.max(elapsed, DEPARTURE_START); stageLimit = departureEnd; }
+    else { elapsed = Math.max(elapsed, EXPANSION_START); stageLimit = END; }
+    play();
   }
+  function restart() {
+    stop(); elapsed = 0; stageLimit = accidentEnd; phase = ''; lastFrame = null; tickOpacity.clear();
+    rows.forEach(row => { row.lastValueTime = -Infinity; });
+    render();
+  }
+
   function onVisibility() { if (document.hidden) { wasRunning = running; stop(); } else if (wasRunning) play(); }
-  function onMotion() { if (reducedMotion.matches) { stop(); elapsed = END; lastFrame = null; tickOpacity.clear(); render(); } }
+  function onMotion() { if (reducedMotion.matches && running) { stop(); elapsed = stageLimit; lastFrame = null; tickOpacity.clear(); render(); } }
   const observer = new ResizeObserver(layout);
   observer.observe(plot.node());
   window.addEventListener('resize', layout);

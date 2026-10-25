@@ -1,0 +1,32 @@
+.hook-view { display:grid; grid-template-columns:1.05fr 1fr; grid-template-rows:1fr auto; align-items:center; column-gap:6vw; row-gap:24px; padding:clamp(28px,5vh,64px) var(--presentation-gutter) 32px; }
+.hook-copy { min-width:0; }
+.hook-dateline { font-size:11px; letter-spacing:.07em; margin:0 0 24px; color:var(--bs-secondary-color); }
+.hook-dateline span { padding:0 10px; color:var(--bs-border-color); }
+.hook-copy h1 { font-size:clamp(38px,4.4vw,68px); line-height:1.05; letter-spacing:-.05em; margin:0 0 32px; font-weight:550; }
+.hook-copy h1 em { font-family:Georgia,serif; font-weight:400; }
+.hook-script { position:relative; min-height:235px; }
+.hook-sentence { font-size:clamp(21px,2vw,30px); line-height:1.5; letter-spacing:-.025em; margin:0; }
+.hook-landing { font-size:clamp(18px,1.6vw,23px); line-height:1.5; margin:25px 0 0; color:var(--bs-secondary-color); }
+.hook-pivot { position:absolute; inset:0; }
+.hook-question { font-size:clamp(23px,2.2vw,34px); line-height:1.35; letter-spacing:-.025em; margin:0 0 24px; }
+.hook-invitation { font-size:17px; line-height:1.65; color:var(--bs-secondary-color); max-width:42ch; margin:0; }
+.hook-event { transition:opacity .35s ease; }
+#flight-1282[data-hook-step="4"] .hook-event { opacity:0; visibility:hidden; }
+.reveal .slides .hook-clause.fragment { opacity:0; visibility:hidden; transition:opacity .55s ease,filter .55s ease,transform .55s cubic-bezier(.2,.7,.2,1); filter:blur(2px); }
+.reveal .slides .hook-clause.fragment.visible { opacity:1; visibility:visible; filter:none; }
+.hook-polaroid { box-sizing:border-box; margin:0; padding:14px 14px 0; background:#fffdf8; color:#33352f; box-shadow:0 20px 55px #0003,0 2px 5px #0002; transform-origin:50% 75%; align-self:center; }
+.hook-polaroid img { display:block; width:100%; height:auto; }
+.hook-polaroid figcaption { display:flex; flex-direction:column; gap:7px; padding:20px 7px 23px; font-size:15px; line-height:1.35; }
+.hook-polaroid figcaption>span { font-family:Georgia,serif; font-style:italic; }
+.hook-polaroid a { font-size:10px; color:#77796d; text-underline-offset:3px; align-self:flex-start; }
+.reveal .slides .hook-polaroid.fragment { opacity:0; visibility:hidden; transform:translate(25px,40px) rotate(6deg) scale(.96); transition:opacity .65s ease,transform .85s cubic-bezier(.16,1,.3,1),visibility .65s; }
+.reveal .slides .hook-polaroid.fragment.visible { opacity:1; visibility:visible; transform:translate(0,0) rotate(-2deg) scale(1); }
+.hook-controls { grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:24px; padding-top:12px; }
+.journey-button { display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:999px; background:#168fd0; color:#fff; padding:16px 28px; font:500 14px var(--bs-font-sans-serif); text-decoration:none; cursor:pointer; }
+.journey-button:hover { background:#087bb9; color:#fff; }
+.journey-button:disabled { opacity:.65; cursor:default; }
+body.presentation-hook { --presentation-footer-height:0px; }
+.presentation-hook .presentation-footer,.presentation-hook .reveal .slide-number,.presentation-hook .reveal .progress { display:none !important; }
+.presentation-hook .story-stages { visibility:hidden; }
+@media(max-width:760px) { .hook-view { grid-template-columns:1fr; grid-template-rows:auto auto auto; gap:24px; align-content:start; padding-top:26px; }.hook-copy h1{font-size:42px;margin-bottom:24px}.hook-dateline{margin-bottom:16px}.hook-script{min-height:190px}.hook-sentence{font-size:23px}.hook-landing{font-size:18px;margin-top:20px}.hook-question{font-size:24px;margin-bottom:18px}.hook-invitation{font-size:16px}.hook-polaroid{width:min(100%,400px);justify-self:center;padding:10px 10px 0}.hook-polaroid figcaption{padding:13px 5px 16px}.hook-controls{position:sticky;bottom:0;background:var(--bs-body-bg);padding:12px 0}.presentation-hook .story-stages{display:none} }
+@media(prefers-reduced-motion:reduce) { .reveal .slides .hook-clause.fragment,.reveal .slides .hook-polaroid.fragment,.hook-event { transition:none; filter:none; }.reveal .slides .hook-polaroid.fragment.visible{transform:rotate(-2deg)} }

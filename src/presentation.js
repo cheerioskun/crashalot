@@ -5,6 +5,8 @@ import sandstoneUrl from './vendor/sandstone.css?url';
 import darklyUrl from './vendor/darkly.css?url';
 import { schemePaired } from 'd3';
 import cover from './views/cover.html?raw';
+import opening from './views/opening.html?raw';
+import './opening.css';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
@@ -12,7 +14,7 @@ import { mountCountRateComparison } from './components/narrative-counts.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
 import { mountPhaseSankey } from './components/phase-sankey.js';
 
-document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${chapters}`;
+document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${opening}${chapters}`;
 
 const chartInstances = [];
 async function mountChart(id, mount) {
@@ -107,7 +109,8 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 function updateChrome() {
   const index = presentation.getIndices().h;
   document.body.classList.toggle('presentation-cover', index === 0);
-  const stage = index <= 2 ? 'notice' : index <= 4 ? 'reconsider' : 'inspect';
+  document.body.classList.toggle('presentation-hook', presentation.getCurrentSlide()?.id === 'flight-1282');
+  const stage = index <= 3 ? 'notice' : index <= 5 ? 'reconsider' : 'inspect';
   document.querySelectorAll('[data-stage]').forEach(link => {
     if (link.dataset.stage === stage) link.setAttribute('aria-current', 'step');
     else link.removeAttribute('aria-current');
@@ -117,6 +120,22 @@ function updateChrome() {
     chart.setActive?.(chart.slide === presentation.getCurrentSlide());
   });
 }
+const hook = document.getElementById('flight-1282');
+const hookNext = hook.querySelector('[data-hook-next]');
+function updateHook() {
+  const shown = [...hook.querySelectorAll('.fragment.visible')];
+  const step = shown.length ? Math.max(...shown.map(node => Number(node.dataset.fragmentIndex))) + 1 : 0;
+  hook.dataset.hookStep = step;
+  hook.querySelector('.hook-event').setAttribute('aria-hidden', String(step === 4));
+  hookNext.textContent = step === 4 ? 'Start with one year' : 'Continue';
+}
+hook.addEventListener('keydown', event => { if (event.target.closest('button, a') && (event.key === 'Enter' || event.key === ' ')) event.stopPropagation(); });
+hookNext.addEventListener('click', () => presentation.next());
+hook.querySelector('[data-hook-back]').addEventListener('click', () => presentation.prev());
+presentation.on('fragmentshown', updateHook);
+presentation.on('fragmenthidden', updateHook);
+presentation.on('slidechanged', updateHook);
+presentation.on('ready', updateHook);
 presentation.on('ready', updateChrome);
 presentation.on('slidechanged', updateChrome);
 presentation.initialize({
