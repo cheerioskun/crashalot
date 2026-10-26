@@ -1,7 +1,6 @@
 import Reveal from 'reveal.js';
 import 'reveal.js/reveal.css';
 import baselineUrl from 'bootstrap/dist/css/bootstrap.min.css?url';
-import sandstoneUrl from './vendor/sandstone.css?url';
 import darklyUrl from './vendor/darkly.css?url';
 import { schemePaired } from 'd3';
 import cover from './views/cover.html?raw';
@@ -10,6 +9,7 @@ import './opening.css';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
+import { mountDecadeTrend } from './components/decade-trend.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
 
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${opening}${chapters}`;
@@ -22,19 +22,29 @@ async function mountChart(id, mount) {
     const chart = await mount(host);
     chart.slide = host.closest('section');
     chartInstances.push(chart);
+    chart.setPlaybackMode?.(autoPlayback);
     chart.setActive?.(chart.slide.classList.contains('present'));
     updateNavigation();
   }
   catch { host.innerHTML = '<p role="status">The source data could not load. Reload the page to try again.</p>'; }
 }
 mountChart('scale-comparison-chart', mountScaleComparison);
+mountChart('decade-trend-chart', mountDecadeTrend);
 
 const themeOptions = {
   default: { url: baselineUrl, mode: 'light' },
-  sandstone: { url: sandstoneUrl, mode: 'light' },
   darkly: { url: darklyUrl, mode: 'dark' },
 };
-const selector = document.querySelector('#presentation-theme-select');
+const themeToggle = document.querySelector('#theme-toggle');
+const playbackToggle = document.querySelector('#playback-toggle');
+let autoPlayback = false;
+playbackToggle.addEventListener('click', () => {
+  autoPlayback = !autoPlayback;
+  playbackToggle.setAttribute('aria-pressed', String(autoPlayback));
+  playbackToggle.setAttribute('aria-label', autoPlayback ? 'Enable manual playback' : 'Enable auto playback');
+  playbackToggle.title = autoPlayback ? 'Auto playback · switch to Manual' : 'Manual playback · switch to Auto';
+  chartInstances.forEach(chart => chart.setPlaybackMode?.(autoPlayback));
+});
 const status = document.querySelector('#presentation-theme-status');
 let currentTheme = 'default';
 
@@ -54,7 +64,7 @@ function loadStylesheet(url) {
 async function setTheme(name) {
   const selected = themeOptions[name] ? name : 'default';
   const theme = themeOptions[selected];
-  selector.disabled = true;
+  themeToggle.disabled = true;
   status.textContent = 'Applying theme…';
   try {
     const next = await loadStylesheet(theme.url);
@@ -67,21 +77,21 @@ async function setTheme(name) {
     palette.forEach((colorIndex, index) => document.documentElement.style.setProperty(`--viz-series-${index + 1}`, schemePaired[colorIndex]));
     previous.remove();
     currentTheme = selected;
-    selector.value = selected;
+    themeToggle.setAttribute('aria-label', theme.mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggle.title = theme.mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     try { localStorage.setItem('crashalot-component-theme', selected); } catch { /* Theme persistence is optional. */ }
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: selected } }));
     status.textContent = '';
   } catch {
-    selector.value = currentTheme;
     if (!document.querySelector('#presentation-theme').getAttribute('href') && selected !== 'default') {
       await setTheme('default');
     }
     status.textContent = 'The requested theme could not load. The previous appearance has been retained.';
   } finally {
-    selector.disabled = false;
+    themeToggle.disabled = false;
   }
 }
-selector.addEventListener('change', () => setTheme(selector.value));
+themeToggle.addEventListener('click', () => setTheme(currentTheme === 'darkly' ? 'default' : 'darkly'));
 let savedTheme = 'default';
 try { savedTheme = localStorage.getItem('crashalot-component-theme') || 'default'; } catch { /* Theme persistence is optional. */ }
 setTheme(savedTheme);
@@ -101,11 +111,11 @@ function updateNavigation() {
   let position = `${presentation.getIndices().h + 1} / ${presentation.getTotalSlides()} · ${slide.dataset.beat || 'The journey'}`;
   if (cover) position = 'An invitation to look closer';
   if (slide.id === 'flight-1282') position = `Flight 1282 · Beat ${hookStep + 1} of 5`;
-  if (slide.id === 'change-over-time') position = state ? `Beat ${state.step} of ${state.total} · ${state.action}` : 'Loading the comparison…';
+  if (['change-over-time', 'counts-in-context'].includes(slide.id)) position = state ? `Beat ${state.step} of ${state.total} · ${state.action}` : 'Loading the comparison…';
   if (storyPosition.textContent !== position) storyPosition.textContent = position;
   storyBack.hidden = cover;
   storyNext.querySelector('[data-next-label]').textContent = cover ? 'Start the journey' : 'Next';
-  storyNext.disabled = presentation.isLastSlide() || !!state?.running || (slide.id === 'change-over-time' && !chart);
+  storyNext.disabled = presentation.isLastSlide() || !!state?.running || (['change-over-time', 'counts-in-context'].includes(slide.id) && !chart);
   storyNext.setAttribute('aria-label', cover ? 'Start the journey' : state ? `Next: ${state.action.toLowerCase()}` : 'Next');
 }
 function previousBeat() {
@@ -119,7 +129,7 @@ function nextBeat() {
   const chart = chartInstances.find(chart => chart.slide === slide);
   if (chart?.nextBeat?.()) return;
   // Wait for the comparison to mount rather than skipping its opening beat.
-  if (slide?.id === 'change-over-time' && !chart) return;
+  if (['change-over-time', 'counts-in-context'].includes(slide?.id) && !chart) return;
   presentation.next();
 }
 storyNext.addEventListener('click', nextBeat);

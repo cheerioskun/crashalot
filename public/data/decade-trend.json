@@ -1,0 +1,394 @@
+{
+  "source": {
+    "name": "MauroPello \u00b7 PlaneCrashData",
+    "url": "https://huggingface.co/datasets/MauroPello/planecrashdata",
+    "revision": "b817a96f2b9152b735c9c6570d465102f5f76c88",
+    "sha256": "db334ffbab0cf67b06765038803338531fbfe23522c69b453cd8eb63a6c09b48",
+    "license": "CC BY 4.0",
+    "filter": "flight_type = 'Scheduled Revenue Flight'; 1950 <= year <= 2024",
+    "measure": "Recorded crash records, including fatal and nonfatal outcomes",
+    "scope": "Worldwide; exact source category, excluding separately classified Cargo and Charter/Taxi records",
+    "limitations": [
+      "An archive count, not a complete census or a per-flight risk estimate.",
+      "Historical reporting and category completeness may vary.",
+      "2020\u20132024 contains five years; 2025 excluded because scheduled-flight coverage stops in July.",
+      "Earlier chart uses U.S. scheduled service; this chart changes to a worldwide archive."
+    ]
+  },
+  "rows": [
+    {
+      "decade": 1950,
+      "label": "1950s",
+      "start": 1950,
+      "end": 1959,
+      "years": 10,
+      "partial": false,
+      "count": 688
+    },
+    {
+      "decade": 1960,
+      "label": "1960s",
+      "start": 1960,
+      "end": 1969,
+      "years": 10,
+      "partial": false,
+      "count": 704
+    },
+    {
+      "decade": 1970,
+      "label": "1970s",
+      "start": 1970,
+      "end": 1979,
+      "years": 10,
+      "partial": false,
+      "count": 923
+    },
+    {
+      "decade": 1980,
+      "label": "1980s",
+      "start": 1980,
+      "end": 1989,
+      "years": 10,
+      "partial": false,
+      "count": 711
+    },
+    {
+      "decade": 1990,
+      "label": "1990s",
+      "start": 1990,
+      "end": 1999,
+      "years": 10,
+      "partial": false,
+      "count": 624
+    },
+    {
+      "decade": 2000,
+      "label": "2000s",
+      "start": 2000,
+      "end": 2009,
+      "years": 10,
+      "partial": false,
+      "count": 365
+    },
+    {
+      "decade": 2010,
+      "label": "2010s",
+      "start": 2010,
+      "end": 2019,
+      "years": 10,
+      "partial": false,
+      "count": 269
+    },
+    {
+      "decade": 2020,
+      "label": "2020\u201324",
+      "start": 2020,
+      "end": 2024,
+      "years": 5,
+      "partial": true,
+      "count": 44
+    }
+  ],
+  "annual": [
+    {
+      "year": 1950,
+      "count": 82
+    },
+    {
+      "year": 1951,
+      "count": 86
+    },
+    {
+      "year": 1952,
+      "count": 62
+    },
+    {
+      "year": 1953,
+      "count": 73
+    },
+    {
+      "year": 1954,
+      "count": 65
+    },
+    {
+      "year": 1955,
+      "count": 61
+    },
+    {
+      "year": 1956,
+      "count": 61
+    },
+    {
+      "year": 1957,
+      "count": 59
+    },
+    {
+      "year": 1958,
+      "count": 76
+    },
+    {
+      "year": 1959,
+      "count": 63
+    },
+    {
+      "year": 1960,
+      "count": 71
+    },
+    {
+      "year": 1961,
+      "count": 68
+    },
+    {
+      "year": 1962,
+      "count": 71
+    },
+    {
+      "year": 1963,
+      "count": 65
+    },
+    {
+      "year": 1964,
+      "count": 56
+    },
+    {
+      "year": 1965,
+      "count": 71
+    },
+    {
+      "year": 1966,
+      "count": 59
+    },
+    {
+      "year": 1967,
+      "count": 71
+    },
+    {
+      "year": 1968,
+      "count": 76
+    },
+    {
+      "year": 1969,
+      "count": 96
+    },
+    {
+      "year": 1970,
+      "count": 94
+    },
+    {
+      "year": 1971,
+      "count": 80
+    },
+    {
+      "year": 1972,
+      "count": 99
+    },
+    {
+      "year": 1973,
+      "count": 119
+    },
+    {
+      "year": 1974,
+      "count": 78
+    },
+    {
+      "year": 1975,
+      "count": 98
+    },
+    {
+      "year": 1976,
+      "count": 88
+    },
+    {
+      "year": 1977,
+      "count": 86
+    },
+    {
+      "year": 1978,
+      "count": 93
+    },
+    {
+      "year": 1979,
+      "count": 88
+    },
+    {
+      "year": 1980,
+      "count": 84
+    },
+    {
+      "year": 1981,
+      "count": 64
+    },
+    {
+      "year": 1982,
+      "count": 67
+    },
+    {
+      "year": 1983,
+      "count": 73
+    },
+    {
+      "year": 1984,
+      "count": 50
+    },
+    {
+      "year": 1985,
+      "count": 64
+    },
+    {
+      "year": 1986,
+      "count": 56
+    },
+    {
+      "year": 1987,
+      "count": 78
+    },
+    {
+      "year": 1988,
+      "count": 78
+    },
+    {
+      "year": 1989,
+      "count": 97
+    },
+    {
+      "year": 1990,
+      "count": 62
+    },
+    {
+      "year": 1991,
+      "count": 60
+    },
+    {
+      "year": 1992,
+      "count": 65
+    },
+    {
+      "year": 1993,
+      "count": 85
+    },
+    {
+      "year": 1994,
+      "count": 60
+    },
+    {
+      "year": 1995,
+      "count": 74
+    },
+    {
+      "year": 1996,
+      "count": 63
+    },
+    {
+      "year": 1997,
+      "count": 61
+    },
+    {
+      "year": 1998,
+      "count": 57
+    },
+    {
+      "year": 1999,
+      "count": 37
+    },
+    {
+      "year": 2000,
+      "count": 43
+    },
+    {
+      "year": 2001,
+      "count": 41
+    },
+    {
+      "year": 2002,
+      "count": 37
+    },
+    {
+      "year": 2003,
+      "count": 33
+    },
+    {
+      "year": 2004,
+      "count": 26
+    },
+    {
+      "year": 2005,
+      "count": 40
+    },
+    {
+      "year": 2006,
+      "count": 26
+    },
+    {
+      "year": 2007,
+      "count": 42
+    },
+    {
+      "year": 2008,
+      "count": 41
+    },
+    {
+      "year": 2009,
+      "count": 36
+    },
+    {
+      "year": 2010,
+      "count": 38
+    },
+    {
+      "year": 2011,
+      "count": 46
+    },
+    {
+      "year": 2012,
+      "count": 24
+    },
+    {
+      "year": 2013,
+      "count": 28
+    },
+    {
+      "year": 2014,
+      "count": 29
+    },
+    {
+      "year": 2015,
+      "count": 31
+    },
+    {
+      "year": 2016,
+      "count": 22
+    },
+    {
+      "year": 2017,
+      "count": 10
+    },
+    {
+      "year": 2018,
+      "count": 16
+    },
+    {
+      "year": 2019,
+      "count": 25
+    },
+    {
+      "year": 2020,
+      "count": 6
+    },
+    {
+      "year": 2021,
+      "count": 9
+    },
+    {
+      "year": 2022,
+      "count": 12
+    },
+    {
+      "year": 2023,
+      "count": 6
+    },
+    {
+      "year": 2024,
+      "count": 11
+    }
+  ]
+}

@@ -71,3 +71,17 @@ The [NTSB source audit](safety-trend-source.md) establishes a matched 2005–202
 Fatal accidents include ground fatalities. An aircraft-level audit resolves fatal-event versus eligible-aircraft multiplicity in this window, but the source does not directly enumerate completed flights linked to outcomes. Therefore an exact observed safe-flight share is not yet established: `safePercent` remains unset, and the mathematical rate complement must not silently acquire that label. This measurement question does **not** change the user's agreed meaning of safe or discard the planned 100% reveal.
 
 The source-backed graph implementations and visual treatment are now reviewable locally. Final narrative scope, the near-100% measurement, and final theme choice remain open.
+
+## Second visualization · October 25, 2026
+
+Requested and implemented: animated decade counts for the exact PlaneCrashData Scheduled Revenue Flight category. Exact title retained: “Aviation has been getting safer and safer through the decades”. Five pauses reveal 1950s–1960s → 1970s peak → 1980s–1990s decline with technology and training context → 2000s–2010s → separate partial 2020–2024 bar. Shared navigation, D3 transitions, reversible beats, reduced motion, and inspectable source table.
+
+Evidence changes the initial hypothesis: 1970s is the peak (923), not a dip; the decline follows, reaching 269 in the 2010s. 2020–2024 has 44 records over five years. The category ends mid-2025, so that year is excluded. Worldwide archive counts include nonfatal outcomes and do not establish risk per flight or causal attribution. Historical GPWS and CRM sources contextualize the change without explaining its magnitude. See [source and beat notes](decade-trend-source.md).
+
+Follow-up: the user requested a bar-to-line morph. Added a sixth beat: connect the bar tops at their horizontal centers, then fade the bars, retaining exact labels and scales. The partial 2020–2024 period becomes an unconnected hollow diamond.
+
+Playback follow-up: a top Manual / Auto toggle controls the second visualization. Auto waits two seconds after each completed beat, then advances, stopping on the final line chart. Manual is the default; Pause/Resume, Back, Replay, and slide departure cancel or resume scheduled playback explicitly.
+
+## Motion direction revision · October 26, 2026
+
+Latest user direction supersedes the six-beat treatment: three beats (rise/peak, sustained decline, partial decade plus line transformation). The final segment MUST be dashed, rather than omitted; the five-year label and hollow marker remain. Move playback out of the chart into a quiet header icon beside the sun/moon theme switch, replacing Appearance. Timing is provisional for a later motion-design pass. Music is a future addition only.

@@ -119,3 +119,15 @@ body.presentation-cover .presentation-footer, body.presentation-hook .presentati
 .story-nav:disabled { opacity:.35; cursor:default; }
 .story-nav[hidden] { display:none; }
 @media(max-width:700px) { .presentation-footer { gap:12px; }.story-position { font-size:11px; max-width:50%; }.presentation-footer nav { gap:2px; }.story-nav { gap:7px; padding-inline:9px; }.story-nav-next { padding-inline:13px; }.presentation-keyboard-hint { display:none; } }
+
+/* Quiet, shared presentation utilities; space remains for future audio controls. */
+.presentation-utilities{display:flex;align-items:center;gap:6px}
+.utility-button{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--bs-secondary-color);cursor:pointer;padding:9px}
+.utility-button:hover{color:var(--bs-body-color);background:var(--bs-tertiary-bg)}
+.utility-button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.utility-button:disabled{opacity:.4;cursor:wait}
+.utility-button .icon-sun,.utility-button .icon-auto{display:none}
+[data-bs-theme="dark"] .utility-button .icon-sun{display:block}
+[data-bs-theme="dark"] .utility-button .icon-moon{display:none}
+#playback-toggle[aria-pressed="true"] .icon-auto{display:block}
+#playback-toggle[aria-pressed="true"] .icon-manual{display:none}
