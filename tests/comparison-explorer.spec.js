@@ -56,7 +56,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  s=await state(page);check(s,rows);
  const highlighted=await page.locator('.comparison-scatter circle[data-selected=true]').evaluateAll(ns=>ns.map(n=>n.dataset.recordId));
  expect(highlighted).toEqual(s.recordIds);
- await page.locator('[data-story-back]').click();
+ for(let i=0;i<5;i++)await page.locator('[data-story-back]').click();
  await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await expect(page.locator('.comparison-types [data-start]')).toHaveValue('2000');
  await expect(page.locator('.comparison-types [data-end]')).toHaveValue('2009');
@@ -124,13 +124,17 @@ test('fatal stacks start at zero and disclose fatal, nonfatal and total outcomes
   expect(cell.fatalCount).toBe(source.filter(r=>r.fatalities>0).length);
   expect(cell.count).toBe(source.length);
  }
+ await chart.locator('[data-start]').click(); // Open exploration before checking final stacked geometry.
  const first=chart.locator('.type-row').first();
  const fatal=first.locator('.outcome-fatal'),nonfatal=first.locator('.outcome-nonfatal');
  expect(Number(await fatal.getAttribute('x'))).toBe(0);
+ expect(Number(await fatal.getAttribute('width'))).toBeGreaterThan(0);
+ const totalWidth=Number(await fatal.getAttribute('width'))+Number(await nonfatal.getAttribute('width'));
+ expect(Number(await fatal.getAttribute('width'))/totalWidth).toBeCloseTo(cells[0].fatalCount/cells[0].count,5);
  expect(Number(await nonfatal.getAttribute('x'))).toBeCloseTo(Number(await fatal.getAttribute('width')),5);
  await first.hover();await expect(chart.getByRole('tooltip')).toContainText('fatal');await expect(chart.getByRole('tooltip')).toContainText('nonfatal');await expect(chart.getByRole('tooltip')).toContainText('total');
  await first.focus();await expect(chart.getByRole('tooltip')).toBeVisible();
- await page.goto('/#/aircraft-design');await expect(root(page).locator('.record-bar').first()).toBeVisible();
+ await page.goto('/#/aircraft-design');await root(page).locator('[data-start]').click();await expect(root(page).locator('.record-bar').first()).toBeVisible();
  await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
  await maker.focus();await expect(root(page).getByRole('tooltip')).toContainText('total');

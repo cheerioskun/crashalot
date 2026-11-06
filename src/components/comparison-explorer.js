@@ -1,5 +1,6 @@
 import {axisBottom,axisLeft,bin,brushX,format,group,max,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
+import {createComparisonBeats} from './comparison-beats.js';
 
 let dataset;
 const shared={start:1970,end:2025,operation:'scheduled',manufacturer:null};
@@ -53,10 +54,11 @@ async function mount(container,kind) {
           <p class="comparison-brush-hint">Drag across years. The bars on the selection’s right edge show aircraft ages in five-year groups.</p>
         </div>
         <aside class="comparison-linked">
-          <h2>Aircraft in this period</h2>
+          <div class="comparison-age-story"><p class="eyebrow">The aircraft’s age</p><h2></h2><p class="comparison-age-copy"></p></div>
+          <div class="comparison-maker-controls"><h2>Aircraft in this period</h2>
           <label class="comparison-manufacturer">Manufacturer label <select data-manufacturer aria-label="Manufacturer"></select></label>
           <p class="comparison-manufacturer-context"></p>
-          <div class="comparison-manufacturer-bars record-bars" aria-label="Manufacturers in the selected period"></div>
+          <div class="comparison-manufacturer-bars record-bars" aria-label="Manufacturers in the selected period"></div></div>
         </aside>
       </div>
       <div class="comparison-selection" role="status" aria-live="polite"></div>
@@ -71,7 +73,7 @@ async function mount(container,kind) {
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
       <p>Worldwide archive · 1970–2024 · recorded airborne phases. Counts describe records in this archive; they do not estimate accident probability per flight or rank operational or manufacturer safety. Fleet size, flight activity, mission and reporting coverage are not controlled here.</p>
-      <p class="comparison-source-age"></p>
+      <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
       <p>Manufacturer labels come from a reviewed list of literal aircraft-name prefixes, with unmatched names kept unclassified. They do not resolve historical ownership or prove that a manufacturer caused an accident. Aircraft age uses the crash year minus the recorded manufacture year.</p>
       <p>Original source IDs are preserved throughout brushing, grouping and record inspection. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
       <p><a href="${import.meta.env.BASE_URL}data/comparison-records.json" download>Download the retained comparison records</a></p>
@@ -81,11 +83,12 @@ async function mount(container,kind) {
   q('[data-operation]').append(option('all','All kinds of flying'),...Object.entries(labels).map(([value,label])=>option(value,label)));
   let active=false,destroyed=false,brushing=false,scatterKey='',selectionKey='',limit=8,currentSelected=[];
   const editingYears=new Set();
-  let scatter,points,x,y,brush,brushLayer,histogramLayer,cohortLayer;
+  let scatter,points,x,y,brush,brushLayer,histogramLayer,cohortLayer,pointReveal,typeRows,typeScale,narrative,lastStoryStage=-1;
   const ageCeiling=Math.max(10,Math.ceil((max(data.records,r=>r.age)||10)/5)*5+5);
   const ageBinner=bin().value(r=>r.age).domain([0,ageCeiling]).thresholds(range(5,ageCeiling,5));
   const eligible=data.records.filter(row=>!aircraft || row.age!==null);
   const skipped=data.records.length-eligible.length;
+  q('.comparison-age-evidence').hidden=!aircraft;
   q('.comparison-source-age').textContent=aircraft
     ? `${number(skipped)} records with missing or invalid manufacture years are omitted from both the scatterplot and its linked breakdown. ${number(eligible.length)} usable-age records remain across all flight types. The time and type choices carry between chapters; the preceding flight-type chart also includes unknown-age records.`
     : `All ${number(data.records.length)} airborne-phase records are eligible here, including records without usable aircraft ages. The following age scatterplot omits those records. No raw record is deleted from the retained source.`;
@@ -170,6 +173,7 @@ async function mount(container,kind) {
     rows.select('.type-value').attr('x',width-4).attr('y',17).text(r=>`${number(r.fatalCount)} fatal`);
     rows.select('.outcome-fatal').attr('x',0).attr('y',27).attr('width',r=>scale(r.fatalCount));
     rows.select('.outcome-nonfatal').attr('x',r=>scale(r.fatalCount)).attr('y',27).attr('width',r=>scale(r.count-r.fatalCount));
+    typeRows=rows;typeScale=scale;
   }
   function drawScatter(base,selectedIds) {
     const width=Math.max(260,q('.comparison-scatter').clientWidth),height=340;
@@ -183,7 +187,8 @@ async function mount(container,kind) {
       scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(42,0)`).call(axisLeft(y).ticks(5).tickSize(-(width-54))).call(g=>g.select('.domain').remove());
       scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(0,${height-45})`).call(axisBottom(x).ticks(utcYear.every(width<500?20:10)).tickFormat(date=>String(date.getUTCFullYear())));
       scatter.append('text').attr('class','comparison-axis-title').attr('x',(width+30)/2).attr('y',height-5).attr('text-anchor','middle').text('Year of recorded crash');
-      points=scatter.append('g').selectAll('circle').data(base,r=>r.source_id).join('circle')
+      pointReveal=scatter.append('defs').append('clipPath').attr('id','comparison-points-reveal').append('rect').attr('x',42).attr('y',12).attr('height',height-57);
+      points=scatter.append('g').attr('class','comparison-points').attr('clip-path','url(#comparison-points-reveal)').selectAll('circle').data(base,r=>r.source_id).join('circle')
         .attr('data-record-id',r=>r.source_id).attr('cx',r=>x(new Date(r.time))).attr('cy',r=>y(r.age)).attr('r',2.5);
       brush=brushX().extent([[42,12],[width-12,height-45]]).handleSize(12)
         .on('start',event=>{if(event.sourceEvent)brushing=true;})
@@ -306,14 +311,74 @@ async function mount(container,kind) {
       const label=shared.operation==='all'?'All kinds of flying':labels[shared.operation];
       q('.comparison-type-selection').textContent=`${label} · ${number(currentSelected.length)} recorded crashes in ${shared.start}–${shared.end-1}`;
     }
+    if(narrative)paintNarrative(narrative.state);
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
   }
+  function paintNarrative({stage,progress,reduced}) {
+    root.classList.toggle('is-exploring',stage===(aircraft?4:3));
+    if(aircraft) {
+      const width=Math.max(260,q('.comparison-scatter').clientWidth);
+      if(pointReveal)pointReveal.attr('width',(width-54)*(stage===0?0:stage===1?progress:1));
+      cohortLayer?.attr('opacity',stage<2?0:stage===2?progress:1);
+      histogramLayer?.attr('opacity',stage<4?0:progress).attr('aria-hidden',String(stage<4));
+      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<4||!b.length?-1:0);
+      const stories=[
+        ['Aircraft from different generations.','Aircraft built decades apart appear in the same period.'],
+        ['Decades of aircraft, side by side.','Some were newly built. Others were manufactured decades earlier.'],
+        ['One generation grows older.','The diagonal follows aircraft built in the same year. At each later event, that generation is older by the same amount.'],
+        ['Airworthiness takes maintenance.','For U.S. air carriers, aging aircraft undergo inspections and maintenance-record reviews. Age-sensitive components require adequate, timely maintenance.'],
+      ];
+      if(stage!==lastStoryStage){
+        const copy=stories[Math.min(stage,3)];
+        q('.comparison-age-story h2').textContent=copy[0];
+        q('.comparison-age-copy').replaceChildren(document.createTextNode(copy[1]));
+        if(stage===3){const link=document.createElement('a');link.href='https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf';link.target='_blank';link.rel='noreferrer';link.textContent=' FAA · Aging aircraft';q('.comparison-age-copy').append(link);}
+      }
+      q('.comparison-age-story').hidden=stage===4;
+      q('.comparison-maker-controls').hidden=stage<4;
+      q('.comparison-model-grid').hidden=stage<4;
+      q('.comparison-selection').hidden=stage<4;
+      q('.comparison-brush-hint').textContent=stage<4?'': 'Drag across years. The bars on the selection’s right edge show aircraft ages in five-year groups.';
+    } else {
+      if(typeRows) {
+        const reveal=r=>stage===0?0:stage===1?(r.label==='scheduled'?progress:0):stage===2?(r.label==='scheduled'?1:progress):1;
+        typeRows.select('.outcome-fatal').attr('width',r=>typeScale(r.fatalCount)*reveal(r));
+        typeRows.select('.outcome-nonfatal').attr('x',r=>typeScale(r.fatalCount)*reveal(r)).attr('width',r=>typeScale(r.count-r.fatalCount)*reveal(r));
+        typeRows.select('.type-value').attr('opacity',r=>reveal(r)>=1?1:0);
+      }
+      if(stage!==lastStoryStage){
+        const stories=[['Different kinds of flying','An airline, a private aircraft and a training flight share the archive. They operate in different settings.'],['Start with scheduled services.','Scheduled revenue services form one part of this worldwide archive.'],['The archive extends beyond airlines.','Private, charter, cargo and training flights also contribute to the crash records.'],['Which flights belong in your comparison?','Choose a kind of flying to carry into the aircraft view. Comparing per-flight safety also requires flight activity for each group.']];
+        q('.comparison-type-note h2').textContent=stories[stage][0];
+        q('.comparison-type-note>p:not(.eyebrow)').textContent=stories[stage][1];
+      }
+    }
+    if(stage!==lastStoryStage){
+      const story=q(aircraft?'.comparison-age-story':'.comparison-type-note');
+      story.classList.remove('comparison-copy-enter');
+      if(!reduced){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
+      lastStoryStage=stage;
+    }
+  }
+  narrative=createComparisonBeats({root,container,aircraft,paint:paintNarrative});
+  // An intentional data interaction opens exploration immediately and suspends Auto.
+  root.addEventListener('pointerdown',event=>{
+    if(event.target.closest('input,select,.type-row,.record-bar,.comparison-brush,[data-reset-years],[data-clear-maker]'))narrative.explore();
+  },true);
+  root.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)&&event.target.closest('.type-row,.record-bar'))narrative.explore();},true);
+  root.addEventListener('input',event=>{if(event.target.matches('input,select'))narrative.explore();},true);
+  root.addEventListener('change',event=>{if(event.target.matches('input,select'))narrative.explore();},true);
   const observer=new ResizeObserver(()=>{if(active)render();});observer.observe(root);
   listeners.add(render);render();
   return {
     resize(){if(active){scatterKey='';render();}},
-    setActive(value){active=value;if(active)render();},
-    destroy(){destroyed=true;listeners.delete(render);observer.disconnect();root.remove();},
+    setActive(value){active=value;narrative.setActive(value);if(active)render();},
+    setPlaybackMode:value=>narrative.setPlaybackMode(value),
+    getNavigationState:()=>narrative.getNavigationState(),
+    finishBeat:()=>narrative.finishBeat(),
+    nextBeat:()=>narrative.nextBeat(),
+    previousBeat:()=>narrative.previousBeat(),
+    showLastBeat:()=>narrative.showLastBeat(),
+    destroy(){destroyed=true;narrative.destroy();listeners.delete(render);observer.disconnect();root.remove();},
   };
 }
 export const mountFlightTypes=container=>mount(container,'types');

@@ -92,3 +92,13 @@ button.record-bar { cursor:pointer; }
 .comparison-cohort text{fill:var(--bs-body-color);font:11px var(--bs-font-sans-serif);paint-order:stroke;stroke:var(--bs-body-bg);stroke-width:4px;stroke-linejoin:round}
 .cohort-label-title{font-weight:650}.cohort-diagonal{stroke:var(--bs-body-color);stroke-width:1.3;stroke-dasharray:4 4;opacity:.65}
 .cohort-connector{fill:none;stroke:var(--bs-body-color);stroke-width:1;opacity:.5}
+
+.comparison-outcome-key{align-items:center}.comparison-transport{display:flex;gap:18px;margin-left:auto}
+.comparison-transport button{font-size:11px;min-width:42px}.comparison-transport button:disabled{opacity:.35}
+.comparison-age-copy{font-size:14px;line-height:1.75}.comparison-age-copy a{display:block;margin-top:12px;font-size:11px;color:var(--bs-secondary-color)}
+.comparison-age-story[hidden],.comparison-maker-controls[hidden],.comparison-model-grid[hidden],.comparison-selection[hidden]{display:none}
+.comparison-copy-enter{animation:comparison-copy-in .4s ease-out both}
+@keyframes comparison-copy-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.comparison-copy-enter{animation:none}}
+
+@media(max-width:720px){.comparison-aircraft:not(.is-exploring) .comparison-linked{order:-1}.comparison-age-story h2{font-size:25px}.comparison-age-copy{font-size:13px;margin-bottom:0}.comparison-age-story p{margin-bottom:8px}}

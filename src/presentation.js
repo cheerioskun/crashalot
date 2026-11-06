@@ -146,12 +146,12 @@ function updateNavigation() {
   let position = `${slidePosition} · ${slide.dataset.beat || 'The journey'}`;
   if (cover) position = `${slidePosition} · Welcome`;
   if (slide.id === 'flight-1282') position = `${slidePosition} · Reveal ${hookStep + 1} of ${hookBeatLabels.length}`;
-  if (['change-over-time', 'counts-in-context', 'flight-phase'].includes(slide.id)) position = state ? `${slidePosition} · Reveal ${state.step} of ${state.total}` : `${slidePosition} · Loading…`;
+  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide.id)) position = state ? `${slidePosition} · Reveal ${state.step} of ${state.total}` : `${slidePosition} · Loading…`;
   if (storyPosition.textContent !== position) storyPosition.textContent = position;
   storyBack.hidden = false;
   storyBack.disabled = cover;
   playbackToggle.hidden = false;
-  storyNext.disabled = presentation.isLastSlide() || (['change-over-time', 'counts-in-context', 'flight-phase'].includes(slide.id) && !chart);
+  storyNext.disabled = (presentation.isLastSlide() && (!state || state.complete)) || (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide.id) && !chart);
 }
 function previousBeat() {
   if (presentation.getCurrentSlide()?.id === 'flight-1282') hookPlayback.hold();
@@ -166,7 +166,7 @@ function nextBeat() {
   if (state?.running || state?.inProgress) { chart.finishBeat?.(); return; }
   if (chart?.nextBeat?.()) return;
   // Wait for the comparison to mount rather than skipping its opening beat.
-  if (['change-over-time', 'counts-in-context', 'flight-phase'].includes(slide?.id) && !chart) return;
+  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide?.id) && !chart) return;
   if (slide?.id === 'flight-1282') hookPlayback.engage();
   presentation.next();
 }
