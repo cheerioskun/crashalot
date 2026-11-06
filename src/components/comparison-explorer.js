@@ -1,4 +1,4 @@
-import {axisBottom,axisLeft,bin,brushX,format,group,max,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
+import {axisBottom,axisLeft,bin,brushX,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
 
@@ -54,7 +54,7 @@ async function mount(container,kind) {
           <p class="comparison-brush-hint">Drag across years. The bars on the selection’s right edge show aircraft ages in five-year groups.</p>
         </div>
         <aside class="comparison-linked">
-          <div class="comparison-age-story"><p class="eyebrow">The aircraft’s age</p><h2></h2><p class="comparison-age-copy"></p></div>
+
           <div class="comparison-maker-controls"><h2>Aircraft in this period</h2>
           <label class="comparison-manufacturer">Manufacturer label <select data-manufacturer aria-label="Manufacturer"></select></label>
           <p class="comparison-manufacturer-context"></p>
@@ -206,13 +206,13 @@ async function mount(container,kind) {
           if(!brushing)syncBrush();drawAgeDistribution(width);
         });
       brushLayer=scatter.append('g').attr('class','comparison-brush').call(brush);
-      cohortLayer=scatter.append('g').attr('class','comparison-cohort').attr('pointer-events','none');
+      cohortLayer=scatter.append('g').attr('class','comparison-age-annotation').attr('pointer-events','none');
       histogramLayer=scatter.append('g').attr('class','comparison-age-histogram').attr('role','group').attr('aria-label','Selected aircraft ages, five-year bins; widths encode record counts.');
     }
     points.attr('data-selected',r=>String(selectedIds.has(r.source_id))).attr('fill-opacity',r=>selectedIds.has(r.source_id) ? .65 : .055);
     if(!brushing)syncBrush();
     drawAgeDistribution(width);
-    drawCohort(base.filter(byManufacturer),width);
+    drawAgeSpread(base.filter(byManufacturer),width);
   }
   function syncBrush() {
     if(!brushLayer)return;
@@ -249,26 +249,27 @@ async function mount(container,kind) {
     root.comparisonState.ageBins=bins.map(b=>({from:b.x0,to:b.x1,count:b.length,fatalCount:b.filter(r=>r.fatalities>0).length,recordIds:ids(b)}));
     root.comparisonState.histogram={edge:boundary,maxWidth,maxCount:largest,binYears:5,direction:'outward'};
   }
-  function drawCohort(base,width) {
-    // Same manufacture year implies age = crash year - manufacture year: a slope-one band.
-    const candidates=[...group(base,r=>r.manufacture_year)]
-      .filter(([,rows])=>rows.length>=3 && max(rows,r=>r.year)-Math.min(...rows.map(r=>r.year))>=15)
-      .sort((a,b)=>b[1].length-a[1].length);
-    const chosen=candidates.find(([year])=>year<1950)||candidates[0];
+  function drawAgeSpread(base,width) {
+    const summarize=rows=>{
+      const ages=rows.map(r=>r.age).sort((a,b)=>a-b);
+      const p10=quantileSorted(ages,.1),p90=quantileSorted(ages,.9);
+      return {count:rows.length,p10,p90,span:p90-p10,recordIds:ids(rows)};
+    };
+    const early=summarize(base.filter(r=>r.year<1990));
+    const late=summarize(base.filter(r=>r.year>=2005));
+    const widened=early.count>=10 && late.count>=10 && late.span>early.span;
+    const lines=widened?['Aircraft ages at crash','become more spread out','as the years go by.']:['Aircraft ages at crash','span a range of ages','in the later years.'];
     cohortLayer.selectAll('*').remove();
-    if(!chosen)return;
-    const [year,rows]=chosen;
-    const first=Math.min(...rows.map(r=>r.year)),last=max(rows,r=>r.year);
-    const middle=Math.max(first,Math.min(last,1995));
-    const targetX=x(new Date(Date.UTC(middle,0,1))),targetY=y(middle-year);
-    cohortLayer.append('line').attr('class','cohort-diagonal').attr('x1',x(new Date(Date.UTC(first,0,1)))).attr('y1',y(first-year))
-      .attr('x2',x(new Date(Date.UTC(last,0,1)))).attr('y2',y(last-year));
-    const labelX=width<430?50:65,labelY=width<430?38:42;
-    cohortLayer.append('path').attr('class','cohort-connector').attr('d',`M${labelX+90},${labelY+26} L${targetX},${targetY-7}`);
+    const labelX=width<500?48:65,labelY=35;
     const label=cohortLayer.append('text').attr('x',labelX).attr('y',labelY);
-    label.append('tspan').attr('class','cohort-label-title').text(`Built in ${year}`);
-    label.append('tspan').attr('x',labelX).attr('dy',16).text('One build year. One diagonal.');
-    root.comparisonState.cohort={manufactureYear:year,recordIds:ids(rows)};
+    lines.forEach((line,i)=>label.append('tspan').attr('x',labelX).attr('dy',i?16:0).attr('class',i?'':'age-annotation-title').text(line));
+    const brackets=[{year:1980,stats:early},{year:2015,stats:late}].filter(d=>d.stats.count>=10);
+    for(const {year,stats}of brackets){
+      const at=x(new Date(Date.UTC(year,0,1))),top=y(stats.p90),bottom=y(stats.p10);
+      cohortLayer.append('path').attr('class','age-spread-bracket').attr('d',`M${at-5},${top}H${at+5}M${at},${top}V${bottom}M${at-5},${bottom}H${at+5}`);
+    }
+    if(late.count>=10)cohortLayer.append('path').attr('class','cohort-connector').attr('d',`M${labelX+135},${labelY+40}L${x(new Date(Date.UTC(2015,0,1)))},${y(late.p90)-6}`);
+    root.comparisonState.ageSpread={early:{years:[1970,1989],...early},late:{years:[2005,2024],...late},widened,annotation:lines.join(' ')};
   }
   function renderRecords() {
     if(!aircraft)return;
@@ -323,30 +324,22 @@ async function mount(container,kind) {
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
   }
   function paintNarrative({stage,progress,reduced}) {
-    root.classList.toggle('is-exploring',stage===(aircraft?4:3));
+    root.classList.toggle('is-exploring',stage===3);
     if(aircraft) {
+      root.closest('section').dataset.aircraftBeat=String(stage);
+      const intro=container.closest('main').querySelector('[data-aircraft-intro]');
+      if(intro)intro.hidden=stage===0;
+      for(const selector of ['.comparison-toolbar','.comparison-scope','.comparison-outcome-key','.aircraft-comparison-grid','.comparison-model-grid','.comparison-selection','.comparison-source'])q(selector).hidden=stage<2;
       const width=Math.max(260,q('.comparison-scatter').clientWidth);
-      if(pointReveal)pointReveal.attr('width',(width-(width<500?56:92)-42)*(stage===0?0:stage===1?progress:1));
-      cohortLayer?.attr('opacity',stage<2?0:stage===2?progress:1);
-      histogramLayer?.attr('opacity',stage<4?0:progress).attr('aria-hidden',String(stage<4));
-      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<4||!b.length?-1:0);
-      const stories=[
-        ['Aircraft from different generations.','Aircraft built decades apart appear in the same period.'],
-        ['Decades of aircraft, side by side.','Some were newly built. Others were manufactured decades earlier.'],
-        ['One generation grows older.','The diagonal follows aircraft built in the same year. At each later event, that generation is older by the same amount.'],
-        ['Airworthiness takes maintenance.','For U.S. air carriers, aging aircraft undergo inspections and maintenance-record reviews. Age-sensitive components require adequate, timely maintenance.'],
-      ];
-      if(stage!==lastStoryStage){
-        const copy=stories[Math.min(stage,3)];
-        q('.comparison-age-story h2').textContent=copy[0];
-        q('.comparison-age-copy').replaceChildren(document.createTextNode(copy[1]));
-        if(stage===3){const link=document.createElement('a');link.href='https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf';link.target='_blank';link.rel='noreferrer';link.textContent=' FAA · Aging aircraft';q('.comparison-age-copy').append(link);}
-      }
-      q('.comparison-age-story').hidden=stage===4;
-      q('.comparison-maker-controls').hidden=stage<4;
-      q('.comparison-model-grid').hidden=stage<4;
-      q('.comparison-selection').hidden=stage<4;
-      q('.comparison-brush-hint').textContent=stage<4?'': 'Drag across years. The bars on the selection’s right edge show aircraft ages in five-year groups.';
+      const graphProgress=stage<2?0:stage===2?progress:1;
+      if(pointReveal)pointReveal.attr('width',(width-(width<500?56:92)-42)*graphProgress);
+      select(q('.aircraft-comparison-grid')).style('opacity',stage===2?Math.min(1,progress*3):1);
+      select(q('.aircraft-comparison-grid')).selectAll('.record-bar-track').style('transform',`scaleX(${graphProgress})`).style('transform-origin','left');
+      cohortLayer?.attr('opacity',stage<3?0:progress);
+      histogramLayer?.attr('opacity',graphProgress).attr('aria-hidden',String(stage<2));
+      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<2||!b.length?-1:0);
+      q('.comparison-maker-controls').hidden=stage<2;
+      q('.comparison-brush-hint').textContent=stage<2?'': 'Drag across years. Age distributions face outward from the selection’s right edge. Click outside the brush to clear it.';
     } else {
       if(typeRows) {
         const reveal=r=>stage===0?0:stage===1?(r.label==='scheduled'?progress:0):stage===2?(r.label==='scheduled'?1:progress):1;
@@ -361,7 +354,7 @@ async function mount(container,kind) {
       }
     }
     if(stage!==lastStoryStage){
-      const story=q(aircraft?'.comparison-age-story':'.comparison-type-note');
+      const story=aircraft?container.closest('main').querySelector('[data-aircraft-intro]'):q('.comparison-type-note');
       story.classList.remove('comparison-copy-enter');
       if(!reduced){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
       lastStoryStage=stage;

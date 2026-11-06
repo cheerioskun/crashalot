@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+test.beforeEach(async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});});
 const root=p=>p.locator('.comparison-aircraft');
 const state=p=>root(p).evaluate(r=>r.comparisonState);
 const projected=data=>data.rows.map(row=>Object.fromEntries(data.columns.map((c,i)=>[c,row[i]])));
@@ -56,7 +57,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  s=await state(page);check(s,rows);
  const highlighted=await page.locator('.comparison-scatter circle[data-selected=true]').evaluateAll(ns=>ns.map(n=>n.dataset.recordId));
  expect(highlighted).toEqual(s.recordIds);
- for(let i=0;i<5;i++)await page.locator('[data-story-back]').click();
+ for(let i=0;i<4;i++)await page.locator('[data-story-back]').click();
  await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await expect(page.locator('.comparison-types [data-start]')).toHaveValue('2000');
  await expect(page.locator('.comparison-types [data-end]')).toHaveValue('2009');
@@ -83,7 +84,9 @@ test('a real time brush selects original plotted IDs and survives resizing and t
  expect(selected.ageBins.length).toBeGreaterThan(0);
  const edge=await page.locator('.comparison-age-histogram>line').getAttribute('x1');
  expect(Number(edge)).toBeCloseTo(selected.histogram.edge,5);
- const cohort=selected.cohort;expect(cohort.recordIds.every(id=>rows.some(r=>r.source_id===id && r.manufacture_year===cohort.manufactureYear))).toBe(true);
+ const spread=selected.ageSpread;expect(spread.widened).toBe(true);
+ expect(spread.early.recordIds.every(id=>rows.some(r=>r.source_id===id && r.year<1990))).toBe(true);
+ expect(spread.late.recordIds.every(id=>rows.some(r=>r.source_id===id && r.year>=2005))).toBe(true);
  expect(selected.recordIds.length).toBeGreaterThan(0);expect(selected.recordIds.length).toBeLessThan(before.recordIds.length);
  const plotted=await page.locator('.comparison-scatter circle').evaluateAll(ns=>ns.map(n=>n.dataset.recordId));
  expect(plotted.every(id=>rows.find(r=>r.source_id===id).age!==null)).toBe(true);

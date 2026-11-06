@@ -3,8 +3,8 @@ import {createBeatPlayback} from './beat-playback.js';
 
 // Reveals stay inside the current chapter. Only the presentation owns slide navigation.
 export function createComparisonBeats({root,container,aircraft,paint}) {
-  const durations=aircraft?[0,1200,1000,0,650]:[0,900,1500,0];
-  const holds=aircraft?[1000,2400,3500,5300,0]:[900,2200,3500,0];
+  const durations=aircraft?[0,0,1500,600]:[0,900,1500,0];
+  const holds=aircraft?[1100,5400,3200,0]:[900,2200,3500,0];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let stage=0,progress=1,clock,running=false,active=false,destroyed=false;
   const transport=document.createElement('div');transport.className='comparison-transport';

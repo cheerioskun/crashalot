@@ -5,11 +5,13 @@ import json
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
+from statistics import quantiles
 import polars as pl
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 parser.add_argument('--check', action='store_true')
+parser.add_argument('--age-audit', action='store_true', help='Print reproducible age-distribution summaries without changing source records')
 args = parser.parse_args()
 manifest = json.loads((ROOT / 'data/sources.json').read_text())
 source = next(f for f in manifest['files'] if f['path'] == 'data/raw/planecrashdata.parquet')
@@ -77,3 +79,15 @@ if args.check:
 else:
     output.write_text(text)
 print(json.dumps(payload['audit'],indent=2))
+
+if args.age_audit:
+    summaries = []
+    for operation in ['all', 'scheduled']:
+        for start, end in [(1970, 1989), (2005, 2024)]:
+            cohort = [r for r in rows if r[8] is not None and start <= r[2] <= end and (operation == 'all' or r[3] == operation)]
+            ages = sorted(r[8] for r in cohort)
+            deciles = quantiles(ages, n=10, method='inclusive')
+            summaries.append({'operation': operation, 'years': [start, end], 'records': len(ages),
+                'p10': deciles[0], 'p90': deciles[8], 'central80Width': deciles[8]-deciles[0],
+                'fiveYearBins': dict(sorted(Counter(age//5*5 for age in ages).items()))})
+    print(json.dumps({'ageDistributionAudit': summaries}, indent=2))
