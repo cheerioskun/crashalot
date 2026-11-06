@@ -3,7 +3,7 @@ import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
 
 let dataset;
-const shared={start:1970,end:2025,operation:'scheduled',manufacturer:null};
+const shared={start:1970,end:2025,operation:'all',manufacturer:null};
 const listeners=new Set();
 const number=format(',d');
 function change(patch) {

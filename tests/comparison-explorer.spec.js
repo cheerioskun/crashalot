@@ -43,7 +43,9 @@ test('new chapters replace every old placeholder; type choice and years carry be
  expect(await page.locator('.slides>section').evaluateAll(ns=>ns.map(n=>n.id))).toEqual(['welcome','flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design']);
  await expect(page.locator('.storyboard-placeholder,#another-perspective,#the-whole-picture,#arrival')).toHaveCount(0);
  const initial=await page.locator('.comparison-types').evaluate(r=>r.comparisonState);
- expect(sorted(initial.recordIds)).toEqual(sorted(phases.rows.filter(r=>['departure','in_flight','arrival'].includes(r[1])).map(r=>r[0])));
+ expect(initial.filter.operation).toBe('all');
+ expect(initial.recordIds).toEqual(rows.map(r=>r.source_id));
+ expect(sorted(initial.typeCells.find(c=>c.label==='scheduled').recordIds)).toEqual(sorted(phases.rows.filter(r=>['departure','in_flight','arrival'].includes(r[1])).map(r=>r[0])));
  expect(initial.typeCells.reduce((n,c)=>n+c.count,0)).toBe(rows.length);
  await page.getByRole('button',{name:/^Private: /}).click();
  await page.locator('[data-story-next]').click();await expect(root(page)).toBeVisible();
@@ -70,6 +72,8 @@ test('a real time brush selects original plotted IDs and survives resizing and t
  const rows=projected(await(await request.get('/data/comparison-records.json')).json());
  await open(page);
  const before=await state(page);check(before,rows);
+ await expect(root(page).locator('[data-operation]')).toHaveValue('all');
+ expect(before.recordIds).toEqual(rows.filter(r=>r.age!==null).map(r=>r.source_id));
  const box=await page.locator('.comparison-scatter').boundingBox();
  const x=year=>box.x+42+(Date.UTC(year,6,1)-Date.UTC(1970,0,1))/(Date.UTC(2025,0,1)-Date.UTC(1970,0,1))*(box.width-42-(box.width<500?56:92));
  await page.mouse.move(x(1995),box.y+120);await page.mouse.down();
