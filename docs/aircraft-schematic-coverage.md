@@ -1,10 +1,16 @@
 # Aircraft schematic coverage
 
-Reviewed November 6, 2026. The top 30 raw model labels by crash count in the full known-age selection (all kinds of flying, worldwide 1970–2024) are fixed for this asset catalogue. The packed chart itself includes all 479 model labels and responds to the current filters.
+Reviewed November 6, 2026. The packed chart includes all 479 model labels in the full known-age selection (all kinds of flying, worldwide 1970–2024). The asset catalogue covers the original top 30 labels by crash count, plus Boeing and Airbus models.
 
-23 of the top 30 labels have public free-blueprint previews. Seven have placeholders. Remaining model labels also use placeholders. Family-level drawings are named explicitly in the Polaroid caption.
+The original top 30 retain 23 public schematic previews and seven placeholders. Boeing/Airbus coverage is now **41 of 42** model labels: **11 of 11 Airbus** and **30 of 31 Boeing**. The remaining gap is Boeing KC-137 Stratoliner. All commercial Boeing/Airbus model labels present in this view have drawings.
 
-The source limits signed-out previews to 500 pixels. Only the image publicly displayed on each free blueprint page was retrieved; no paid vector or full-resolution login-only download was used. Drawings retain their source marks. Source pages do not grant an open licence; copyrights remain with their respective rights holders.
+## Sources and fidelity
+
+Free-blueprint images use only the public image shown on the source page (maximum 500 pixels). No paid vector or login-only full-resolution download was used. Drawings retain source marks; the host does not grant an open licence. Original rights remain with the respective rights holder. Family-level drawings are named in the Polaroid caption.
+
+The A300-600, A350-900 and Boeing 737 MAX 8 use manufacturer airport-planning drawings. The original PDFs are not altered: reviewed page regions are rendered at 2,000 pixels and fitted proportionally into the image. A350-900 combines its side/front and plan-view sheets. Page numbers, crop rectangles, source PDF SHA-256 and output SHA-256 are recorded in the catalogue. The published manuals are February 2026 (A350), December 2009 (A300-600), and Revision K July 2025 (737 MAX).
+
+## Original top 30
 
 | Model label | Drawing / availability | Source |
 |---|---|---|
@@ -39,4 +45,51 @@ The source limits signed-out previews to 500 pixels. Only the image publicly dis
 | Antonov AN-2 | Antonov An-2 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/antonov/45882/view/antonov_an-2_colt/) |
 | Cessna 421C Golden Eagle III | Free Cessna 421 drawings found, but the 421C variant is not identified. | [Reviewed listing](https://www.the-blueprints.com/blueprints/modernplanes/cessna/) · placeholder |
 
-The catalogue, original preview URLs, dimensions and SHA-256 checksums are in `src/data/aircraft-schematics.json`. Refresh the reviewed public previews with `node scripts/prepare_aircraft_schematics.mjs`. This does not search for or silently substitute new models.
+## Additional Boeing and Airbus models
+
+| Model label | Drawing / availability | Source |
+|---|---|---|
+| Airbus A300 | Airbus A300 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/84796/view/airbus_a300/) |
+| Airbus A300-600 | Airbus A300-600 | [View drawing](https://www.airbus.com/sites/g/files/jlcbta136/files/2021-11/Airbus-Commercial-Aircraft-AC-A300-600-Dec-2009.pdf#page=21) |
+| Airbus A310 | Airbus A310 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/80880/view/airbus_a310/) |
+| Airbus A319 | Airbus A319 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/73376/view/airbus_a319/) |
+| Airbus A320 | Airbus A320 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/76361/view/airbus_a320/) |
+| Airbus A321 | Airbus A321 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/84803/view/airbus_a321/) |
+| Airbus A330 | Airbus A330 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/73377/view/airbus_a330/) |
+| Airbus A340-300 | Airbus A340-300 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/80885/view/airbus_a340-300/) |
+| Airbus A340-600 | Airbus A340-600 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/73378/view/airbus_a340-600/) |
+| Airbus A350-900 | Airbus A350-900 | [View drawing](https://mediaassets.airbus.com/pm_38_787_787482-4sir0n2x4f.pdf?fileName=a350-aircraft-characteristics-airport-and-maintenance-planning.pdf#page=49) |
+| Airbus A400M | Airbus A400M Atlas | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/airbus/80887/view/airbus_a400m_atlas/) |
+| Boeing 307 Stratoliner | Boeing 307 Stratoliner | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/18007/view/boeing_307_stratoliner/) |
+| Boeing 720 | Boeing 720 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/1860/view/boeing_720/) |
+| Boeing 727-100 | Boeing 727-100 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/20060/view/boeing_727-100/) |
+| Boeing 727-200 | Boeing 727-200 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/20061/view/boeing_727-200/) |
+| Boeing 737 MAX 8 | Boeing 737 MAX 8 | [View drawing](https://www.boeing.com/content/dam/boeing/v2/airports/acaps/737MAX_RevK.pdf#page=26) |
+| Boeing 737-100 | Boeing 737-100 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/53935/view/boeing_737-100/) |
+| Boeing 737-300 | Boeing 737-300 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/75751/view/boeing_737-300/) |
+| Boeing 737-400 | Boeing 737-400 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/20062/view/boeing_737-400/) |
+| Boeing 737-500 | Boeing 737-500 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/75752/view/boeing_737-500/) |
+| Boeing 737-700 | Boeing 737-700 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/73449/view/boeing_737-700/) |
+| Boeing 737-800 | Boeing 737-800 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/24000/view/boeing_737-800/) |
+| Boeing 747-100 | Boeing 747-100 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/75754/view/boeing_747-100/) |
+| Boeing 747-200 | Boeing 747-200 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/54680/view/boeing_747-200/) |
+| Boeing 747-300 | Boeing 747-300 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/54681/view/boeing_747-300/) |
+| Boeing 747-400 | Boeing 747-400 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/73452/view/boeing_747-400/) |
+| Boeing 747SP | Boeing 747SP | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/73455/view/boeing_747sp/) |
+| Boeing 757-200 | Boeing 757-200 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/84906/view/boeing_757-200/) |
+| Boeing 767-200 | Boeing 767-200 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/84907/view/boeing_767-200/) |
+| Boeing 767-300 | Boeing 767-300 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/19891/view/boeing_767-300/) |
+| Boeing 777-200 | Boeing 777-200 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/20064/view/boeing_777-200/) |
+| Boeing 777-300 | Boeing 777-3 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/19895/view/boeing_777-3/) |
+| Boeing B-17 Flying Fortress | Boeing B-17G Flying Fortress | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/53947/view/boeing_b-17g_flying_fortress/) |
+| Boeing B-52 Stratofortress | Boeing B-52 Stratofortress | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/2022/view/boeing_b-52_stratofortress/) |
+| Boeing C-135 Stratolifter | Boeing C-135A Stratolifter | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/76413/view/boeing_c-135a_stratolifter/) |
+| Boeing C-97 Stratofreighter | Boeing C-97 Stratofreighter | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/80952/view/boeing_c-97_stratofreighter/) |
+| Boeing E-3 Sentry | Boeing E-3A Sentry AWACS | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/80953/view/boeing_e-3a_sentry_awacs/) |
+| Boeing KC-135 Stratotanker | Boeing KC-135 Stratotanker | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/2287/view/boeing_kc-135_stratotanker/) |
+| Boeing KC-137 Stratoliner | No verified KC-137 schematic found. | [Reviewed listing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/) · placeholder |
+| Boeing KC-97 Stratotanker | Boeing KC-97 | [View drawing](https://www.the-blueprints.com/blueprints/modernplanes/boeing/17414/view/boeing_kc-97/) |
+
+## Reproduction
+
+`src/data/aircraft-schematics.json` preserves the exact model-to-drawing mapping and attribution. `node scripts/prepare_aircraft_schematics.mjs` refreshes public blueprint previews; `--pending` retrieves only newly reviewed entries. `python scripts/prepare_manufacturer_schematics.py` renders the three manufacturer PDF figures using Pillow and Poppler. Pass `--pdf-dir` to reuse cached source PDFs. These tools never search for or silently substitute aircraft models.

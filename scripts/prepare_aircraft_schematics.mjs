@@ -7,7 +7,7 @@ const manifestPath=new URL('../src/data/aircraft-schematics.json',import.meta.ur
 const catalogue=JSON.parse(await readFile(manifestPath));
 const target=new URL('../public/assets/aircraft-schematics/',import.meta.url);
 await mkdir(target,{recursive:true});
-const pages=[...new Map(catalogue.models.filter(model=>model.sourceId).map(model=>[model.sourceId,model])).values()];
+const pages=[...new Map(catalogue.models.filter(model=>model.sourceId&&(!process.argv.includes('--pending')||model.status==='pending')).map(model=>[model.sourceId,model])).values()];
 const fetched=new Map();
 for(let start=0;start<pages.length;start+=3) {
   await Promise.all(pages.slice(start,start+3).map(async model=>{
@@ -15,7 +15,8 @@ for(let start=0;start<pages.length;start+=3) {
     const html=await response.text();
     const tag=[...html.matchAll(/<img\b[^>]+>/g)].map(match=>match[0]).find(tag=>/id=['"]BPViewImage['"]/.test(tag));
     const source=tag?.match(/\bsrc=['"]([^'"]+)/)?.[1];
-    if(!source||!source.includes('/blueprints-depot-restricted/'))throw Error(`No public limited preview on ${model.sourceUrl}`);
+    const width=Number(tag?.match(/\bwidth=['"](\d+)/)?.[1]),height=Number(tag?.match(/\bheight=['"](\d+)/)?.[1]);
+    if(!source||!source.includes('/blueprints-depot')||Math.max(width,height)>500)throw Error(`No public preview of at most 500px on ${model.sourceUrl}`);
     const url=new URL(source.replaceAll('&amp;','&'));
     const image=await fetch(url);if(!image.ok)throw Error(`Preview ${model.sourceId}: ${image.status}`);
     const mime=image.headers.get('content-type')?.split(';')[0];
@@ -24,10 +25,10 @@ for(let start=0;start<pages.length;start+=3) {
     const bytes=Buffer.from(await image.arrayBuffer()),filename=`blueprint-${model.sourceId}.${extension}`;
     await writeFile(new URL(filename,target),bytes);
     fetched.set(model.sourceId,{asset:`assets/aircraft-schematics/${filename}`,imageUrl:url.href,sha256:createHash('sha256').update(bytes).digest('hex'),
-      previewWidth:Number(tag.match(/\bwidth=['"](\d+)/)?.[1]),previewHeight:Number(tag.match(/\bheight=['"](\d+)/)?.[1]),
+      previewWidth:width,previewHeight:height,
       status:'public-preview',credit:'Drawing · The-Blueprints.com',rights:'Third-party drawing; original rights remain with the rights holder. The source does not supply an open licence.',retrievedAt:new Date().toISOString().slice(0,10)});
     console.log(`Downloaded public preview ${model.sourceId}`);
   }));
 }
-for(const model of catalogue.models)if(model.sourceId)Object.assign(model,fetched.get(model.sourceId));
+for(const model of catalogue.models)if(fetched.has(model.sourceId))Object.assign(model,fetched.get(model.sourceId));
 await writeFile(manifestPath,JSON.stringify(catalogue,null,2)+'\n');

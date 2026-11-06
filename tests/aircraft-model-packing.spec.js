@@ -49,11 +49,17 @@ test('circle and keyboard selection change the schematic without changing the br
 
 test('schematics have local previews and source credits; layout fits mobile and theme changes',async({page,request})=>{
  const catalogue=JSON.parse(await readFile(new URL('../src/data/aircraft-schematics.json',import.meta.url)));
- expect(catalogue.models).toHaveLength(30);expect(catalogue.models.filter(m=>m.asset)).toHaveLength(23);
+ const original=catalogue.models.filter(m=>m.cohort!=='boeing-airbus-extension');
+ expect(original).toHaveLength(30);expect(original.filter(m=>m.asset)).toHaveLength(23);
  for(const m of catalogue.models.filter(m=>m.asset)){
-  expect(m.sourceUrl).toMatch(/^https:\/\/www\.the-blueprints\.com\/blueprints\//);
-  expect(m.imageUrl).toContain('/blueprints-depot-restricted/');
-  expect(Math.max(m.previewWidth,m.previewHeight)).toBeLessThanOrEqual(500);
+  if(m.sourceType==='manufacturer-pdf'){
+   expect(new URL(m.sourceUrl).hostname).toMatch(/(?:^|\.)(?:boeing|airbus)\.com$/);
+   expect(m.sourcePages.length).toBeGreaterThan(0);expect(m.sourceSha256).toMatch(/^[a-f0-9]{64}$/);
+  }else{
+   expect(m.sourceUrl).toMatch(/^https:\/\/www\.the-blueprints\.com\/blueprints\//);
+   expect(m.imageUrl).toContain('/blueprints-depot');
+   expect(Math.max(m.previewWidth,m.previewHeight)).toBeLessThanOrEqual(500);
+  }
   const response=await request.get('/'+m.asset);expect(response.ok()).toBe(true);expect(response.headers()['content-type']).toMatch(/^image\//);
  }
  await open(page);await page.setViewportSize({width:390,height:844});
@@ -63,6 +69,21 @@ test('schematics have local previews and source credits; layout fits mobile and 
  await page.locator('#theme-toggle').click();await expect(page.locator('html')).toHaveAttribute('data-bs-theme','dark');
  expect((await state(page)).recordIds).toEqual(ids);
  await expect(root(page).locator('.model-polaroid a')).toHaveAttribute('href',/the-blueprints\.com/);
+});
+
+test('all Airbus models and every verified Boeing variant select their own schematic',async({page})=>{
+ await open(page);
+ const models=(await state(page)).modelCells.filter(model=>/^(Airbus|Boeing)\b/.test(model.label));
+ expect(models.filter(model=>model.label.startsWith('Airbus'))).toHaveLength(11);
+ expect(models.filter(model=>model.label.startsWith('Boeing'))).toHaveLength(31);
+ const before=(await state(page)).recordIds;
+ for(const model of models){
+  await root(page).getByRole('combobox',{name:'Aircraft model',exact:true}).selectOption(model.label);
+  const hasDrawing=model.label!=='Boeing KC-137 Stratoliner';
+  await expect(root(page).locator('.model-polaroid-stage')).toHaveAttribute('data-has-schematic',String(hasDrawing));
+  if(hasDrawing)await expect.poll(()=>root(page).locator('.model-polaroid img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+ }
+ expect((await state(page)).recordIds).toEqual(before);
 });
 
 test('a new model enters with the opening Polaroid fade and tilted rise',async({page})=>{
