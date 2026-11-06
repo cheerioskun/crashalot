@@ -26,6 +26,7 @@
     "d3-sankey": "^0.12.3",
     "d3-svg-annotation": "^2.5.1",
     "number-flow": "^0.6.2",
+    "penflow": "0.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "reveal.js": "^6.0.2"

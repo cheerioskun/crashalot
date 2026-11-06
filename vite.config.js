@@ -1,7 +1,10 @@
+import {controlledPenflow} from './scripts/penflow-controlled.mjs';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
+  plugins:[controlledPenflow()],
+  optimizeDeps:{exclude:['penflow'],include:['typr.js','react/jsx-runtime']},
   build: {
     rollupOptions: {
       input: {

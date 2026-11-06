@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Build a browser-only, offline presentation. Recipient machines need no runtime.
 import { build } from 'vite';
+import {controlledPenflow} from './penflow-controlled.mjs';
 import { readFile, writeFile, mkdir, readdir, cp, rm, mkdtemp } from 'node:fs/promises';
 import { dirname, resolve, relative, join, basename, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -78,7 +79,7 @@ try {
   await build({
     root, configFile:false, publicDir:false, base:'',
     define:{ 'import.meta.env.BASE_URL':JSON.stringify(''), 'process.env.NODE_ENV':JSON.stringify('production') },
-    plugins:[{ name:'portable-license-inputs', transform(code,id) {
+    plugins:[controlledPenflow(),{ name:'portable-license-inputs', transform(code,id) {
       if(id===join(root,'src/presentation.js')) return code.replace('catch { host.innerHTML', 'catch (error) { console.error(error); host.innerHTML');
     }, generateBundle(_options,bundle) {
       for (const output of Object.values(bundle)) if (output.type==='chunk') {
@@ -167,6 +168,9 @@ try {
   const libraries=[];
   for (const library of [...packages.values()].sort((a,b)=>a.name.localeCompare(b.name))) {
     const notices=(await readdir(library.location)).filter(name=>/^(?:licen[cs]e|copying|notice)(?:\.|$|-)/i.test(name));
+    // The published Penflow 0.1.0 tarball supplies no license declaration.
+    // Preserve its exact package metadata and README rather than invent a license.
+    if(!notices.length&&library.name==='penflow')notices.push('package.json','README.md');
     if (!notices.length) throw new Error(`Missing license notice for bundled library ${library.name}`);
     const noticeDirectory=join('licenses',`${library.name.replaceAll('/','__')}@${library.version}`);
     for (const name of notices) await copy(join(library.location,name),join(folder,noticeDirectory,name));

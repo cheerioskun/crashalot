@@ -6,7 +6,7 @@ test('Escape shows eight clickable previews and every selected chapter opens at 
  test.setTimeout(45000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/#/aircraft-design');await page.locator('.comparison-aircraft').waitFor({state:'attached'});
- const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','3'],[7,'.comparison-aircraft','3.5'],[8,'.conclusion-scene','Exit']];
+ const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','3'],[7,'.comparison-aircraft','3.5'],[8,'.conclusion-scene','Thanks']];
  for(const [number,selector,beat]of choices){
   await page.keyboard.press('Escape');await expect(overview(page)).toBeVisible();
   await expect(page.getByRole('button',{name:/^Slide \d+:/})).toHaveCount(8);
@@ -55,6 +55,6 @@ test('Escape from an aircraft control opens the overview and reaches the conclus
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/aircraft-design');
  await page.locator('#aircraft-design .comparison-source summary').focus();await page.keyboard.press('Escape');
  await expect(overview(page)).toBeVisible();await card(page,8).click();
- await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','Exit');
+ await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','Thanks');
  await expect(page.getByRole('button',{name:'Back to the beginning'})).toBeVisible();
 });

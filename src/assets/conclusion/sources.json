@@ -4,6 +4,14 @@
     "land": {
       "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
       "sha256": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9"
+    },
+    "font": {
+      "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/pinyonscript/PinyonScript-Regular.ttf",
+      "sha256": "4aab130a6ed27f8b8117738c84a5602edf9300cdcc0651a9a65bf96f451ac29a"
+    },
+    "fontLicense": {
+      "path": "PinyonScript-OFL.txt",
+      "license": "SIL Open Font License 1.1"
     }
   }
 }
