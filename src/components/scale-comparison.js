@@ -311,7 +311,9 @@ export async function mountScaleComparison(container) {
     lastFrame=null;tickOpacity.clear();rows.forEach(row=>{row.lastValueTime=-Infinity;});render();
   }
   const playback = createBeatPlayback({
-    state:()=>({running:(countBeat() || stage===7) && motionRunning,complete:autoComplete(),atBoundary:!(countBeat() || stage===7) || !motionIncomplete()}),
+    state:()=>({key:stage,running:(countBeat() || stage===7) && motionRunning,complete:autoComplete(),atBoundary:!(countBeat() || stage===7) || !motionIncomplete(),terminal:stage>=7,
+      remainingMs:stage===1?(1-accidentProgress)*ACCIDENT_MS:stage===3?(1-departureProgress)*DEPARTURE_MS:stage>=7?Math.max(YEAR_END-yearElapsed,stage===7?COIN_END-coinElapsed:0):0,
+      durationMs:stage===1?ACCIDENT_MS:stage===3?DEPARTURE_MS:stage>=7?Math.max(YEAR_END-(history[stage]?.yearElapsed||0),stage===7?COIN_END:0):0}),
     play,pause:stop,advance:advanceStage,holdMs:()=>holds[stage],
     reduced:reducedMotion,showAll,changed:render,
   });
@@ -324,6 +326,7 @@ export async function mountScaleComparison(container) {
     finishBeat,
     showLastBeat() { playback.hold(); showAll(8); },
     setPlaybackMode: value => playback.setMode(value),
+    getPlaybackTiming:()=>playback.timing,
     getNavigationState() { return {step:stage+1,total:beatLabels.length,running:countBeat() && motionRunning,inProgress:countBeat() && motionIncomplete(),action:complete() ? 'Continue the story' : 'Reveal the next beat'}; },
     previousBeat() {
       if (!active || stage===0) return false;

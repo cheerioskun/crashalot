@@ -141,7 +141,7 @@ export async function mountDecadeTrend(container) {
   function advance() {if(stage>=beats.length-1)return;stage++;render();play();playback.settled();}
   function showAll(lastStage=Math.max(stage,10)) {stop();stage=lastStage;progress=beats[stage].end;render();}
   const playback=createBeatPlayback({
-    state:()=>({running,complete:autoComplete(),atBoundary:progress>=beats[stage].end}),
+    state:()=>({key:stage,running,complete:autoComplete(),atBoundary:progress>=beats[stage].end,remainingMs:Math.max(0,beats[stage].end-progress)*(beats[stage].unitMs||0),durationMs:Math.max(0,beats[stage].end-(beats[stage-1]?.end||0))*(beats[stage].unitMs||0),terminal:stage>=10}),
     play,pause:stop,advance,holdMs:()=>beats[stage].hold,reduced,showAll,changed(){render();notify();},
   });
   function resize() {
@@ -163,6 +163,7 @@ export async function mountDecadeTrend(container) {
     finishBeat(){playback.engage();stop();progress=beats[stage].end;playback.settled();},
     setPlaybackMode:value=>playback.setMode(value),
     setActive(value){active=value;playback.setActive(value);},
+    getPlaybackTiming:()=>playback.timing,
     getNavigationState(){return{step:stage+1,total:beats.length,running,inProgress:progress<beats[stage].end,action:complete() ? 'Continue the story' : 'Reveal the next beat'};},
     nextBeat(){if(complete())return false;playback.engage();advance();return true;},
     previousBeat(){if(stage===0)return false;playback.hold();stage--;progress=beats[stage].end;render();notify();return true;},

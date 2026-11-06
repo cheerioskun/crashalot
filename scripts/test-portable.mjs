@@ -75,8 +75,9 @@ try {
   await page.mouse.move(1430,20);
   await page.screenshot({path:join(output,'portable-browser-check.png')});
   await navigate(8);
-  await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','n');
+  await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','Exit');
   await expect(page.getByRole('button',{name:'Back to the beginning'})).toBeVisible();
+  await expect(page.getByRole('img',{name:'EXIT — the end'})).toBeVisible();
   await expect(page.locator('.globe-route')).toHaveCount(6);
   await expect(page.locator('.globe-land')).toHaveAttribute('d',/^M/);
   await page.screenshot({path:join(output,'portable-conclusion-check.png')});
@@ -96,8 +97,11 @@ try {
   await motion.locator('[data-story-next]').click();
   await expect(motion.locator('#flight-1282')).toHaveClass(/present/);
   await expect.poll(()=>motion.locator('#flight-1282').getAttribute('data-hook-step'),{timeout:6000}).not.toBe('0');
+  await expect(motion.locator('.presentation-footer')).toHaveAttribute('data-timing-state','countdown');
+  await expect(motion.locator('.beat-wick')).toBeVisible();
   await motion.keyboard.press('Space');
   await expect(motion.locator('#playback-toggle')).toHaveAttribute('aria-pressed','false');
+  await expect(motion.locator('.presentation-footer')).toHaveAttribute('data-timing-state','paused');
   await motion.keyboard.press('Space');
   await expect(motion.locator('#playback-toggle')).toHaveAttribute('aria-pressed','true');
   await motion.locator('[data-story-back]').click();
@@ -105,7 +109,7 @@ try {
   await motion.close();
   assert.deepEqual(network,[],'No runtime HTTP(S) request should be needed');
   assert.deepEqual(errors,[],'No browser runtime error should occur');
-  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; Space toggles Auto; Back disables Auto',conclusion:'Globe and calligraphic Fin load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
+  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; live footer wick counts down and freezes on Space; Back disables Auto',conclusion:'Globe and cabin EXIT sign load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
   await writeFile(join(output,'portable-verification.json'),JSON.stringify(result,null,2)+'\n');
   console.log(JSON.stringify(result,null,2));
 } finally { await browser.close();await rm(temporary,{recursive:true,force:true}); }

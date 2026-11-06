@@ -363,6 +363,7 @@ async function mount(container,kind) {
     setActive(value){active=value;narrative.setActive(value);if(active)render();},
     setPlaybackMode:value=>narrative.setPlaybackMode(value),
     getNavigationState:()=>narrative.getNavigationState(),
+    getPlaybackTiming:()=>narrative.getPlaybackTiming(),
     finishBeat:()=>narrative.finishBeat(),
     nextBeat:()=>narrative.nextBeat(),
     previousBeat:()=>narrative.previousBeat(),

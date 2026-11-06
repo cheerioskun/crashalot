@@ -1,20 +1,12 @@
 import {easeCubicInOut,timer} from 'd3';
 import {createBeatPlayback} from './beat-playback.js';
 import {createConclusionGlobe} from './conclusion-globe.js';
-import lettering from '../assets/conclusion/fin.json';
 import './conclusion.css';
 
-const labels=['0','1','2','2.3','2.6','3','4','F','i','n'];
-const durations=[0,650,500,500,500,500,750,2200,800,1800];
-const holds=[1800,3200,450,450,650,1800,0,280,180,0];
+const labels=['0','1','2','2.3','2.6','3','4','Exit'];
+const durations=[0,650,500,500,500,500,750,1000];
+const holds=[1800,3200,450,450,650,1800,0,0];
 const clamp=t=>Math.max(0,Math.min(1,t));
-// Broad ink masks follow the pen's route; the filled outlines retain nib contrast.
-const penPaths={
- F:[['M2225 1560 C2070 1280 1850 1375 1510 1385 C980 1450 520 1240 530 965 C530 730 1085 845 1195 1210',140],['M1660 1200 C1410 1190 1240 945 1030 690 C780 300 600 30 350 10 C110 -10 -50 100 70 180',190],['M350 335 C470 530 860 630 1400 785 L1260 500',125]],
- i:[['M400 680 C240 480 -50 160 -35 65 C-20 -55 210 -20 580 425',155]],
- n:[['M-5 420 C180 650 290 745 240 575 L55 20 C290 310 650 750 835 665 C1130 620 370 55 640 20 C805 -20 1030 210 1170 400',145]],
- dot:[['M535 895 L640 1010',150]],
-};
 export function mountConclusion(container){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  container.innerHTML=`<div class="conclusion-scene" data-beat="0">
@@ -30,55 +22,60 @@ export function mountConclusion(container){
    </div>
    <div class="conclusion-globe-stage"></div>
   </div>
-  <div class="conclusion-fin" aria-hidden="true">
-   <svg class="fin-lettering" viewBox="-130 -1730 3150 1960" role="img" aria-label="Fin"><defs></defs><g class="fin-ink" transform="scale(1,-1)"></g></svg>
-   <button type="button" class="text-button conclusion-restart" hidden>Back to the beginning <span aria-hidden="true">↺</span></button>
+  <div class="conclusion-exit" aria-hidden="true">
+   <div class="exit-luminaire">
+    <svg viewBox="0 0 680 250" class="cabin-exit-sign" role="img" aria-label="EXIT — the end">
+     <defs>
+      <linearGradient id="exit-housing" x2="0" y2="1"><stop stop-color="var(--exit-housing-top)"/><stop offset=".5" stop-color="var(--exit-housing-mid)"/><stop offset="1" stop-color="var(--exit-housing-bottom)"/></linearGradient>
+      <linearGradient id="exit-panel" x2="0" y2="1"><stop stop-color="#fffdf5"/><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#e9edef"/></linearGradient>
+     </defs>
+     <path class="exit-shell" d="M24 116C43 57 155 37 340 37s297 20 316 79c-18 64-134 98-316 98S42 180 24 116Z" fill="url(#exit-housing)"/>
+     <path d="M53 104C112 64 228 56 340 56s228 8 287 48" fill="none" stroke="var(--exit-highlight)" stroke-width="1.5" opacity=".7"/>
+     <rect x="108" y="57" width="464" height="133" rx="19" class="exit-panel-rim"/>
+     <rect x="114" y="63" width="452" height="121" rx="14" fill="url(#exit-panel)"/>
+     <g class="exit-letters" fill="#972e28">
+      <path d="m164 91-30 32 30 32V91Zm352 0 30 32-30 32V91Z"/>
+      <path d="M190 87h65v15h-46v13h40v15h-40v15h46v15h-65Zm77 0h22l17 24 17-24h22l-28 36 29 37h-23l-17-25-18 25h-22l29-37Zm92 0h20v73h-20Zm32 0h83v16h-31v57h-21v-57h-31Z"/>
+     </g>
+     <path d="M148 200c62 10 132 13 192 13s130-3 192-13" fill="none" stroke="var(--exit-highlight)" stroke-width="1.5" opacity=".55"/>
+    </svg>
+   </div>
+   <button type="button" class="conclusion-restart" hidden aria-label="Back to the beginning">
+    <span class="exit-person-tile" aria-hidden="true"><svg viewBox="0 0 80 80" class="exit-person">
+     <path class="exit-door" d="M29 9h35v62H29V9Z"/>
+     <g class="exit-runner" fill="currentColor">
+      <circle cx="46" cy="23" r="5.5"/>
+      <path d="m38 31 12 2 9 15-6 3-8-12-5 11 7 15h12v6H42l-8-17-10 17h-8l14-25 4-9-9 8H12v-6h10l12-10Z"/>
+     </g>
+     <path d="M20 73H8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </svg></span>
+    <span class="exit-restart-label">Back to the beginning</span>
+   </button>
   </div>
  </div>`;
- const root=container.firstElementChild,fin=root.querySelector('.conclusion-fin'),ink=root.querySelector('.fin-ink'),defs=root.querySelector('defs'),restart=root.querySelector('.conclusion-restart');
- const ns='http://www.w3.org/2000/svg',maskStrokes=new Map();
- function element(name,attrs,parent){const node=document.createElementNS(ns,name);Object.entries(attrs).forEach(([key,value])=>node.setAttribute(key,value));parent.append(node);return node;}
- function letter(key,path,x){
-  const mask=element('mask',{id:`fin-mask-${key}`,maskUnits:'userSpaceOnUse',x:-400,y:-400,width:3300,height:2400},defs);
-  const strokes=penPaths[key].map(([d,width])=>element('path',{d,fill:'none',stroke:'white','stroke-width':width,'stroke-linecap':'round','stroke-linejoin':'round',pathLength:1,'stroke-dasharray':'1 1','stroke-dashoffset':1},mask));
-  const fill=element('rect',{x:-400,y:-400,width:3300,height:2400,fill:'white',opacity:0},mask);
-  element('path',{d:path,transform:`translate(${x},0)`,mask:`url(#fin-mask-${key})`,'data-fin-letter':key},ink);
-  maskStrokes.set(key,{strokes,fill,lengths:strokes.map(node=>node.getTotalLength())});
- }
- for(const l of lettering.letters){letter(l.letter,l.body,l.x);if(l.dot)letter('dot',l.dot,l.x);}
+ const root=container.firstElementChild,end=root.querySelector('.conclusion-exit'),restart=root.querySelector('.conclusion-restart');
  const globe=createConclusionGlobe(root.querySelector('.conclusion-globe-stage'),reduced);
  let stage=0,progress=1,running=false,active=false,clock,destroyed=false;
  const notify=()=>container.dispatchEvent(new CustomEvent('storybeat',{bubbles:true}));
- const complete=()=>stage===9&&progress===1;
+ const complete=()=>stage===7&&progress===1;
  const autoComplete=()=>stage===6&&progress===1||complete();
- function drawLetter(key,value){
-  const {strokes,fill,lengths}=maskStrokes.get(key),total=lengths.reduce((a,b)=>a+b,0);
-  let used=0;
-  strokes.forEach((stroke,index)=>{const part=clamp((value*total-used)/lengths[index]);stroke.setAttribute('stroke-dashoffset',1-part);stroke.setAttribute('opacity',part>0?1:0);used+=lengths[index];});
-  fill.setAttribute('opacity',clamp((value-.965)/.035));
-  root.dataset[`ink${key==='dot'?'Dot':key.toUpperCase()}`]=String(value);
- }
  function render(){
-  const ending=stage>=7;
+  const ending=stage===7;
   root.dataset.beat=labels[stage];root.dataset.progress=String(progress);root.dataset.playback=playback.status;
-  root.classList.toggle('is-farewell',stage===6);root.classList.toggle('is-fin',ending);
+  root.classList.toggle('is-farewell',stage===6);root.classList.toggle('is-exit',ending);
+  root.style.setProperty('--exit-light',ending?easeCubicInOut(progress):0);
   root.querySelector('.conclusion-landing').inert=ending;
   root.querySelector('.conclusion-landing').setAttribute('aria-hidden',String(ending));
   for(const node of root.querySelectorAll('[data-closing-reveal]')){
    const beat=Number(node.dataset.closingReveal),value=stage<beat?0:stage===beat?easeCubicInOut(progress):1;
    node.style.opacity=String(value);node.style.transform=`translateY(${(1-value)*10}px)`;node.setAttribute('aria-hidden',String(stage<beat||stage>=6));
   }
-  const farewell=root.querySelector('.conclusion-farewell');farewell.setAttribute('aria-hidden',String(stage!==6));
-  farewell.style.opacity=stage===6?easeCubicInOut(progress):0;
-  fin.setAttribute('aria-hidden',String(!ending));fin.inert=!ending;
-  drawLetter('F',stage<7?0:stage===7?clamp((progress*2200-400)/1700):1);
-  drawLetter('i',stage<8?0:stage===8?progress:1);
-  drawLetter('n',stage<9?0:clamp(progress/.77));
-  drawLetter('dot',stage<9?0:clamp((progress-.84)/.16));
+  const farewell=root.querySelector('.conclusion-farewell');farewell.setAttribute('aria-hidden',String(stage!==6));farewell.style.opacity=stage===6?easeCubicInOut(progress):0;
+  end.setAttribute('aria-hidden',String(!ending));end.inert=!ending;
   restart.hidden=!complete();
   if(complete()&&document.activeElement?.matches('[data-story-next]'))restart.focus({preventScroll:true});
   globe.setQuiet(stage>=6);
-  if(active){document.body.classList.toggle('presentation-fin',ending);document.body.classList.toggle('presentation-fin-complete',complete());}
+  if(active){document.body.classList.toggle('presentation-exit',ending);document.body.classList.toggle('presentation-exit-complete',complete());}
  }
  function stop(){clock?.stop();clock=null;running=false;}
  function play(){
@@ -88,20 +85,21 @@ export function mountConclusion(container){
   clock=timer(elapsed=>{progress=clamp(from+elapsed/durations[stage]);if(progress===1){stop();render();playback.settled();notify();}else render();});render();notify();
  }
  function advance(){if(complete())return;stop();stage++;progress=durations[stage]?0:1;render();play();playback.settled();notify();}
- function showAll(final=false){stop();stage=final||stage>=7?9:6;progress=1;render();notify();}
- const playback=createBeatPlayback({state:()=>({running,complete:autoComplete(),atBoundary:progress===1}),play,pause:stop,advance,holdMs:()=>holds[stage],reduced,showAll,changed:render});
+ function showAll(final=false){stop();stage=final||stage===7?7:6;progress=1;render();notify();}
+ const playback=createBeatPlayback({state:()=>({key:stage,running,complete:autoComplete(),atBoundary:progress===1,durationMs:durations[stage],remainingMs:(1-progress)*durations[stage],terminal:stage>=6}),play,pause:stop,advance,holdMs:()=>holds[stage],reduced,showAll,changed:render});
  restart.addEventListener('click',()=>{location.replace(`${location.href.split('#')[0]}#/welcome`);location.reload();});
  root.addEventListener('keydown',event=>{if(event.target.closest('button')&&[' ','Enter'].includes(event.key))event.stopPropagation();});
  render();
  return {
-  setActive(value){active=value;if(!active)document.body.classList.remove('presentation-fin','presentation-fin-complete');globe.setActive(value&&stage<7);playback.setActive(value);render();},
+  setActive(value){active=value;if(!active)document.body.classList.remove('presentation-exit','presentation-exit-complete');globe.setActive(value&&stage<7);playback.setActive(value);render();},
   setPlaybackMode(value){playback.setMode(value);},
+  getPlaybackTiming:()=>playback.timing,
   getNavigationState(){return{step:stage+1,total:labels.length,running,inProgress:progress<1,complete:complete()};},
   finishBeat(){playback.engage();stop();progress=1;render();playback.settled();notify();},
   nextBeat(){if(complete())return false;playback.engage();advance();globe.setActive(active&&stage<7);return true;},
   previousBeat(){if(stage===0)return false;playback.hold();stop();stage--;progress=1;globe.setActive(active&&stage<7);render();notify();return true;},
   showLastBeat(){playback.hold();showAll(true);globe.setActive(false);},
   resize(){},
-  destroy(){destroyed=true;playback.destroy();globe.destroy();document.body.classList.remove('presentation-fin','presentation-fin-complete');root.remove();},
+  destroy(){destroyed=true;playback.destroy();globe.destroy();document.body.classList.remove('presentation-exit','presentation-exit-complete');root.remove();},
  };
 }

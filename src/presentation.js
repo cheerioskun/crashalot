@@ -9,6 +9,7 @@ import './opening.css';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
+import { createFooterBeatTimer } from './components/footer-beat-timer.js';
 import { mountConclusion } from './components/conclusion.js';
 import { mountDecadeTrend } from './components/decade-trend.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
@@ -18,6 +19,7 @@ import { installPresentationOverview } from './components/presentation-overview.
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${opening}${chapters}`;
 
 const chartInstances = [];
+let footerTimer;
 let overviewFinalSlide=null;
 async function mountChart(id, mount) {
   const host = document.getElementById(id);
@@ -160,6 +162,7 @@ function updateNavigation() {
   storyBack.hidden = false;
   storyBack.disabled = cover;
   playbackToggle.hidden = false;
+  footerTimer?.refresh();
   storyNext.disabled = (presentation.isLastSlide() && (!state || state.complete)) || (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design', 'conclusion'].includes(slide.id) && !chart);
 }
 function previousBeat() {
@@ -203,7 +206,7 @@ const hookBeatLabels = ['0','1','2','2.5','3','4','5','6','7','8'];
 const hookHolds = [1000, 1400, 900, 1200, 2300, 1800, 3500, 4400, 4600];
 let completingHook = false;
 const hookPlayback = createBeatPlayback({
-  state: () => ({ running:false, complete:Number(hook.dataset.hookStep || 0) >= hookBeatLabels.length-1, atBoundary:true }),
+  state: () => ({ key:Number(hook.dataset.hookStep || 0),running:false, complete:Number(hook.dataset.hookStep || 0) >= hookBeatLabels.length-1, atBoundary:true }),
   play() {}, pause() {},
   advance() { if (presentation.getCurrentSlide() === hook) presentation.nextFragment(); },
   holdMs: () => hookHolds[Number(hook.dataset.hookStep || 0)],
@@ -256,6 +259,16 @@ presentation.on('slidechanged', event => {
   if (event.previousSlide && presentation.getIndices(event.previousSlide).h > event.indexh) setAutoPlayback(false);
   updateChrome();
 });
+footerTimer=createFooterBeatTimer({footer:document.querySelector('.presentation-footer'),read(){
+  if(presentation.isOverview()||document.hidden)return {mode:'hidden'};
+  const slide=presentation.getCurrentSlide();
+  if(!slide)return {mode:'hidden'};
+  if(slide.id==='welcome')return {mode:'start'};
+  if(slide.id==='flight-1282')return hookPlayback.timing;
+  return chartInstances.find(chart=>chart.slide===slide)?.getPlaybackTiming?.()||{mode:'loading'};
+}});
+presentation.on('overviewshown',()=>footerTimer.refresh());
+presentation.on('overviewhidden',()=>footerTimer.refresh());
 presentation.initialize({
   disableLayout: true,
   center: false,

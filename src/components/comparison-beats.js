@@ -35,7 +35,7 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
     stop();stage++;progress=durations[stage]?0:1;render();play();playback.settled();notify();
   }
   function showAll(){stop();stage=durations.length-1;progress=1;render();notify();}
-  const playback=createBeatPlayback({state:()=>({running,complete:complete(),atBoundary:progress===1}),
+  const playback=createBeatPlayback({state:()=>({key:stage,running,complete:complete(),atBoundary:progress===1,durationMs:durations[stage],remainingMs:(1-progress)*durations[stage],terminal:stage===durations.length-1}),
     play,pause:stop,advance,holdMs:()=>holds[stage],reduced,showAll,changed:render});
   pause.addEventListener('click',()=>playback.togglePause());
   transport.querySelector('[data-comparison-replay]').addEventListener('click',()=>{
@@ -46,6 +46,7 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
     get state(){return {stage,progress,reduced:reduced.matches};},
     setActive(value){active=value;playback.setActive(value);},
     setPlaybackMode(value){playback.setMode(value);},
+    getPlaybackTiming:()=>playback.timing,
     getNavigationState(){return {step:stage+1,total:durations.length,running,inProgress:progress<1,complete:complete()};},
     finishBeat(){playback.engage();stop();progress=1;render();playback.settled();notify();},
     nextBeat(){if(complete())return false;playback.engage();advance();return true;},
