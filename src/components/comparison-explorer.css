@@ -102,3 +102,11 @@ button.record-bar { cursor:pointer; }
 @media(prefers-reduced-motion:reduce){.comparison-copy-enter{animation:none}}
 
 @media(max-width:720px){.comparison-aircraft:not(.is-exploring) .comparison-linked{order:-1}.comparison-age-story h2{font-size:25px}.comparison-age-copy{font-size:13px;margin-bottom:0}.comparison-age-story p{margin-bottom:8px}}
+
+/* Match the fatal series in the historical chapter. */
+.comparison-explorer{--comparison-fatal:#a67900}
+[data-bs-theme="dark"] .comparison-explorer{--comparison-fatal:#f1ce63}
+.type-row .outcome-fatal,.type-row.is-selected .outcome-fatal,.age-bin-fatal{fill:var(--comparison-fatal)}
+.comparison-outcome-key .outcome-fatal,.record-bar-track .outcome-fatal{background:var(--comparison-fatal)}
+.comparison-scatter circle{transition:fill-opacity .16s ease}
+@media(prefers-reduced-motion:reduce){.comparison-scatter circle{transition:none}}

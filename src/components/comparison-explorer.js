@@ -83,7 +83,7 @@ async function mount(container,kind) {
   q('[data-operation]').append(option('all','All kinds of flying'),...Object.entries(labels).map(([value,label])=>option(value,label)));
   let active=false,destroyed=false,brushing=false,scatterKey='',selectionKey='',limit=8,currentSelected=[];
   const editingYears=new Set();
-  let scatter,points,x,y,brush,brushLayer,histogramLayer,cohortLayer,pointReveal,typeRows,typeScale,narrative,lastStoryStage=-1;
+  let scatter,points,x,y,brush,brushLayer,histogramLayer,cohortLayer,pointReveal,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
   const ageCeiling=Math.max(10,Math.ceil((max(data.records,r=>r.age)||10)/5)*5+5);
   const ageBinner=bin().value(r=>r.age).domain([0,ageCeiling]).thresholds(range(5,ageCeiling,5));
   const eligible=data.records.filter(row=>!aircraft || row.age!==null);
@@ -177,30 +177,33 @@ async function mount(container,kind) {
   }
   function drawScatter(base,selectedIds) {
     const width=Math.max(260,q('.comparison-scatter').clientWidth),height=340;
+    const gutter=width<500?56:92,plotRight=width-gutter;
     const key=`${width}:${shared.operation}`;
     if(scatterKey!==key) {
       scatterKey=key;
       scatter=select(q('.comparison-scatter')).attr('viewBox',`0 0 ${width} ${height}`);
       scatter.selectAll('*').remove();
-      x=scaleUtc().domain([new Date(Date.UTC(1970,0,1)),new Date(Date.UTC(2025,0,1))]).range([42,width-12]);
+      x=scaleUtc().domain([new Date(Date.UTC(1970,0,1)),new Date(Date.UTC(2025,0,1))]).range([42,plotRight]);
       y=scaleLinear().domain([0,ageCeiling]).range([height-45,18]);
-      scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(42,0)`).call(axisLeft(y).ticks(5).tickSize(-(width-54))).call(g=>g.select('.domain').remove());
+      scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(42,0)`).call(axisLeft(y).ticks(5).tickSize(-(plotRight-42))).call(g=>g.select('.domain').remove());
       scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(0,${height-45})`).call(axisBottom(x).ticks(utcYear.every(width<500?20:10)).tickFormat(date=>String(date.getUTCFullYear())));
-      scatter.append('text').attr('class','comparison-axis-title').attr('x',(width+30)/2).attr('y',height-5).attr('text-anchor','middle').text('Year of recorded crash');
+      scatter.append('text').attr('class','comparison-axis-title').attr('x',(plotRight+42)/2).attr('y',height-5).attr('text-anchor','middle').text('Year of recorded crash');
       pointReveal=scatter.append('defs').append('clipPath').attr('id','comparison-points-reveal').append('rect').attr('x',42).attr('y',12).attr('height',height-57);
       points=scatter.append('g').attr('class','comparison-points').attr('clip-path','url(#comparison-points-reveal)').selectAll('circle').data(base,r=>r.source_id).join('circle')
         .attr('data-record-id',r=>r.source_id).attr('cx',r=>x(new Date(r.time))).attr('cy',r=>y(r.age)).attr('r',2.5);
-      brush=brushX().extent([[42,12],[width-12,height-45]]).handleSize(12)
+      brush=brushX().extent([[42,12],[plotRight,height-45]]).handleSize(12)
         .on('start',event=>{if(event.sourceEvent)brushing=true;})
         .on('brush end',event=>{
           if(!event.sourceEvent)return;
-          if(event.type==='end')brushing=false;
-          if(!event.selection){change({start:1970,end:2025});if(!brushing)syncBrush();return;}
+          liveBrush=event.selection;
+          if(event.type==='end'){brushing=false;liveBrush=null;}
+          if(!event.selection||Math.abs(event.selection[1]-event.selection[0])<1){if(event.type!=='end')return;liveBrush=null;change({start:1970,end:2025});if(!brushing){syncBrush();drawAgeDistribution(width);}return;}
           const [left,right]=event.selection.map(x.invert);
           const start=Math.max(1970,Math.min(2024,left.getUTCFullYear()));
           const boundary=Date.UTC(right.getUTCFullYear(),0,1);
           const end=Math.min(2025,Math.max(start+1,right.getUTCFullYear()+(+right>boundary?1:0)));
-          change({start,end});if(!brushing)syncBrush();
+          change({start,end});
+          if(!brushing)syncBrush();drawAgeDistribution(width);
         });
       brushLayer=scatter.append('g').attr('class','comparison-brush').call(brush);
       cohortLayer=scatter.append('g').attr('class','comparison-cohort').attr('pointer-events','none');
@@ -219,9 +222,8 @@ async function mount(container,kind) {
   }
   function drawAgeDistribution(width) {
     const bins=ageBinner(currentSelected);
-    const boundary=x(new Date(Date.UTC(shared.end,0,1)));
-    const left=x(new Date(Date.UTC(shared.start,0,1)));
-    const maxWidth=Math.min(76,Math.max(1,(boundary-left)*.45));
+    const boundary=brushing&&liveBrush?liveBrush[1]:x(new Date(Date.UTC(shared.end,0,1)));
+    const maxWidth=width<500?46:76;
     const largest=max(bins,b=>b.length)||0;
     const scale=scaleLinear().domain([0,largest||1]).range([0,maxWidth]);
     const rows=histogramLayer.selectAll('g.age-bin').data(bins,b=>b.x0).join(enter=>{
@@ -231,15 +233,21 @@ async function mount(container,kind) {
     rows.attr('data-age-from',b=>b.x0).attr('data-count',b=>b.length)
       .attr('aria-label',b=>`${b.x0}–${b.x1-1} years: ${number(b.length)} selected records.`)
       .on('focus',(event,b)=>showOutcome(event,{label:`Age ${b.x0}–${b.x1-1}`,count:b.length,fatalCount:b.filter(r=>r.fatalities>0).length})).on('blur',hideOutcome);
-    rows.select('.age-bin-nonfatal').attr('x',b=>boundary-scale(b.length)).attr('width',b=>scale(b.length-b.filter(r=>r.fatalities>0).length))
-      .attr('y',b=>y(b.x1)+.5).attr('height',b=>Math.max(0,y(b.x0)-y(b.x1)-1));
-    rows.select('.age-bin-fatal').attr('x',b=>boundary-scale(b.filter(r=>r.fatalities>0).length)).attr('width',b=>scale(b.filter(r=>r.fatalities>0).length))
-      .attr('y',b=>y(b.x1)+.5).attr('height',b=>Math.max(0,y(b.x0)-y(b.x1)-1));
+    const geometry=(node,b,fatal)=>{
+      const fatalWidth=scale(b.filter(r=>r.fatalities>0).length),totalWidth=scale(b.length);
+      const target={x:boundary+(fatal?0:fatalWidth),width:fatal?fatalWidth:totalWidth-fatalWidth,y:y(b.x1)+.5,height:Math.max(0,y(b.x0)-y(b.x1)-1)};
+      const selection=select(node);selection.interrupt('age-distribution');
+      // Follow the pointer directly while dragging; ease discrete field/filter changes.
+      const update=brushing||matchMedia('(prefers-reduced-motion: reduce)').matches||!node.hasAttribute('x')?selection:selection.transition('age-distribution').duration(180);
+      for(const [key,value]of Object.entries(target))update.attr(key,value);
+    };
+    rows.select('.age-bin-nonfatal').each(function(b){geometry(this,b,false);});
+    rows.select('.age-bin-fatal').each(function(b){geometry(this,b,true);});
     histogramLayer.selectAll('line').data([null]).join('line').attr('x1',boundary).attr('x2',boundary).attr('y1',18).attr('y2',295);
-    const labelX=Math.max(46,Math.min(width-75,boundary-maxWidth));
+    const labelX=Math.max(46,Math.min(width-116,boundary));
     histogramLayer.selectAll('text').data([`Age counts · max ${number(largest)}`]).join('text').attr('x',labelX).attr('y',10).text(d=>d);
     root.comparisonState.ageBins=bins.map(b=>({from:b.x0,to:b.x1,count:b.length,fatalCount:b.filter(r=>r.fatalities>0).length,recordIds:ids(b)}));
-    root.comparisonState.histogram={edge:boundary,maxWidth,maxCount:largest,binYears:5};
+    root.comparisonState.histogram={edge:boundary,maxWidth,maxCount:largest,binYears:5,direction:'outward'};
   }
   function drawCohort(base,width) {
     // Same manufacture year implies age = crash year - manufacture year: a slope-one band.
@@ -293,7 +301,7 @@ async function mount(container,kind) {
     const stateKey=JSON.stringify(shared);if(stateKey!==selectionKey){selectionKey=stateKey;limit=8;}
     root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(shared.start);root.dataset.endYear=String(shared.end-1);
     root.comparisonState={source:data.source,kind,filter:{...shared,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
-    q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide · Recorded airborne phases${aircraft?' · Known aircraft age':''}`;
+    q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
     if(aircraft) {
       q('[data-manufacturer]').value=shared.manufacturer||'';
       const displayed=makers.slice(0,7);
@@ -318,7 +326,7 @@ async function mount(container,kind) {
     root.classList.toggle('is-exploring',stage===(aircraft?4:3));
     if(aircraft) {
       const width=Math.max(260,q('.comparison-scatter').clientWidth);
-      if(pointReveal)pointReveal.attr('width',(width-54)*(stage===0?0:stage===1?progress:1));
+      if(pointReveal)pointReveal.attr('width',(width-(width<500?56:92)-42)*(stage===0?0:stage===1?progress:1));
       cohortLayer?.attr('opacity',stage<2?0:stage===2?progress:1);
       histogramLayer?.attr('opacity',stage<4?0:progress).attr('aria-hidden',String(stage<4));
       histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<4||!b.length?-1:0);

@@ -70,12 +70,16 @@ test('a real time brush selects original plotted IDs and survives resizing and t
  await open(page);
  const before=await state(page);check(before,rows);
  const box=await page.locator('.comparison-scatter').boundingBox();
- const x=year=>box.x+42+(Date.UTC(year,6,1)-Date.UTC(1970,0,1))/(Date.UTC(2025,0,1)-Date.UTC(1970,0,1))*(box.width-54);
+ const x=year=>box.x+42+(Date.UTC(year,6,1)-Date.UTC(1970,0,1))/(Date.UTC(2025,0,1)-Date.UTC(1970,0,1))*(box.width-42-(box.width<500?56:92));
  await page.mouse.move(x(1995),box.y+120);await page.mouse.down();
  await page.mouse.move(x(2005),box.y+120,{steps:12});await page.mouse.up();
  await expect(root(page)).toHaveAttribute('data-start-year','1995');
  await expect(root(page)).toHaveAttribute('data-end-year','2005');
  const selected=await state(page);check(selected,rows);
+ expect(selected.histogram.direction).toBe('outward');
+ await expect.poll(()=>page.locator('.age-bin-fatal').evaluateAll(ns=>Math.min(...ns.map(n=>Number(n.getAttribute('x')))))).toBeCloseTo(selected.histogram.edge,4);
+ const nonfatalRects=await page.locator('.age-bin-nonfatal').evaluateAll(ns=>ns.map(n=>Number(n.getAttribute('x'))));
+ expect(nonfatalRects.every(x=>x>=selected.histogram.edge)).toBe(true);
  expect(selected.ageBins.length).toBeGreaterThan(0);
  const edge=await page.locator('.comparison-age-histogram>line').getAttribute('x1');
  expect(Number(edge)).toBeCloseTo(selected.histogram.edge,5);
@@ -138,4 +142,18 @@ test('fatal stacks start at zero and disclose fatal, nonfatal and total outcomes
  await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
  await maker.focus();await expect(root(page).getByRole('tooltip')).toContainText('total');
+});
+
+
+test('clicking outside the time brush clears it; outward histogram stays within the SVG',async({page})=>{
+ await open(page);await years(page,1995,2005);
+ const selected=await state(page);expect(selected.recordIds.length).toBeGreaterThan(0);
+ const box=await page.locator('.comparison-scatter').boundingBox();
+ await page.mouse.click(box.x+55,box.y+120);
+ await expect(root(page)).toHaveAttribute('data-start-year','1970');await expect(root(page)).toHaveAttribute('data-end-year','2024');
+ expect((await state(page)).recordIds.length).toBeGreaterThan(selected.recordIds.length);
+ await expect(page.locator('.comparison-brush .selection')).not.toBeVisible();
+ await expect.poll(()=>page.locator('.comparison-age-histogram rect').evaluateAll(ns=>Math.max(...ns.map(n=>Number(n.getAttribute('x'))+Number(n.getAttribute('width')))))) .toBeLessThanOrEqual(box.width);
+ const colors=await page.locator('.age-bin-fatal,.comparison-manufacturer-bars .outcome-fatal').evaluateAll(ns=>ns.map(n=>getComputedStyle(n)[n.tagName==='rect'?'fill':'backgroundColor']));
+ expect(colors.every(color=>color==='rgb(166, 121, 0)')).toBe(true);
 });
