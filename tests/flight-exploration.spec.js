@@ -92,6 +92,7 @@ test("keyboard chart controls do not advance Reveal; completed exploration retai
   expect(page.url()).toContain("#/flight-phase");
   await page.keyboard.press("ArrowRight");
   expect(page.url()).toContain("#/flight-phase");
+  await page.locator("#playback-toggle").click(); // Keep the destination at its first beat for the round trip.
   await page.locator("[data-story-next]").click();
   await expect(page).toHaveURL(/#\/flight-types$/);
   await page.locator("[data-story-back]").click();

@@ -863,6 +863,7 @@ export async function mountFlightExploration(container) {
       renderArea();
     },
     setPlaybackMode:value => playback.setMode(value),
+    showLastBeat(){playback.hold();showAll();},
     finishBeat() { playback.engage(); stopReveal(); revealProgress=scene().end; rebuildMembership(); renderReveal(); playback.settled(); },
     getNavigationState() { return {step:revealStage+1,total:beats.length,running,inProgress:revealProgress<scene().end,action:complete() ? 'Continue the story' : 'Reveal the next beat'}; },
     nextBeat() { if(complete())return false;playback.engage();advanceReveal();return true; },

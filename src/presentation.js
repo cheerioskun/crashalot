@@ -12,10 +12,12 @@ import './cover.css';
 import { mountDecadeTrend } from './components/decade-trend.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
 import { createBeatPlayback } from './components/beat-playback.js';
+import { installPresentationOverview } from './components/presentation-overview.js';
 
 document.querySelector('.slides').innerHTML = `<section id="welcome">${cover}</section>${opening}${chapters}`;
 
 const chartInstances = [];
+let overviewFinalSlide=null;
 async function mountChart(id, mount) {
   const host = document.getElementById(id);
   host.replaceChildren();
@@ -24,7 +26,8 @@ async function mountChart(id, mount) {
     chart.slide = host.closest('section');
     chartInstances.push(chart);
     chart.setPlaybackMode?.(autoPlayback);
-    chart.setActive?.(chart.slide.classList.contains('present'));
+    chart.setActive?.(chart.slide.classList.contains('present')&&!presentation.isOverview());
+    if(overviewFinalSlide===chart.slide){chart.showLastBeat?.();overviewFinalSlide=null;}
     updateNavigation();
   }
   catch { host.innerHTML = '<p role="status">The source data could not load. Reload the page to try again.</p>'; }
@@ -154,12 +157,14 @@ function updateNavigation() {
   storyNext.disabled = (presentation.isLastSlide() && (!state || state.complete)) || (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide.id) && !chart);
 }
 function previousBeat() {
+  if(presentation.isOverview())return;
   if (presentation.getCurrentSlide()?.id === 'flight-1282') hookPlayback.hold();
   const chart = chartInstances.find(chart => chart.slide === presentation.getCurrentSlide());
   if (chart?.previousBeat?.()) return;
   presentation.prev();
 }
 function nextBeat() {
+  if(presentation.isOverview())return;
   const slide = presentation.getCurrentSlide();
   const chart = chartInstances.find(chart => chart.slide === slide);
   const state = chart?.getNavigationState?.();
@@ -179,9 +184,9 @@ function updateChrome() {
   document.body.classList.toggle('presentation-hook', presentation.getCurrentSlide()?.id === 'flight-1282');
   chartInstances.forEach(chart => {
     chart.resize?.();
-    chart.setActive?.(chart.slide === presentation.getCurrentSlide());
+    chart.setActive?.(!presentation.isOverview()&&chart.slide === presentation.getCurrentSlide());
   });
-  hookPlayback.setActive(presentation.getCurrentSlide()?.id === 'flight-1282');
+  hookPlayback.setActive(!presentation.isOverview()&&presentation.getCurrentSlide()?.id === 'flight-1282');
   updateNavigation();
 }
 const hook = document.getElementById('flight-1282');
@@ -225,6 +230,20 @@ presentation.on('fragmentshown', updateHook);
 presentation.on('fragmenthidden', updateHook);
 presentation.on('slidechanged', updateHook);
 presentation.on('ready', updateHook);
+function finishOverviewSlide(slide){
+  if(slide.id==='flight-1282'){
+    hookPlayback.hold();completingHook=true;
+    while(presentation.getCurrentSlide()===hook&&presentation.nextFragment()) { /* Stay inside the opening. */ }
+    completingHook=false;delete hook.dataset.hookStatic;updateHook();
+  }else{
+    const chart=chartInstances.find(chart=>chart.slide===slide);
+    if(chart){chart.showLastBeat?.();overviewFinalSlide=null;}
+    else if(slide.querySelector('.narrative-chart'))overviewFinalSlide=slide;
+  }
+  updateNavigation();
+}
+presentation.on('ready',()=>installPresentationOverview({presentation,charts:()=>chartInstances,finishSlide:finishOverviewSlide,
+  suspendOpening:()=>hookPlayback.setActive(false),resume:updateChrome}));
 presentation.on('ready', updateChrome);
 presentation.on('slidechanged', updateChrome);
 presentation.initialize({
@@ -236,7 +255,7 @@ presentation.initialize({
   slideNumber: false,
   showSlideNumber: 'all',
   // Up/Down, Space and Page keys belong to reading, including focused headings.
-  keyboardCondition: event => !['ArrowUp', 'ArrowDown', ' ', 'PageUp', 'PageDown'].includes(event.key) && !event.target.closest('button, a, input, select, textarea, summary, [role=button], [contenteditable=true]'),
+  keyboardCondition: event => event.key==='Escape'||!['ArrowUp', 'ArrowDown', ' ', 'PageUp', 'PageDown'].includes(event.key) && !event.target.closest('button, a, input, select, textarea, summary, [role=button], [contenteditable=true]'),
   keyboard: { 32: null, 33: null, 34: null, 38: null, 40: null, 39: nextBeat, 78: nextBeat, 37: previousBeat, 80: previousBeat },
   // Touch gestures scroll chart pages; explicit navigation remains available.
   touch: false,

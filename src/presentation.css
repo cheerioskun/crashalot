@@ -136,3 +136,19 @@ body.presentation-cover .presentation-footer, body.presentation-hook .presentati
 .utility-button:disabled { cursor:wait; opacity:.4; }
 .utility-button[hidden] { display:none; }
 @media(prefers-reduced-motion:no-preference) { .utility-icon { transition:color .18s ease,filter .18s ease; } }
+
+/* Fluid chapter pages need a grid overview, rather than Reveal's fixed-size strip. */
+.presentation-overview-heading{position:absolute;top:10px;left:var(--presentation-gutter);right:var(--presentation-gutter);z-index:25;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.presentation-overview-heading[hidden]{display:none}.presentation-overview-heading h2{font-size:24px;letter-spacing:-.04em;margin:0 0 4px}.presentation-overview-heading p{font-size:12px;color:var(--bs-secondary-color);margin:0}
+.presentation-overview .presentation-footer{visibility:hidden;pointer-events:none}
+.reveal.overview .slides{transform:none!important;inset:76px var(--presentation-gutter) 24px!important;width:auto!important;height:auto!important;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:var(--overview-card-height);gap:20px;overflow:auto;align-content:start;padding:4px}
+.reveal.overview .slides>section,.reveal.overview .slides>section[hidden]{position:relative!important;inset:auto!important;transform:none!important;display:block!important;visibility:visible!important;opacity:1!important;height:100%!important;width:100%!important;aspect-ratio:16/10;overflow:hidden;border:1px solid var(--bs-border-color);background:var(--bs-body-bg);border-radius:5px;cursor:pointer;outline-offset:0}
+.reveal.overview .slides>section::after{display:block!important;z-index:3;content:attr(data-overview-label);position:absolute;bottom:0;left:0;right:0;padding:10px 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--bs-body-bg);border-top:1px solid var(--bs-border-color);font:500 12px var(--bs-font-sans-serif);color:var(--bs-body-color);pointer-events:none}
+.reveal.overview .slides>section.present{border-color:var(--bs-body-color)}
+.reveal.overview .slides>section>.view{width:var(--overview-deck-width)!important;height:var(--overview-deck-height)!important;max-width:none;transform:scale(var(--overview-scale));transform-origin:top left;overflow:hidden;pointer-events:none}
+.reveal.overview .backgrounds{display:none!important}
+@media(min-width:1350px){.reveal.overview .slides{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:900px){.reveal.overview .slides{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
+@media(max-width:520px){.reveal.overview .slides{grid-template-columns:1fr}.presentation-overview-heading h2{font-size:21px}}
+
+.reveal.overview .slides>section:hover{outline:1px solid var(--bs-body-color);outline-offset:0}
