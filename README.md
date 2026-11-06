@@ -1,6 +1,6 @@
 # crashalot
 
-An aviation data presentation for the 6730 group project. Narrative, evidence, charts, interactions, and visual language are developed together, desktop first. The presentation combines a landing page, Flight 1282 opening, count and decade-trend beats, an animated phase/cause explanation in fifth position, and question-led chapter previews. Remaining storyboard placeholders are not finished visualizations.
+An aviation data presentation for the 6730 group project. Narrative, evidence, charts, interactions, and visual language are developed together, desktop first. The seven chapters combine a landing page, Flight 1282 opening, U.S. scheduled-service scale comparison, worldwide historical counts, a linked phase/cause explanation, flight-type comparisons, and aircraft-age brushing with model circle packing and schematics.
 
 ## Run locally
 
@@ -12,6 +12,14 @@ npm run dev
 `npm run build` produces `dist/`; `npm run preview` serves that production build. Vite provides the development and build tooling. The `wrangler.jsonc` serves `dist/` as Cloudflare static assets and runs `npm run build` before Wrangler deployment.
 
 For Cloudflare Workers Builds (Git integration), set the dashboard **Build command** to `npm run build` and **Deploy command** to `npx wrangler deploy`. Workers Builds does not honor Wrangler custom build settings, so the dashboard build command is required to generate the ignored `dist/` directory on a fresh checkout.
+
+## Browser-only Windows package
+
+See [portable package instructions](docs/windows-package.md) for a ZIP that runs offline by opening `START.html` in Chrome or Edge, without installing Node or a local server. The package includes the presentation, relevant prepared JSON, source code and bundled-library license notices. Ordinary `dist/index.html` requires an HTTP server and is not the double-click export.
+
+## Data audit
+
+[November 6 audit](docs/data-audit-2026-11-06.md) records the verified figures, aircraft-record grain, source/category cleanup and review limits. With the retained raw sources and Python dependencies available, run `.venv/bin/python scripts/audit_story_data.py`; chart use and portable playback only need the committed JSON files.
 
 ## Design and implementation
 
