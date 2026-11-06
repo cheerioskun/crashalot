@@ -125,7 +125,7 @@ try {
       download.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
     });
     const boot=document.querySelector('#portable-loading');
-    const ready=()=>document.querySelector('.reveal.ready') && ['.scale-comparison','.decade-trend','.flight-exploration','.comparison-types','.comparison-aircraft'].every(selector=>document.querySelector(selector));
+    const ready=()=>document.querySelector('.reveal.ready') && ['.scale-comparison','.decade-trend','.flight-exploration','.comparison-types','.comparison-aircraft','.conclusion-scene'].every(selector=>document.querySelector(selector));
     const observer=new MutationObserver(()=>{if(ready()){boot.remove();observer.disconnect();}});
     observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
     setTimeout(()=>{if(boot.isConnected) boot.querySelector('p').textContent='The presentation could not start. Close this tab and open START.html again in Microsoft Edge or Chrome.';},15000);
@@ -164,6 +164,7 @@ try {
     const location=join(root,'node_modules',name),metadata=JSON.parse(await readFile(join(location,'package.json'),'utf8'));
     packages.set(name,{name,version:metadata.version,license:metadata.license,location});
   }
+  await copy(join(root,'src/assets/conclusion/PinyonScript-OFL.txt'),join(folder,'licenses/PinyonScript-OFL.txt'));
   const libraries=[];
   for (const library of [...packages.values()].sort((a,b)=>a.name.localeCompare(b.name))) {
     const notices=(await readdir(library.location)).filter(name=>/^(?:licen[cs]e|copying|notice)(?:\.|$|-)/i.test(name));

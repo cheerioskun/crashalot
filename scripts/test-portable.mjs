@@ -27,7 +27,7 @@ page.on('console',message=>{if(message.type()==='error')errors.push(message.text
 page.on('request',request=>{if(/^https?:/.test(request.url()))network.push(request.url());});
 const navigate=async number=>{
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button',{name:/^Slide \d+:/})).toHaveCount(7);
+  await expect(page.getByRole('button',{name:/^Slide \d+:/})).toHaveCount(8);
   await page.getByRole('button',{name:new RegExp(`^Slide ${number}:`)}).click();
   await expect(page.locator('.reveal.overview')).toHaveCount(0);
 };
@@ -35,7 +35,7 @@ try {
   // Open the isolated file, not a server and not the folder containing source.
   await page.goto(pathToFileURL(isolated).href+'#/welcome');
   await expect(page.locator('#portable-loading')).toHaveCount(0,{timeout:15000});
-  await expect(page.locator('.slides > section')).toHaveCount(7);
+  await expect(page.locator('.slides > section')).toHaveCount(8);
   await expect(page.locator('#welcome')).toHaveClass(/present/);
   const render=[];
   for(const [number,id,selector]of [[2,'flight-1282','.hook-polaroid img'],[3,'change-over-time','.scale-comparison'],[4,'counts-in-context','.decade-trend'],[5,'flight-phase','.flight-exploration'],[6,'flight-types','.comparison-types'],[7,'aircraft-design','.comparison-aircraft']]){
@@ -74,6 +74,16 @@ try {
   await aircraft.locator('.comparison-model-grid').scrollIntoViewIfNeeded();
   await page.mouse.move(1430,20);
   await page.screenshot({path:join(output,'portable-browser-check.png')});
+  await navigate(8);
+  await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','n');
+  await expect(page.getByRole('button',{name:'Back to the beginning'})).toBeVisible();
+  await expect(page.locator('.globe-route')).toHaveCount(6);
+  await expect(page.locator('.globe-land')).toHaveAttribute('d',/^M/);
+  await page.screenshot({path:join(output,'portable-conclusion-check.png')});
+  await page.getByRole('button',{name:'Back to the beginning'}).click();
+  await expect(page.locator('#welcome')).toHaveClass(/present/);
+  await expect(page.locator('#playback-toggle')).toHaveAttribute('aria-pressed','true');
+  render.push('conclusion');
   // Exercise the moving presentation as well as reduced-motion completed views.
   const motion=await context.newPage();
   motion.on('pageerror',error=>errors.push(error.message));
@@ -95,7 +105,7 @@ try {
   await motion.close();
   assert.deepEqual(network,[],'No runtime HTTP(S) request should be needed');
   assert.deepEqual(errors,[],'No browser runtime error should occur');
-  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; Space toggles Auto; Back disables Auto',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
+  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; Space toggles Auto; Back disables Auto',conclusion:'Globe and calligraphic Fin load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
   await writeFile(join(output,'portable-verification.json'),JSON.stringify(result,null,2)+'\n');
   console.log(JSON.stringify(result,null,2));
 } finally { await browser.close();await rm(temporary,{recursive:true,force:true}); }
