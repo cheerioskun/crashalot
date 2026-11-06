@@ -128,7 +128,7 @@ button.record-bar { cursor:pointer; }
 .age-spread-bracket{fill:none;stroke:var(--bs-body-color);stroke-width:1.4;opacity:.75}
 .age-annotation-title{font-weight:650}
 
-/* Opaque overlapping profiles create the reference's back-to-front depth. */
+/* Ridgeline: category bands, a shared count scale and hover isolation. */
 .comparison-types .comparison-scope{margin:14px 0 22px}
 .comparison-types .comparison-measure{margin-bottom:2px}
 .comparison-types .comparison-outcome-key{margin-bottom:18px}
@@ -149,3 +149,10 @@ button.record-bar { cursor:pointer; }
 .comparison-type-note .comparison-type-hint{font-size:11px!important;line-height:1.8!important;color:var(--bs-secondary-color);margin:22px 0 0!important}
 .comparison-types [hidden]{display:none!important}
 @media(max-width:720px){.comparison-types .type-comparison-grid{gap:18px}.comparison-types .type-row .type-label{font-size:11px}.comparison-types .comparison-type-note{margin-bottom:18px}}
+
+.ridge-shape{transition:opacity .2s ease}
+.trail-marks.has-inspection .type-row:not(.is-inspected) .ridge-shape{opacity:.12}
+.trail-marks.has-inspection .type-row:not(.is-inspected) .type-label{opacity:.4}
+.ridge-count-guides line{stroke:var(--bs-body-color);stroke-width:.7;stroke-opacity:.2}
+.ridge-count-guides text{font:10px var(--bs-font-sans-serif);fill:var(--bs-body-color);paint-order:stroke;stroke:var(--bs-body-bg);stroke-width:3px;stroke-linejoin:round}
+@media(prefers-reduced-motion:reduce){.ridge-shape{transition:none}}

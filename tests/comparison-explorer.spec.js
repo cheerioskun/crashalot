@@ -129,13 +129,14 @@ test('keyboard year controls allow an empty selection without stale records or s
 });
 
 
-test('frequency trails preserve annual source identities and expose counts on hover and keyboard focus',async({page,request})=>{
+test('ridgeline chart preserves annual source identities and expose counts on hover and keyboard focus',async({page,request})=>{
  const rows=projected(await(await request.get('/data/comparison-records.json')).json());
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/flight-types');
  const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(3);
  const state=await chart.evaluate(r=>r.comparisonState),trails=state.typeTrails;
  expect(trails.outcome).toBe('fatal');expect(trails.series.map(row=>row.label)).toEqual(['scheduled','private','charter']);
- expect(trails.layout.amplitude).toBeGreaterThan(trails.layout.rowSpacing*3);
+ expect(trails.layout.type).toBe('ridgeline');
+ expect(trails.layout.amplitude).toBeCloseTo(trails.layout.rowSpacing*trails.layout.overlap,5);
  await expect(chart.locator('.trail-fatal').first()).toHaveCSS('fill-opacity','1');
  await expect(chart.locator('.trail-total,.trail-total-line')).toHaveCount(0);
  await expect(chart.locator('.comparison-outcome-key')).not.toContainText('Nonfatal');
@@ -155,6 +156,9 @@ test('frequency trails preserve annual source identities and expose counts on ho
  await expect(page.locator('#flight-types .comparison-deck')).toHaveText('Flying in a commercial plane is very different from flying in your private jet, or flying it yourself!');
  await expect(chart.locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
  const first=chart.locator('.type-row').first();await first.locator('.type-label').hover();await expect(chart.getByRole('tooltip')).toContainText('fatal crashes');await expect(chart.getByRole('tooltip')).not.toContainText('nonfatal');
+ await expect(chart.locator('.trail-marks')).toHaveClass(/has-inspection/);
+ await expect(chart.locator('.ridge-count-guides text').first()).toBeVisible();
+ await expect(chart.locator('.type-row').nth(1).locator('.ridge-shape')).toHaveCSS('opacity','0.12');
  await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1970');
  await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1971');
  await expect(page).toHaveURL(/flight-types$/);

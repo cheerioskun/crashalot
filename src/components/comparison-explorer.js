@@ -1,7 +1,7 @@
 import {axisBottom,axisLeft,bin,brushX,easeCubicInOut,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
-import {createFlightTypeTrails} from './flight-type-trails.js';
+import {createFlightTypeRidgeline} from './flight-type-ridgeline.js';
 import {createAircraftModelPacking} from './aircraft-model-packing.js';
 
 let dataset;
@@ -147,7 +147,7 @@ async function mount(container,kind) {
     if(interactive)nodes.attr('aria-pressed',r=>String(shared.manufacturer===r.label))
       .on('click',(_,r)=>change({manufacturer:shared.manufacturer===r.label?null:r.label}));
   }
-  const typeTrails=aircraft?null:createFlightTypeTrails({element:q('.comparison-types-chart'),tooltip:q('.comparison-tooltip'),labels,onSelect:operation=>change({operation})});
+  const typeTrails=aircraft?null:createFlightTypeRidgeline({element:q('.comparison-types-chart'),tooltip:q('.comparison-tooltip'),labels,onSelect:operation=>change({operation})});
   function drawScatter(base,selectedIds) {
     const width=Math.max(260,q('.comparison-scatter').clientWidth),height=340;
     const gutter=width<500?56:92,plotRight=width-gutter;

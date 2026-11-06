@@ -58,6 +58,7 @@ try {
       await page.locator('.type-row').nth(1).locator('.type-label').hover();
       await expect(page.locator('.comparison-types [role="tooltip"]')).toContainText('fatal crashes');
       await expect(page.locator('.comparison-types [role="tooltip"]')).not.toContainText('nonfatal');
+      await expect(page.locator('.ridge-count-guides text').first()).toBeVisible();
       await page.screenshot({path:join(output,'portable-flight-types-check.png')});
       await page.mouse.move(1430,20);
     }
@@ -125,7 +126,7 @@ try {
   await motion.close();
   assert.deepEqual(network,[],'No runtime HTTP(S) request should be needed');
   assert.deepEqual(errors,[],'No browser runtime error should occur');
-  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; live footer wick counts down and freezes on Space; Back disables Auto',flightTypes:'Three overlapping fatal-crash trails, year/count tooltips and explicit phase transition work offline',conclusion:'Globe and Penflow handwriting load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
+  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; live footer wick counts down and freezes on Space; Back disables Auto',flightTypes:'Three fatal-crash ridgelines, hover isolation/count guides and explicit phase transition work offline',conclusion:'Globe and Penflow handwriting load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
   await writeFile(join(output,'portable-verification.json'),JSON.stringify(result,null,2)+'\n');
   console.log(JSON.stringify(result,null,2));
 } finally { await browser.close();await rm(temporary,{recursive:true,force:true}); }
