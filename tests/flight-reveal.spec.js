@@ -5,7 +5,7 @@ const snapshot = p => p.locator('.flight-exploration').evaluate(r => ({
 }));
 async function openFrozen(page,auto=true) {
   await page.clock.install({time:new Date('2026-11-05T12:00:00Z')});
-  await page.goto('/#/another-perspective');
+  await page.goto('/#/flight-types');
   await page.locator('.flight-exploration').waitFor({state:'attached'});
   await page.clock.pauseAt(new Date('2026-11-05T12:01:00Z'));
   if(!auto)await page.locator('#playback-toggle').click();
@@ -92,9 +92,9 @@ test('guided beats introduce each branch before its causes, preserving source id
   await expect(page.locator('[data-phase-takeaway]')).toHaveText('Arrival accounts for over half.');
   await expect(page.locator('.phase-controls')).toBeVisible();
   await expect(page.locator('.phase-summary-row strong')).toHaveText(['610','655','1,527']);
-  await expect(page.locator('[data-story-position]')).toHaveText('5 of 8 · Reveal 11 of 11');
+  await expect(page.locator('[data-story-position]')).toHaveText('5 of 7 · Reveal 11 of 11');
   await page.clock.fastForward(60000);await expect(page.locator('#flight-phase')).toHaveClass(/present/);
-  await next(page).click();await expect(page.locator('#another-perspective')).toHaveClass(/present/);
+  await next(page).click();await expect(page.locator('#flight-types')).toHaveClass(/present/);
   expect(errors).toEqual([]);
 });
 

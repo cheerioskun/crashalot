@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 const next = page => page.locator('[data-story-next]');
 async function frozen(page, id) {
   await page.clock.install({ time:new Date('2026-11-05T12:00:00Z') });
-  await page.goto('/#/another-perspective');
+  await page.goto('/#/flight-types');
   await page.locator('.decade-trend').waitFor({ state:'attached' });
   await page.clock.pauseAt(new Date('2026-11-05T12:01:00Z'));
   await page.evaluate(id => { location.hash = `/${id}`; }, id);
@@ -101,8 +101,8 @@ test('leaving a slide or hiding a tab suspends decade motion and its pending cue
   await frozen(page,'counts-in-context');
   const root=page.locator('.decade-trend');
   await page.clock.runFor(3000);
-  await page.evaluate(()=>{location.hash='/another-perspective';});
-  await expect(page.locator('#another-perspective')).toHaveClass(/present/);
+  await page.evaluate(()=>{location.hash='/flight-types';});
+  await expect(page.locator('#flight-types')).toHaveClass(/present/);
   const away=await root.getAttribute('data-progress');
   await page.clock.runFor(10000);await expect(root).toHaveAttribute('data-progress',away);
   await page.evaluate(()=>{location.hash='/counts-in-context';});

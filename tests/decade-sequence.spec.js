@@ -3,7 +3,7 @@ const next=p=>p.locator('[data-story-next]');
 const chart=p=>p.locator('.decade-trend');
 async function frozen(page) {
  await page.clock.install({time:new Date('2026-11-06T12:00:00Z')});
- await page.goto('/#/another-perspective');await page.locator('.decade-trend').waitFor({state:'attached'});
+ await page.goto('/#/flight-types');await page.locator('.decade-trend').waitFor({state:'attached'});
  await page.clock.pauseAt(new Date('2026-11-06T12:01:00Z'));
  await page.locator('#playback-toggle').click();
  await page.evaluate(()=>location.hash='/counts-in-context');await expect(chart(page)).toBeVisible();

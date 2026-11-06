@@ -7,7 +7,7 @@ async function expectStableNext(page, initial) {
   for (const key of ['x', 'y', 'width', 'height']) expect(current[key]).toBe(initial[key]);
 }
 async function scale(page) {
-  await page.goto('/#/another-perspective');
+  await page.goto('/#/flight-types');
   await page.locator('#playback-toggle').click(); // Manual sequencing for these transport checks.
   await page.evaluate(() => { location.hash = '/change-over-time'; });
   await expect(page.locator('.scale-comparison')).toBeVisible();
@@ -49,7 +49,7 @@ test('Next stays fixed while settling running and paused scale beats; routes pre
   expect(await scaleValues(page)).toEqual(totals);
   await page.locator('.scale-comparison__transport button', { hasText: 'Replay' }).click();
   expect(await scaleValues(page)).toEqual([0, 0]);
-  await expect(page.locator('[data-story-position]')).toHaveText('3 of 8 · Reveal 1 of 9');
+  await expect(page.locator('[data-story-position]')).toHaveText('3 of 7 · Reveal 1 of 9');
 });
 
 test('reading keys scroll the exploration without advancing; explicit footer still navigates', async ({ page }) => {
@@ -66,7 +66,7 @@ test('reading keys scroll the exploration without advancing; explicit footer sti
     await expect(page).toHaveURL(/flight-phase$/);
   }
   await next(page).click();
-  await expect(page).toHaveURL(/another-perspective$/);
+  await expect(page).toHaveURL(/flight-types$/);
 });
 
 test('all decades fit mobile and retain readable labels, including the partial period', async ({ page }) => {

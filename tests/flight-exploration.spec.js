@@ -93,7 +93,7 @@ test("keyboard chart controls do not advance Reveal; completed exploration retai
   await page.keyboard.press("ArrowRight");
   expect(page.url()).toContain("#/flight-phase");
   await page.locator("[data-story-next]").click();
-  await expect(page).toHaveURL(/#\/another-perspective$/);
+  await expect(page).toHaveURL(/#\/flight-types$/);
   await page.locator("[data-story-back]").click();
   await expect(page).toHaveURL(/#\/flight-phase$/);
   expect((await state(page)).selection.cohort).toBe("later");
