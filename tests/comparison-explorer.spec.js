@@ -8,6 +8,10 @@ function check(s,rows) {
  expect(s.recordIds).toEqual(expected.map(r=>r.source_id));
  expect(new Set(s.recordIds).size).toBe(s.recordIds.length);
  expect(sorted(s.modelCells.flatMap(c=>c.recordIds))).toEqual(sorted(s.recordIds));
+ for(const cell of [...s.modelCells,...s.manufacturerCells]) {
+  expect(cell.fatalCount).toBe(cell.fatalRecordIds.length);
+  expect(cell.fatalRecordIds.every(id=>rows.some(r=>r.source_id===id && r.fatalities>0))).toBe(true);
+ }
  for(const cell of s.modelCells) expect(cell.recordIds).toEqual(expected.filter(r=>r.aircraft===cell.label).map(r=>r.source_id));
  for(const cell of s.manufacturerCells) expect(cell.recordIds).toEqual(rows.filter(r=>r.age!==null && r.year>=s.filter.start && r.year<s.filter.end && (s.filter.operation==='all'||r.operation===s.filter.operation) && r.manufacturer===cell.label).map(r=>r.source_id));
  expect(s.recordKeys).toEqual(s.recordIds.map(id=>`${s.source.dataset}@${s.source.revision}:${id}`));
@@ -95,4 +99,27 @@ test('keyboard year controls allow an empty selection without stale records or s
  await root(page).locator('[data-clear-maker]').click();
  expect((await state(page)).recordIds.length).toBeGreaterThan(0);
  await expect(page.locator('[data-story-next]')).toBeDisabled();
+});
+
+
+test('fatal stacks start at zero and disclose fatal, nonfatal and total outcomes on hover and focus',async({page,request})=>{
+ const rows=projected(await(await request.get('/data/comparison-records.json')).json());
+ await page.goto('/#/flight-types');
+ const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(8);
+ const cells=await chart.evaluate(r=>r.comparisonState.typeCells);
+ for(const cell of cells){
+  const source=rows.filter(r=>r.operation===cell.label);
+  expect(cell.fatalCount).toBe(source.filter(r=>r.fatalities>0).length);
+  expect(cell.count).toBe(source.length);
+ }
+ const first=chart.locator('.type-row').first();
+ const fatal=first.locator('.outcome-fatal'),nonfatal=first.locator('.outcome-nonfatal');
+ expect(Number(await fatal.getAttribute('x'))).toBe(0);
+ expect(Number(await nonfatal.getAttribute('x'))).toBeCloseTo(Number(await fatal.getAttribute('width')),5);
+ await first.hover();await expect(chart.getByRole('tooltip')).toContainText('fatal');await expect(chart.getByRole('tooltip')).toContainText('nonfatal');await expect(chart.getByRole('tooltip')).toContainText('total');
+ await first.focus();await expect(chart.getByRole('tooltip')).toBeVisible();
+ await page.goto('/#/aircraft-design');await expect(root(page).locator('.record-bar').first()).toBeVisible();
+ await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
+ const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
+ await maker.focus();await expect(root(page).getByRole('tooltip')).toContainText('total');
 });

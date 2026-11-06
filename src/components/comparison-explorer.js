@@ -20,7 +20,7 @@ async function load() {
   return dataset;
 }
 function cells(rows,key) {
-  return [...group(rows,row=>row[key])].map(([label,records])=>({label,count:records.length,recordIds:records.map(r=>r.source_id)}))
+  return [...group(rows,row=>row[key])].map(([label,records])=>({label,count:records.length,fatalCount:records.filter(r=>r.fatalities>0).length,recordIds:records.map(r=>r.source_id),fatalRecordIds:records.filter(r=>r.fatalities>0).map(r=>r.source_id)}))
     .sort((a,b)=>b.count-a.count || a.label.localeCompare(b.label));
 }
 const ids=rows=>rows.map(row=>row.source_id);
@@ -44,7 +44,7 @@ async function mount(container,kind) {
       <button type="button" class="text-button" data-reset-years>Reset years</button>
       <button type="button" class="text-button" data-clear-maker hidden></button>
     </div>
-    <p class="comparison-scope"></p>
+    <p class="comparison-scope"></p><div class="comparison-outcome-key" aria-label="Crash outcomes"><span><i class="outcome-fatal"></i>Fatal crashes</span><span><i class="outcome-nonfatal"></i>Nonfatal crashes</span></div>
     ${aircraft ? `
       <div class="aircraft-comparison-grid">
         <div class="comparison-scatter-wrap">
@@ -68,6 +68,7 @@ async function mount(container,kind) {
         <div><p class="comparison-measure">Recorded crashes by kind of flying</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crash counts by flight type. Choose a type for the aircraft comparison."></svg></div>
         <aside class="comparison-type-note"><p class="eyebrow">Different kinds of flying</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><div class="comparison-type-selection" role="status" aria-live="polite"></div><p class="comparison-type-carry">Your chosen flight type and years carry into the aircraft view.</p></aside>
       </div>`}
+    <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
       <p>Worldwide archive · 1970–2024 · recorded airborne phases. Counts describe records in this archive; they do not estimate accident probability per flight or rank operational or manufacturer safety. Fleet size, flight activity, mission and reporting coverage are not controlled here.</p>
       <p class="comparison-source-age"></p>
@@ -114,16 +115,34 @@ async function mount(container,kind) {
       const link=document.createElement('a');link.href=url;link.download='crashalot-selection.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     });
   }
+  function describeOutcome(cell,label=cell.label) {
+    return `${label}: ${number(cell.fatalCount)} fatal crashes, ${number(cell.count-cell.fatalCount)} nonfatal crashes; ${number(cell.count)} total.`;
+  }
+  function showOutcome(event,cell,label=cell.label) {
+    const tooltip=q('.comparison-tooltip');
+    tooltip.replaceChildren();
+    const title=document.createElement('strong');title.textContent=label;
+    const values=document.createElement('span');values.textContent=`${number(cell.fatalCount)} fatal · ${number(cell.count-cell.fatalCount)} nonfatal · ${number(cell.count)} total`;
+    tooltip.append(title,values);tooltip.hidden=false;
+    const bounds=event.currentTarget.getBoundingClientRect();
+    const left=event.clientX || bounds.left+Math.min(100,bounds.width/2);
+    tooltip.style.left=`${Math.max(12,Math.min(innerWidth-tooltip.offsetWidth-12,left))}px`;
+    tooltip.style.top=`${Math.max(12,Math.min(innerHeight-tooltip.offsetHeight-12,bounds.bottom+7))}px`;
+  }
+  function hideOutcome() {q('.comparison-tooltip').hidden=true;}
   function recordBars(element,rows,{interactive=false}={}) {
     const scale=scaleLinear().domain([0,max(rows,r=>r.count)||1]).range([0,100]);
     const nodes=select(element).selectAll('.record-bar').data(rows,r=>r.label).join(enter=>{
       const row=enter.append(interactive?'button':'div').attr('class','record-bar');
       if(interactive)row.attr('type','button');
       row.append('span').attr('class','record-bar-name');row.append('strong');
-      row.append('span').attr('class','record-bar-track').attr('aria-hidden','true').append('i');return row;
+      const track=row.append('span').attr('class','record-bar-track').attr('aria-hidden','true');track.append('i').attr('class','outcome-nonfatal');track.append('i').attr('class','outcome-fatal');return row;
     });
-    nodes.select('.record-bar-name').text(r=>r.label);nodes.select('strong').text(r=>number(r.count));
-    nodes.select('i').style('width',r=>`${scale(r.count)}%`);
+    nodes.select('.record-bar-name').text(r=>r.label);nodes.select('strong').text(r=>`${number(r.fatalCount)} fatal`);
+    nodes.attr('aria-label',r=>describeOutcome(r)).attr('tabindex',interactive?null:0)
+      .on('pointerenter focus',showOutcome).on('pointermove',showOutcome).on('pointerleave blur',hideOutcome);
+    nodes.select('.outcome-nonfatal').style('left',r=>`${scale(r.fatalCount)}%`).style('width',r=>`${scale(r.count-r.fatalCount)}%`);
+    nodes.select('.outcome-fatal').style('width',r=>`${scale(r.fatalCount)}%`);
     if(interactive)nodes.attr('aria-pressed',r=>String(shared.manufacturer===r.label))
       .on('click',(_,r)=>change({manufacturer:shared.manufacturer===r.label?null:r.label}));
   }
@@ -135,18 +154,20 @@ async function mount(container,kind) {
       const row=enter.append('g').attr('class','type-row').attr('role','button').attr('tabindex',0);
       row.append('rect').attr('class','type-hit').attr('fill','transparent');
       row.append('text').attr('class','type-label');row.append('text').attr('class','type-value').attr('text-anchor','end');
-      row.append('rect').attr('class','type-bar').attr('height',15);return row;
+      row.append('rect').attr('class','type-bar outcome-nonfatal').attr('height',15);row.append('rect').attr('class','type-bar outcome-fatal').attr('height',15);return row;
     });
     rows.attr('transform',(_,i)=>`translate(0,${i*rowHeight+4})`).attr('aria-pressed',r=>String(shared.operation===r.label))
-      .attr('aria-label',r=>`${labels[r.label]}: ${number(r.count)} recorded crashes. Select this kind of flying.`)
+      .attr('aria-label',r=>`${describeOutcome(r,labels[r.label])} Select this kind of flying.`)
       .classed('is-selected',r=>shared.operation===r.label)
+      .on('pointerenter focus',(event,r)=>showOutcome(event,r,labels[r.label])).on('pointermove',(event,r)=>showOutcome(event,r,labels[r.label])).on('pointerleave blur',hideOutcome)
       .on('click',(_,r)=>change({operation:r.label})).on('keydown',(event,r)=>{
         if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();change({operation:r.label});}
       });
     rows.select('.type-hit').attr('width',width).attr('height',rowHeight-3);
     rows.select('.type-label').attr('x',0).attr('y',17).text(r=>labels[r.label]);
-    rows.select('.type-value').attr('x',width-4).attr('y',17).text(r=>number(r.count));
-    rows.select('.type-bar').attr('x',0).attr('y',27).attr('width',r=>scale(r.count));
+    rows.select('.type-value').attr('x',width-4).attr('y',17).text(r=>`${number(r.fatalCount)} fatal`);
+    rows.select('.outcome-fatal').attr('x',0).attr('y',27).attr('width',r=>scale(r.fatalCount));
+    rows.select('.outcome-nonfatal').attr('x',r=>scale(r.fatalCount)).attr('y',27).attr('width',r=>scale(r.count-r.fatalCount));
   }
   function drawScatter(base,selectedIds) {
     const width=Math.max(260,q('.comparison-scatter').clientWidth),height=340;
@@ -212,7 +233,7 @@ async function mount(container,kind) {
     const selectedIds=new Set(ids(currentSelected));
     const makers=cells(context,'manufacturer'),models=cells(currentSelected,'aircraft');
     const typeContext=data.records.filter(byYears).filter(byManufacturer);
-    const typeCells=Object.keys(labels).map(label=>{const records=typeContext.filter(r=>r.operation===label);return {label,count:records.length,recordIds:ids(records)};});
+    const typeCells=Object.keys(labels).map(label=>{const records=typeContext.filter(r=>r.operation===label);return {label,count:records.length,fatalCount:records.filter(r=>r.fatalities>0).length,recordIds:ids(records),fatalRecordIds:ids(records.filter(r=>r.fatalities>0))};});
     const stateKey=JSON.stringify(shared);if(stateKey!==selectionKey){selectionKey=stateKey;limit=8;}
     root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(shared.start);root.dataset.endYear=String(shared.end-1);
     root.comparisonState={source:data.source,kind,filter:{...shared,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
@@ -223,7 +244,7 @@ async function mount(container,kind) {
       if(shared.manufacturer&&!displayed.some(r=>r.label===shared.manufacturer)){
         const chosen=makers.find(r=>r.label===shared.manufacturer);if(chosen)displayed.push(chosen);
       }
-      q('.comparison-manufacturer-context').textContent=`Recorded crashes · ${number(context.length)} in this time/type selection`;
+      q('.comparison-manufacturer-context').textContent='Click a choice to filter on it.';
       recordBars(q('.comparison-manufacturer-bars'),displayed,{interactive:true});
       recordBars(q('.comparison-model-bars'),models.slice(0,7));
       q('.comparison-selection').textContent=`${number(currentSelected.length)} selected records${shared.manufacturer?' · '+shared.manufacturer:''} · ${shared.operation==='all'?'All kinds of flying':labels[shared.operation]} · ${shared.start}–${shared.end-1}`;

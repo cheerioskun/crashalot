@@ -17,3 +17,7 @@ Manufacturer labels are explicit literal prefixes of the aircraft-name string, m
 A shared year interval (inclusive start, exclusive end) and flight-type choice carry between the two chapters. The aircraft scatter plots one mark per usable-age source record at crash date × age. Horizontal D3 brushing snaps to calendar years; numeric year controls supply a keyboard alternative. Unknown ages are excluded from both the scatter and its linked selection views.
 
 All aircraft-linked manufacturer/model cells and record details are derived from selected original IDs, never from display labels or point array indices. A manufacturer choice narrows the highlighted scatter records and model/record views. Manufacturer bars retain the date/type context for comparison. The flight-type chapter retains age-unknown records and states that broader scope in source details; a shared time window is not a claim that its age-independent count equals the aircraft-only subset.
+
+## Fatal-outcome emphasis
+
+Every flight-type, manufacturer and model bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.

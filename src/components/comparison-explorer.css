@@ -68,3 +68,17 @@ button.record-bar { cursor:pointer; }
  .comparison-record-list li{grid-template-columns:80px minmax(0,1fr);gap:4px 10px}
  .comparison-record-actions .text-button{min-height:44px}.comparison-linked{max-width:none}
 }
+
+/* Fatal outcomes share the zero baseline; the pale remainder completes each total. */
+.comparison-outcome-key{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--bs-secondary-color);margin:-8px 0 22px}
+.comparison-outcome-key span{display:flex;align-items:center;gap:7px}.comparison-outcome-key i{width:16px;height:6px;display:inline-block;background:var(--viz-series-1)}
+.comparison-outcome-key .outcome-nonfatal{opacity:.2}
+.type-row .outcome-fatal,.type-row.is-selected .outcome-fatal{fill:var(--viz-series-1);opacity:1}
+.type-row .outcome-nonfatal,.type-row.is-selected .outcome-nonfatal{fill:var(--viz-series-1);opacity:.18}
+.type-row:hover .outcome-nonfatal,.type-row:focus .outcome-nonfatal{opacity:.45}
+.record-bar-track{position:relative;height:7px;background:transparent}
+.record-bar-track i{position:absolute;top:0;left:0;height:100%;opacity:1}
+.record-bar-track .outcome-nonfatal{opacity:.18}.record-bar:hover .outcome-nonfatal,.record-bar:focus .outcome-nonfatal{opacity:.45}
+.record-bar[aria-pressed=true] .record-bar-track .outcome-nonfatal{opacity:.3}
+.comparison-tooltip{position:fixed;z-index:30;max-width:calc(100vw - 24px);padding:10px 13px;border:1px solid var(--bs-border-color);background:var(--bs-body-bg);color:var(--bs-body-color);box-shadow:0 5px 22px #0002;font-size:12px;pointer-events:none;line-height:1.6}
+.comparison-tooltip strong,.comparison-tooltip span{display:block}.comparison-tooltip[hidden]{display:none}
