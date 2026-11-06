@@ -54,7 +54,7 @@ export async function mountScaleComparison(container) {
   const YEAR_END = (cumulative.length - 1) * YEAR_MS;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const root = select(container).append('div').attr('class', 'scale-comparison').attr('data-phase', 'initial');
-  root.append('p').attr('class','scale-comparison__scope').text(data.meta.population);
+  root.append('p').attr('class','scale-comparison__scope').text('U.S. scheduled airline services · NTSB');
   const interval = root.append('p').attr('class', 'scale-comparison__interval').attr('aria-label', 'Data time interval');
   interval.append('span').text(first.year);
   const intervalEnd = interval.append('span').attr('class', 'scale-comparison__interval-end').attr('hidden', true);
@@ -97,7 +97,7 @@ export async function mountScaleComparison(container) {
   const coinInner = coin.append('span').attr('class','scale-comparison__coin-inner');
   coinInner.append('span').attr('class','scale-comparison__coin-back');
   coinInner.append('span').attr('class','scale-comparison__coin-head').text('H');
-  const question = commentary.append('p').attr('class','scale-comparison__question').text('But have planes always been this safe?');
+  const question = commentary.append('p').attr('class','scale-comparison__question').text('What does the longer, worldwide picture look like?');
   const transport = root.append('div').attr('class', 'scale-comparison__transport');
   const controls = transport.append('div');
   const pause = controls.append('button').attr('type', 'button').attr('class', 'text-button').text('Pause').on('click', () => {

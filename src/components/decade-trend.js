@@ -29,10 +29,10 @@ export async function mountDecadeTrend(container) {
   const root = select(container).append('div').attr('class', 'decade-trend');
   const grid = root.append('div').attr('class', 'decade-trend__grid');
   const plot = grid.append('div').attr('class', 'decade-trend__plot');
-  plot.append('p').attr('class', 'decade-trend__measure').text('Recorded crashes · absolute count');
+  plot.append('p').attr('class', 'decade-trend__measure').text('Recorded aircraft crashes');
   const legend = plot.append('div').attr('class','decade-trend__legend').attr('aria-label','Chart legend');
   legend.append('span').attr('class','decade-trend__legend-total').text('Total crashes');
-  legend.append('span').attr('class','decade-trend__legend-fatal').text('Fatal crashes · >0 fatalities');
+  legend.append('span').attr('class','decade-trend__legend-fatal').text('Fatal crashes');
   const svg = plot.append('svg').attr('viewBox', '0 0 900 390').attr('role', 'img').attr('aria-label', 'Total and fatal scheduled revenue flight crashes by decade, worldwide, 1950–2024');
   svg.append('desc').text(data.rows.map(d=>`${d.label}${d.partial ? ' (five years only)' : ''}: ${d.count} total crashes, ${d.fatalCount} with fatalities`).join('; ')+'. Both series use the same zero-based count scale and source records.');
   const x = scaleBand().domain(data.rows.map(d => d.label)).range([60, 875]).padding(.32);
@@ -66,7 +66,7 @@ export async function mountDecadeTrend(container) {
   const note = grid.append('aside').attr('class','decade-trend__note').attr('aria-live','polite');
   const period = note.append('p').attr('class','eyebrow');
   const headline = note.append('h2');
-  const opening = note.append('p').attr('class','decade-trend__opening').text('Recorded crashes rise from 688 in the 1950s to a peak of 923 in the 1970s. First, establish the longer view.');
+  const opening = note.append('p').attr('class','decade-trend__opening').text('Recorded crashes rise from 688 in the 1950s to a peak of 923 in the 1970s.');
   const technology = note.append('p').attr('class','decade-trend__technology').text('Ground-proximity warnings and crew resource management added layers of protection.');
   const decline = note.append('p').attr('class','decade-trend__decline').text('Recorded crashes fell in every completed decade after the 1970s peak, reaching 269 in the 2010s — 71% fewer.');
   const fatalCopy = note.append('p').attr('class','decade-trend__fatal-copy').text('Fatal crashes fell even further: from 475 in the 1970s to 98 in the 2010s — 79% fewer.');
@@ -81,7 +81,7 @@ export async function mountDecadeTrend(container) {
   root.on('keydown',event=>{if(event.target.closest('button, summary, a') && [' ','Enter'].includes(event.key))event.stopPropagation();});
   const source = root.append('details').attr('class','evidence-source decade-trend__source');
   source.append('summary').text('Source, scope & exact counts');
-  source.append('p').html('Source: <a href="https://huggingface.co/datasets/MauroPello/planecrashdata" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> (CC BY 4.0), retained snapshot. Worldwide records with flight_type exactly “Scheduled Revenue Flight”; includes fatal and nonfatal outcomes. Fatal crashes are the subset with total_fatalities > 0. Separately classified cargo and charter records are excluded. This changes geography and measure from the previous U.S. fatal-accident chart. Reporting and classification may vary over time; archive counts are not a complete census or a measure of risk per flight. 2025 is excluded because this category stops in July.');
+  source.append('p').html('Source: <a href="https://huggingface.co/datasets/MauroPello/planecrashdata" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> (CC BY 4.0), retained snapshot. Worldwide records with flight_type exactly “Scheduled Revenue Flight”; includes fatal and nonfatal outcomes. Fatal crashes are the subset with total_fatalities > 0. Separately classified cargo and charter records are excluded. Each record describes an aircraft, so a collision can contribute two records. Unlike the previous U.S. accident-per-departure comparison, these are worldwide archive counts, without flight exposure. The final point covers five years, 2020–2024.');
   source.append('p').html('Historical context: <a href="https://www.ntsb.gov/safety/safety-studies/Documents/SR9801.pdf" target="_blank" rel="noreferrer">NTSB · Ground Proximity Warning Systems</a>; <a href="https://asrs.arc.nasa.gov/publications/callback/cb_370.html" target="_blank" rel="noreferrer">NASA · Crew Resource Management</a>. These milestones do not quantify their contribution to this worldwide trend.');
   const table = source.append('table');
   table.append('caption').text('Recorded crashes in the selected archive category');
@@ -111,7 +111,7 @@ export async function mountDecadeTrend(container) {
       root.classed('has-started',stage>0);
       scope.classed('is-visible',stage>0).attr('aria-hidden',String(stage===0));
       period.text(stage<4 ? '1950s–1970s' : stage<9 ? '1980s–2024' : 'The full view · 1950–2024');
-      const title=stage===11 ? 'What factors affect these numbers?' : stage<4 ? 'The decline did not start immediately.' : stage<9 ? 'Technological innovations started turning things around' : 'These are <i>total</i> crashes,';
+      const title=stage===11 ? 'What factors affect these numbers?' : stage<4 ? 'The decline did not start immediately.' : stage<9 ? 'Safety gained new layers of protection' : 'These are <i>total</i> crashes,';
       if(headline.html()!==title) {
         headline.classed('decade-heading-enter',false).html(title);
         void headline.node().offsetWidth;

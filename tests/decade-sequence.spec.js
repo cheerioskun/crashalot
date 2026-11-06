@@ -26,7 +26,7 @@ test('text leads each sweep; line drawing, bar removal and fatal overlay have se
  await next(page).click();await next(page).click();await expect(chart(page)).toHaveAttribute('data-beat','2');
  await page.clock.runFor(5000);await expect(chart(page)).toHaveAttribute('data-beat','2');
  await next(page).click();await expect(chart(page)).toHaveAttribute('data-beat','2.5');
- await expect(chart(page).locator('h2')).toContainText('Technological innovations');
+ await expect(chart(page).locator('h2')).toContainText('Safety gained new layers');
  await expect(chart(page).locator('.decade-trend__technology')).toBeHidden();
  await next(page).click();await expect(chart(page)).toHaveAttribute('data-beat','3');
  await expect(chart(page).locator('.decade-trend__technology')).toBeVisible();

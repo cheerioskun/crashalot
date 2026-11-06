@@ -33,6 +33,7 @@ const byManufacturer=row=>!shared.manufacturer || row.manufacturer===shared.manu
 async function mount(container,kind) {
   const data=await load(), aircraft=kind==='aircraft';
   const labels=data.scope.operationLabels;
+  const namedOperations=Object.entries(labels).filter(([key])=>key!=='other');
   const root=document.createElement('div');root.className=`comparison-explorer comparison-${kind}`;
   container.replaceChildren(root);
   root.innerHTML=`
@@ -65,20 +66,20 @@ async function mount(container,kind) {
       <div class="comparison-selection" role="status" aria-live="polite"></div>
       <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
-        <div><p class="comparison-measure">Recorded crashes by kind of flying</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crash counts by flight type. Choose a type for the aircraft comparison."></svg></div>
+        <div><p class="comparison-measure">Recorded crashes by kind of flying · counts, not a safety ranking</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crash counts by flight type. Choose a type for the aircraft comparison."></svg></div>
         <aside class="comparison-type-note"><p class="eyebrow">Different kinds of flying</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><div class="comparison-type-selection" role="status" aria-live="polite"></div><p class="comparison-type-carry">Your chosen flight type and years carry into the aircraft view.</p></aside>
       </div>`}
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
-      <p>Worldwide archive · 1970–2024 · recorded airborne phases. Counts describe records in this archive; they do not estimate accident probability per flight or rank operational or manufacturer safety. Fleet size, flight activity, mission and reporting coverage are not controlled here.</p>
+      <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The flight-type bars compare seven named kinds of flying; other missions and missing types are left out of those bars, but remain in “All kinds of flying” and the aircraft view.</p>
       <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
-      <p>Manufacturer labels come from a reviewed list of literal aircraft-name prefixes, with unmatched names kept unclassified. They do not resolve historical ownership or prove that a manufacturer caused an accident. Aircraft age uses the crash year minus the recorded manufacture year.</p>
+      <p>Manufacturer labels use aircraft-name prefixes, preserving historical names. Unclassified names are omitted from the manufacturer choices and bars, but remain in the full scatter and model view. Aircraft age is crash year minus manufacture year.</p>
       <p>Original source IDs are preserved throughout brushing, grouping and the downloadable source data. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
       <p><a href="${import.meta.env.BASE_URL}data/comparison-records.json" download>Download the retained comparison records</a></p>
     </details>`;
   const q=selector=>root.querySelector(selector);
   const option=(value,label)=>{const node=document.createElement('option');node.value=value;node.textContent=label;return node;};
-  q('[data-operation]').append(option('all','All kinds of flying'),...Object.entries(labels).map(([value,label])=>option(value,label)));
+  q('[data-operation]').append(option('all','All kinds of flying'),...namedOperations.map(([value,label])=>option(value,label)));
   let active=false,destroyed=false,brushing=false,scatterKey='',currentSelected=[];
   const editingYears=new Set();
   let scatter,points,pointYears,x,y,brush,brushLayer,histogramLayer,cohortLayer,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
@@ -109,7 +110,7 @@ async function mount(container,kind) {
     if(event.target.closest('button,input,select,summary,a,[role="button"]'))event.stopPropagation();
   });
   if(aircraft) {
-    q('[data-manufacturer]').append(option('','All manufacturers'),...cells(eligible,'manufacturer').sort((a,b)=>a.label.localeCompare(b.label)).map(c=>option(c.label,c.label)));
+    q('[data-manufacturer]').append(option('','All manufacturers'),...cells(eligible,'manufacturer').filter(c=>c.label!=='Unclassified name').sort((a,b)=>a.label.localeCompare(b.label)).map(c=>option(c.label,c.label)));
     q('[data-manufacturer]').addEventListener('change',event=>change({manufacturer:event.target.value||null}));
   }
   const modelPacking=aircraft?createAircraftModelPacking({host:q('.comparison-model-grid'),tooltip:q('.comparison-tooltip'),onSelect:model=>{root.comparisonState.modelPacking.selectedModel=model;}}):null;
@@ -285,7 +286,7 @@ async function mount(container,kind) {
     q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
     if(aircraft) {
       q('[data-manufacturer]').value=shared.manufacturer||'';
-      const displayed=makers.slice(0,7);
+      const displayed=makers.filter(c=>c.label!=='Unclassified name').slice(0,7);
       if(shared.manufacturer&&!displayed.some(r=>r.label===shared.manufacturer)){
         const chosen=makers.find(r=>r.label===shared.manufacturer);if(chosen)displayed.push(chosen);
       }
@@ -295,9 +296,9 @@ async function mount(container,kind) {
       q('.comparison-selection').textContent=`${number(currentSelected.length)} selected records${shared.manufacturer?' · '+shared.manufacturer:''} · ${shared.operation==='all'?'All kinds of flying':labels[shared.operation]} · ${shared.start}–${shared.end-1}`;
       if(active)drawScatter(eligible.filter(byOperation),selectedIds);
     } else {
-      if(active)drawTypes(typeCells);
+      if(active)drawTypes(typeCells.filter(c=>c.label!=='other'));
       const label=shared.operation==='all'?'All kinds of flying':labels[shared.operation];
-      q('.comparison-type-selection').textContent=`${label} · ${number(currentSelected.length)} recorded crashes in ${shared.start}–${shared.end-1}`;
+      q('.comparison-type-selection').textContent=shared.operation==='all' ? 'Choose a bar to filter, or continue with all kinds of flying.' : `${label} · ${number(currentSelected.length)} recorded crashes in ${shared.start}–${shared.end-1}`;
     }
     if(narrative)paintNarrative(narrative.state);
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
@@ -335,7 +336,7 @@ async function mount(container,kind) {
         typeRows.select('.type-value').attr('opacity',r=>reveal(r)>=1?1:0);
       }
       if(stage!==lastStoryStage){
-        const stories=[['Different kinds of flying','An airline, a private aircraft and a training flight share the archive. They operate in different settings.'],['Start with scheduled services.','Scheduled revenue services form one part of this worldwide archive.'],['The archive extends beyond airlines.','Private, charter, cargo and training flights also contribute to the crash records.'],['Which flights belong in your comparison?','Choose a kind of flying to carry into the aircraft view. Comparing per-flight safety also requires flight activity for each group.']];
+        const stories=[['Different kinds of flying','An airline, a private aircraft and a training flight share the archive. They operate in different settings.'],['Start with scheduled services.','Scheduled revenue services form one part of this worldwide archive.'],['The archive extends beyond airlines.','Private, charter, cargo and training flights also contribute to the crash records.'],['Which flights belong in your comparison?','Choose a kind of flying to carry into the aircraft view.']];
         q('.comparison-type-note h2').textContent=stories[stage][0];
         q('.comparison-type-note>p:not(.eyebrow)').textContent=stories[stage][1];
       }

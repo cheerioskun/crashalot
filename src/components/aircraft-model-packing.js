@@ -10,7 +10,7 @@ const drawings=new Map(catalogue.models.map(model=>[model.model,model]));
 export function createAircraftModelPacking({host,tooltip,onSelect}) {
   host.innerHTML=`<div class="model-packing-view">
     <div class="model-packing-head"><h2>Models in the selection</h2><p>Choose a circle to see the aircraft.</p></div>
-    <div class="model-packing-key"><span>Circle area · recorded crashes</span><span class="model-saturation-key">Fatal share <i aria-hidden="true"></i><span>0% — 100%</span></span></div>
+    <div class="model-packing-key"><span>Circle area · recorded crashes</span><span class="model-saturation-key">Share of crashes that were fatal <i aria-hidden="true"></i><span>0% — 100%</span></span></div>
     <svg class="model-packing" role="group" aria-label="Aircraft models. Circle area shows recorded crash count; yellow saturation shows the share with fatalities."></svg>
     <p class="model-packing-empty" hidden>No models in this selection.</p>
   </div><aside class="model-schematic-panel" aria-label="Selected aircraft schematic">

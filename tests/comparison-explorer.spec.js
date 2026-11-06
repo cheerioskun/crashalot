@@ -39,7 +39,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  const data=await(await request.get('/data/comparison-records.json')).json(),rows=projected(data);
  const phases=await(await request.get('/data/flight-exploration.json')).json();
  await page.goto('/#/flight-types');
- await expect(page.locator('.comparison-types .type-row')).toHaveCount(8);
+ await expect(page.locator('.comparison-types .type-row')).toHaveCount(7);
  expect(await page.locator('.slides>section').evaluateAll(ns=>ns.map(n=>n.id))).toEqual(['welcome','flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design']);
  await expect(page.locator('.storyboard-placeholder,#another-perspective,#the-whole-picture,#arrival')).toHaveCount(0);
  const initial=await page.locator('.comparison-types').evaluate(r=>r.comparisonState);
@@ -47,6 +47,9 @@ test('new chapters replace every old placeholder; type choice and years carry be
  expect(initial.recordIds).toEqual(rows.map(r=>r.source_id));
  expect(sorted(initial.typeCells.find(c=>c.label==='scheduled').recordIds)).toEqual(sorted(phases.rows.filter(r=>['departure','in_flight','arrival'].includes(r[1])).map(r=>r[0])));
  expect(initial.typeCells.reduce((n,c)=>n+c.count,0)).toBe(rows.length);
+ await expect(page.locator('.comparison-types .type-row').filter({hasText:'Other / not recorded'})).toHaveCount(0);
+ await expect(page.locator('.comparison-types [data-operation] option[value=other]')).toHaveCount(0);
+ expect(initial.typeCells.find(c=>c.label==='other').count).toBeGreaterThan(0); // Canonical membership survives the display exclusion.
  await page.getByRole('button',{name:/^Private: /}).click();
  await page.locator('[data-story-next]').click();await expect(root(page)).toBeVisible();
  await expect(root(page).locator('[data-operation]')).toHaveValue('private');
@@ -129,7 +132,7 @@ test('keyboard year controls allow an empty selection without stale records or s
 test('fatal stacks start at zero and disclose fatal, nonfatal and total outcomes on hover and focus',async({page,request})=>{
  const rows=projected(await(await request.get('/data/comparison-records.json')).json());
  await page.goto('/#/flight-types');
- const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(8);
+ const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(7);
  const cells=await chart.evaluate(r=>r.comparisonState.typeCells);
  for(const cell of cells){
   const source=rows.filter(r=>r.operation===cell.label);

@@ -87,3 +87,7 @@ Dates refer to specified introductions or U.S. requirements, not universal world
 ### Bridge into the phase story
 
 After the fatal-crash comparison, one explicit Next opens Beat 6: “What factors affect these numbers?” / “The phase of flight is one place to start.” Both completed lines and the legend remain visible. Auto stops at Beat 5.5 and never opens the bridge or changes slides. A second Next enters the Sankey. Back returns to the fatal comparison with its complete plotted values. Reduced-motion Auto likewise stops at the fatal comparison.
+
+## November 6 polish audit
+
+The visible headline now describes fewer recorded crashes since the 1970s peak rather than treating counts as a per-flight safety trend. The preceding U.S. comparison explicitly asks for the longer worldwide picture. Technology copy describes added protection without attributing the measured decline to those interventions. Each archive record describes one aircraft; a multi-aircraft collision can contribute multiple records, so these totals are not deduplicated event counts. The five-year final interval remains visibly marked. Independent raw-source calculations are recorded in `data-audit-2026-11-06.md`.

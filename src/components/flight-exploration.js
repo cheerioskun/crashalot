@@ -426,7 +426,10 @@ export async function mountFlightExploration(container) {
     const otherCount = excluded.filter((r) => r.cause === "other").length,
       unknownCount = excluded.filter((r) => r.cause === "unknown").length;
     root.querySelector(".area-caption").textContent =
-      `Others: ${format(otherCount)} · Cause not recorded: ${format(unknownCount)}. These remain in the Sankey. Percentage compares the four shown causes within each period.`;
+      measure === "percentage" ? "Shares compare the four named causes within each period." : "";
+    root.querySelector(".area-caption").hidden = measure !== "percentage";
+    root.querySelector(".source-cause-coverage").textContent =
+      `${format(displayed.length)} of ${format(cohortRows.length)} selected records have one of the four named causes. Other causes: ${format(otherCount)}; cause not recorded: ${format(unknownCount)}.`;
     root.querySelector(".area-reading").textContent =
       `Order = rank · thickness = ${measure === "count" ? "raw count" : "percentage of the four displayed causes"}.`;
     root
