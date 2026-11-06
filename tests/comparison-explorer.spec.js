@@ -14,6 +14,14 @@ function check(s,rows) {
  }
  for(const cell of s.modelCells) expect(cell.recordIds).toEqual(expected.filter(r=>r.aircraft===cell.label).map(r=>r.source_id));
  for(const cell of s.manufacturerCells) expect(cell.recordIds).toEqual(rows.filter(r=>r.age!==null && r.year>=s.filter.start && r.year<s.filter.end && (s.filter.operation==='all'||r.operation===s.filter.operation) && r.manufacturer===cell.label).map(r=>r.source_id));
+ if(s.ageBins){
+  expect(sorted(s.ageBins.flatMap(b=>b.recordIds))).toEqual(sorted(s.recordIds));
+  for(const b of s.ageBins){
+   expect(b.count).toBe(b.recordIds.length);
+   expect(b.recordIds.every(id=>expected.some(r=>r.source_id===id && r.age>=b.from && r.age<b.to))).toBe(true);
+   expect(b.fatalCount).toBe(expected.filter(r=>r.age>=b.from && r.age<b.to && r.fatalities>0).length);
+  }
+ }
  expect(s.recordKeys).toEqual(s.recordIds.map(id=>`${s.source.dataset}@${s.source.revision}:${id}`));
 }
 async function open(page) {
@@ -68,6 +76,10 @@ test('a real time brush selects original plotted IDs and survives resizing and t
  await expect(root(page)).toHaveAttribute('data-start-year','1995');
  await expect(root(page)).toHaveAttribute('data-end-year','2005');
  const selected=await state(page);check(selected,rows);
+ expect(selected.ageBins.length).toBeGreaterThan(0);
+ const edge=await page.locator('.comparison-age-histogram>line').getAttribute('x1');
+ expect(Number(edge)).toBeCloseTo(selected.histogram.edge,5);
+ const cohort=selected.cohort;expect(cohort.recordIds.every(id=>rows.some(r=>r.source_id===id && r.manufacture_year===cohort.manufactureYear))).toBe(true);
  expect(selected.recordIds.length).toBeGreaterThan(0);expect(selected.recordIds.length).toBeLessThan(before.recordIds.length);
  const plotted=await page.locator('.comparison-scatter circle').evaluateAll(ns=>ns.map(n=>n.dataset.recordId));
  expect(plotted.every(id=>rows.find(r=>r.source_id===id).age!==null)).toBe(true);

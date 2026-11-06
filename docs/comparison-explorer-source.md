@@ -21,3 +21,9 @@ All aircraft-linked manufacturer/model cells and record details are derived from
 ## Fatal-outcome emphasis
 
 Every flight-type, manufacturer and model bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.
+
+## Brush-edge age distribution and cohort guide
+
+The horizontal selection carries a right-edge age histogram. Five-year bins cover the full valid-age domain, sharing the scatterplot's vertical age scale. Bin memberships partition the exact selected source IDs, including the manufacturer filter; no record is counted twice. Each bin uses the same fatal/nonfatal segmentation as the comparison bars. Width is normalized to the largest bin in the current selection, labeled above the histogram; it is not a probability or an exposure-adjusted age-risk curve. The right baseline follows the inclusive calendar selection's exclusive end boundary. Full-range selection pins the histogram to the plot's right edge.
+
+The annotated diagonal follows a single recorded manufacture year. Choose a well-populated pre-1950 build year spanning at least 15 event years when available, otherwise the most represented qualifying build year. Its slope follows the identity `age = event year - manufacture year`; it is not evidence that age causes crashes, that these are repeated observations of one aircraft, or that older aircraft are safer. The labels and membership are recalculated for the active flight type and manufacturer context.
