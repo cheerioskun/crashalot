@@ -48,7 +48,7 @@ async function mount(container,kind) {
       <button type="button" class="text-button" data-reset-years>Reset years</button>
       <button type="button" class="text-button" data-clear-maker hidden></button>
     </div>
-    `:''}<p class="comparison-scope"></p><div class="comparison-outcome-key" aria-label="Crash outcomes"><span><i class="outcome-fatal"></i>Fatal crashes</span><span><i class="outcome-nonfatal"></i>Nonfatal crashes</span></div>
+    `:''}<p class="comparison-scope"></p><div class="comparison-outcome-key" aria-label="Crash outcomes"><span><i class="outcome-fatal"></i>Fatal crashes</span>${aircraft?'<span><i class="outcome-nonfatal"></i>Nonfatal crashes</span>':''}</div>
     ${aircraft ? `
       <div class="aircraft-comparison-grid">
         <div class="comparison-scatter-wrap">
@@ -67,13 +67,13 @@ async function mount(container,kind) {
       <div class="comparison-selection" role="status" aria-live="polite"></div>
       <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
-        <div><p class="comparison-measure">Recorded crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
+        <div><p class="comparison-measure">Fatal crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Fatal crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
         <aside class="comparison-type-note"><p class="eyebrow">Beyond the airline headline</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><p class="comparison-type-hint">Hover to inspect a year.<br>Click a trail to choose a kind of flying.</p></aside>
       </div>`}
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
-      <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The frequency trails compare annual counts for seven named kinds of flying, all on the same vertical count scale. Curves interpolate between the recorded yearly counts. Other missions and missing types are left out of those trails, but remain in “All kinds of flying” and the aircraft view.</p>
-      ${aircraft?'':'<p>Safety context: <a href="https://www.ntsb.gov/safety/Pages/research.aspx" target="_blank" rel="noreferrer">NTSB 2024 U.S. aviation statistics, Table 1</a>: scheduled airline service had 0 fatal accidents per 100,000 flight hours; general aviation had 0.72. That exposure-based comparison supports the narration. The trails above show annual worldwide archive counts.</p>'}
+      <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The three overlapping trails show annual fatal crashes for Scheduled Revenue, Private and Charter/Taxi, all on the same vertical count scale. Opaque profiles overlap like layers in a landscape; the curves interpolate the yearly counts. Other flight types and nonfatal records are left out of those trails, but remain in “All kinds of flying” and the aircraft view.</p>
+      ${aircraft?'':'<p>Safety context: <a href="https://www.ntsb.gov/safety/Pages/research.aspx" target="_blank" rel="noreferrer">NTSB 2024 U.S. aviation statistics, Table 1</a>: scheduled airline service had 0 fatal accidents per 100,000 flight hours; general aviation had 0.72. That exposure-based comparison supports the narration. The trails above show annual fatal-crash counts in the worldwide archive.</p>'}
       <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
       <p>Manufacturer labels use aircraft-name prefixes, preserving historical names. Unclassified names are omitted from the manufacturer choices and bars, but remain in the full scatter and model view. Aircraft age is crash year minus manufacture year.</p>
       <p>Original source IDs are preserved throughout brushing, grouping and the downloadable source data. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
@@ -92,7 +92,7 @@ async function mount(container,kind) {
   q('.comparison-age-evidence').hidden=!aircraft;
   q('.comparison-source-age').textContent=aircraft
     ? `${number(skipped)} records with missing or invalid manufacture years are omitted from both the scatterplot and its linked breakdown. ${number(eligible.length)} usable-age records remain across all flight types. The time and type choices carry between chapters; the preceding flight-type chart also includes unknown-age records.`
-    : `All ${number(data.records.length)} airborne-phase records are eligible here, including records without usable aircraft ages. The following age scatterplot omits those records. No raw record is deleted from the retained source.`;
+    : `The retained source has ${number(data.records.length)} airborne-phase records, including unknown-age and nonfatal records. The three trails select fatal crashes in scheduled revenue, private and charter/taxi flying. Choosing a type carries that operation into the aircraft view, which includes both fatal and nonfatal crashes with a known aircraft age. No raw source record is deleted.`;
   q('[data-operation]')?.addEventListener('change',event=>change({operation:event.target.value}));
   function applyYears(which) {
     editingYears.delete(which);
@@ -313,7 +313,7 @@ async function mount(container,kind) {
         const stories=[
           ['A commercial airliner is really the safest bet.','Professional crews. Scheduled maintenance. A whole system built around getting passengers there safely.'],
           ['First, scheduled airlines.','These are the scheduled revenue flights we’ve followed so far.'],
-          ['Headlines cover much more.','Private, charter, cargo, business, training and military flights appear alongside airlines.'],
+          ['Private flying and charter flights.','Their fatal crashes appear in the same headlines as scheduled airlines.'],
           ['A commercial airliner is really the safest bet.','A crash headline can describe any one of these kinds of flying.'],
         ];
         q('.comparison-type-note h2').textContent=stories[stage][0];

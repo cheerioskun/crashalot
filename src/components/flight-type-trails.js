@@ -1,8 +1,8 @@
 import {area,axisBottom,curveMonotoneX,format,group,max,range,scaleLinear,select} from 'd3';
 
 const integer=format(',d');
-// Annual frequencies share one count scale. Curves only interpolate the observed
-// years; no density normalization or per-flight risk is implied by their height.
+// Opaque, overlapping fatal-crash profiles are painted back to front.
+// Annual counts retain one shared height scale; depth comes from occlusion.
 export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
  const svg=select(element);let series=[],x,y,height,plotLeft,plotRight,chosen='all',start,end,focusedYear=null;
  let lastReveal={stage:0,progress:1};
@@ -11,7 +11,7 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
  const grid=svg.append('g').attr('class','trail-grid');
  const marks=svg.append('g').attr('class','trail-marks');
  const cursor=svg.append('g').attr('class','trail-cursor').attr('pointer-events','none').attr('visibility','hidden');
- cursor.append('line');cursor.append('circle').attr('class','trail-total-dot').attr('r',3);cursor.append('circle').attr('class','trail-fatal-dot').attr('r',3);
+ cursor.append('path').attr('class','trail-inspect-profile');cursor.append('line');cursor.append('circle').attr('class','trail-fatal-dot').attr('r',3);
  const axis=svg.append('g').attr('class','comparison-axis trail-axis');
  svg.append('text').attr('class','comparison-axis-title trail-axis-title').attr('text-anchor','middle').text('Year of recorded crash');
  const visibleProgress=row=>Number(row.getAttribute('data-trail-progress')||0);
@@ -21,11 +21,11 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
   const annual=row.years.find(d=>d.year===year);if(!annual)return;
   focusedYear=year;marks.selectAll('.type-row').classed('is-inspected',d=>d===row);
   cursor.attr('visibility','visible');
+  cursor.select('.trail-inspect-profile').attr('d',select(event.currentTarget).select('.trail-fatal-line').attr('d'));
   cursor.select('line').attr('x1',x(year)).attr('x2',x(year)).attr('y1',14).attr('y2',height-53);
-  cursor.select('.trail-total-dot').attr('cx',x(year)).attr('cy',row.baseline-y(annual.count));
   cursor.select('.trail-fatal-dot').attr('cx',x(year)).attr('cy',row.baseline-y(annual.fatalCount));
   tooltip.replaceChildren();
-  for(const [tag,text] of [['strong',`${labels[row.label]} · ${year}`],['span',`${integer(annual.count)} recorded crashes · ${integer(annual.fatalCount)} fatal · ${integer(annual.count-annual.fatalCount)} nonfatal`],['span',`${start}–${end}: ${integer(row.count)} recorded crashes · ${integer(row.fatalCount)} fatal`]]){
+  for(const [tag,text] of [['strong',`${labels[row.label]} · ${year}`],['span',`${integer(annual.count)} fatal crashes`],['span',`${start}–${end}: ${integer(row.count)} fatal crashes`]]){
    const node=document.createElement(tag);node.textContent=text;tooltip.append(node);
   }
   tooltip.hidden=false;
@@ -37,21 +37,21 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
  return {
   render(records,selection){
    hide();({start,end,operation:chosen}=selection);end-=1;
-   const width=Math.max(260,element.clientWidth),narrow=width<500,rowHeight=narrow?62:59;
+   const width=Math.max(260,element.clientWidth),narrow=width<500,rowHeight=narrow?34:40,amplitude=narrow?170:240;
    plotLeft=narrow?102:132;plotRight=width-14;
    x=scaleLinear().domain([start-.5,end+.5]).range([plotLeft,plotRight]);
-   const byType=group(records,r=>r.operation);
-   series=Object.keys(labels).filter(key=>key!=='other').map((label,index)=>{
+   const byType=group(records.filter(r=>r.fatalities>0),r=>r.operation);
+   series=['scheduled','private','charter'].map((label,index)=>{
     const rows=byType.get(label)||[],byYear=group(rows,r=>r.year);
-    return {label,baseline:63+index*rowHeight,count:rows.length,fatalCount:rows.filter(r=>r.fatalities>0).length,recordIds:rows.map(r=>r.source_id),years:range(start,end+1).map(year=>{
+    return {label,baseline:amplitude+12+index*rowHeight,count:rows.length,fatalCount:rows.filter(r=>r.fatalities>0).length,recordIds:rows.map(r=>r.source_id),years:range(start,end+1).map(year=>{
      const records=byYear.get(year)||[],fatal=records.filter(r=>r.fatalities>0);
      return {year,count:records.length,fatalCount:fatal.length,recordIds:records.map(r=>r.source_id),fatalRecordIds:fatal.map(r=>r.source_id)};
     })};
    });
-   height=series.length*rowHeight+85;
+   height=amplitude+12+(series.length-1)*rowHeight+65;
    const maximum=max(series,row=>max(row.years,d=>d.count))||1;
-   y=scaleLinear().domain([0,maximum]).range([0,rowHeight*1.08]);
-   svg.attr('viewBox',`0 0 ${width} ${height}`).attr('aria-label',`Recorded crashes per year by kind of flying, ${start}–${end}. Hover a trail for annual counts. Click or press Enter to choose a flight type; left and right arrows inspect years.`);
+   y=scaleLinear().domain([0,maximum]).range([0,amplitude]);
+   svg.attr('viewBox',`0 0 ${width} ${height}`).attr('aria-label',`Fatal crashes per year: scheduled revenue, private and charter / taxi, ${start}–${end}. Hover a trail for annual counts. Click or press Enter to choose a flight type; left and right arrows inspect years.`);
    svg.select('clipPath rect').attr('x',plotLeft).attr('y',0).attr('width',plotRight-plotLeft).attr('height',height);
    const ticks=[...new Set([start,...range(Math.ceil(start/10)*10,end,10),end])];
    const shownTicks=narrow&&ticks.length>4?[start,...ticks.filter(t=>t>start+5&&t<end-5&&t%20===0),end]:ticks;
@@ -62,12 +62,11 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
     const row=enter.append('g').attr('class','type-row').attr('role','button').attr('tabindex',0);
     row.append('line').attr('class','trail-baseline');
     const paths=row.append('g').attr('clip-path',`url(#${id})`);
-    paths.append('path').attr('class','trail-area trail-total');paths.append('path').attr('class','trail-line trail-total-line');
     paths.append('path').attr('class','trail-area trail-fatal');paths.append('path').attr('class','trail-line trail-fatal-line');
     row.append('text').attr('class','type-label');row.append('rect').attr('class','type-hit').attr('fill','transparent');return row;
    });
    rows.attr('aria-pressed',row=>String(chosen===row.label)).classed('is-selected',row=>chosen===row.label)
-    .attr('aria-label',row=>`${labels[row.label]}: ${integer(row.count)} recorded crashes, ${integer(row.fatalCount)} fatal, ${start}–${end}. Select this kind of flying.`)
+    .attr('aria-label',row=>`${labels[row.label]}: ${integer(row.count)} fatal crashes, ${start}–${end}. Select this kind of flying.`)
     .on('pointerenter pointermove',(event,row)=>{
      const box=element.getBoundingClientRect(),local=(event.clientX-box.left)*width/box.width;
      inspect(event,row,Math.max(start,Math.min(end,Math.round(x.invert(local)))));
@@ -82,9 +81,9 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
     });
    rows.select('.trail-baseline').attr('x1',plotLeft).attr('x2',plotRight).attr('y1',row=>row.baseline).attr('y2',row=>row.baseline);
    rows.select('.type-label').attr('x',0).attr('y',row=>row.baseline-6).text(row=>labels[row.label]);
-   rows.select('.type-hit').attr('x',0).attr('y',row=>row.baseline-rowHeight+5).attr('width',width).attr('height',rowHeight-2);
+   rows.select('.type-hit').attr('x',0).attr('y',row=>row.baseline-25).attr('width',plotLeft-10).attr('height',30);
    this.reveal(lastReveal);
-   return {start,end,maximum,series};
+   return {start,end,maximum,series,layout:{rowSpacing:rowHeight,amplitude,overlapping:true},outcome:'fatal'};
   },
   reveal(state){
    lastReveal=state;
@@ -94,7 +93,7 @@ export function createFlightTypeTrails({element,tooltip,labels,onSelect}){
     select(this).attr('data-trail-progress',p).attr('aria-disabled',String(p<.99));
     // A one-year brush still occupies a full calendar-year bin.
     const samples=row.years.length===1?[{...row.years[0],year:row.years[0].year-.5},row.years[0],{...row.years[0],year:row.years[0].year+.5}]:row.years;
-    for(const [key,areaClass,lineClass]of [['count','.trail-total','.trail-total-line'],['fatalCount','.trail-fatal','.trail-fatal-line']]){
+    for(const [key,areaClass,lineClass]of [['count','.trail-fatal','.trail-fatal-line']]){
      const generator=area().x(d=>x(d.year)).y0(row.baseline).y1(d=>row.baseline-y(d[key])*p).curve(curveMonotoneX);
      select(this).select(areaClass).attr('d',generator(samples)).attr('opacity',p>0?1:0);
      select(this).select(lineClass).attr('d',generator.lineY1()(samples)).attr('opacity',p>0?1:0);

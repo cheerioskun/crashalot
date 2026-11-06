@@ -39,7 +39,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  const data=await(await request.get('/data/comparison-records.json')).json(),rows=projected(data);
  const phases=await(await request.get('/data/flight-exploration.json')).json();
  await page.goto('/#/flight-types');
- await expect(page.locator('.comparison-types .type-row')).toHaveCount(7);
+ await expect(page.locator('.comparison-types .type-row')).toHaveCount(3);
  expect(await page.locator('.slides>section').evaluateAll(ns=>ns.map(n=>n.id))).toEqual(['welcome','flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design','conclusion']);
  await expect(page.locator('.storyboard-placeholder,#another-perspective,#the-whole-picture,#arrival')).toHaveCount(0);
  const initial=await page.locator('.comparison-types').evaluate(r=>r.comparisonState);
@@ -50,7 +50,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  await expect(page.locator('.comparison-types .type-row').filter({hasText:'Other / not recorded'})).toHaveCount(0);
  await expect(page.locator('.comparison-types [data-operation] option[value=other]')).toHaveCount(0);
  expect(initial.typeCells.find(c=>c.label==='other').count).toBeGreaterThan(0); // Canonical membership survives the display exclusion.
- await page.getByRole('button',{name:/^Private: /}).click();
+ await page.getByRole('button',{name:/^Private: /}).locator('.type-label').click();
  await page.locator('[data-story-next]').click();await expect(root(page)).toBeVisible();
  await expect(root(page).locator('[data-operation]')).toHaveValue('private');
  await years(page,2000,2009);
@@ -132,11 +132,16 @@ test('keyboard year controls allow an empty selection without stale records or s
 test('frequency trails preserve annual source identities and expose counts on hover and keyboard focus',async({page,request})=>{
  const rows=projected(await(await request.get('/data/comparison-records.json')).json());
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/flight-types');
- const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(7);
+ const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(3);
  const state=await chart.evaluate(r=>r.comparisonState),trails=state.typeTrails;
- expect(trails.maximum).toBe(114);expect(trails.start).toBe(1970);expect(trails.end).toBe(2024);
+ expect(trails.outcome).toBe('fatal');expect(trails.series.map(row=>row.label)).toEqual(['scheduled','private','charter']);
+ expect(trails.layout.amplitude).toBeGreaterThan(trails.layout.rowSpacing*3);
+ await expect(chart.locator('.trail-fatal').first()).toHaveCSS('fill-opacity','1');
+ await expect(chart.locator('.trail-total,.trail-total-line')).toHaveCount(0);
+ await expect(chart.locator('.comparison-outcome-key')).not.toContainText('Nonfatal');
+ expect(trails.maximum).toBe(59);expect(trails.start).toBe(1970);expect(trails.end).toBe(2024);
  for(const trail of trails.series){
-  const source=rows.filter(r=>r.operation===trail.label);
+  const source=rows.filter(r=>r.operation===trail.label&&r.fatalities>0);
   expect(trail.years).toHaveLength(55);expect(trail.recordIds).toEqual(source.map(r=>r.source_id));
   expect(trail.years.reduce((sum,cell)=>sum+cell.count,0)).toBe(source.length);
   expect(trail.years.reduce((sum,cell)=>sum+cell.fatalCount,0)).toBe(source.filter(r=>r.fatalities>0).length);
@@ -149,14 +154,14 @@ test('frequency trails preserve annual source identities and expose counts on ho
  await expect(chart.locator('.comparison-toolbar,.type-bar,.type-value,.comparison-type-selection')).toHaveCount(0);
  await expect(page.locator('#flight-types .comparison-deck')).toHaveText('Flying in a commercial plane is very different from flying in your private jet, or flying it yourself!');
  await expect(chart.locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
- const first=chart.locator('.type-row').first();await first.hover();await expect(chart.getByRole('tooltip')).toContainText('recorded crashes');await expect(chart.getByRole('tooltip')).toContainText('fatal');await expect(chart.getByRole('tooltip')).toContainText('nonfatal');
+ const first=chart.locator('.type-row').first();await first.locator('.type-label').hover();await expect(chart.getByRole('tooltip')).toContainText('fatal crashes');await expect(chart.getByRole('tooltip')).not.toContainText('nonfatal');
  await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1970');
  await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1971');
  await expect(page).toHaveURL(/flight-types$/);
  await page.setViewportSize({width:390,height:844});
  await expect.poll(()=>page.locator('#flight-types .view').evaluate(v=>v.scrollWidth<=v.clientWidth)).toBe(true);
- await chart.locator('.type-row').nth(1).click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','true');
- await chart.locator('.type-row').nth(1).click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','false');
+ await chart.locator('.type-row').nth(1).locator('.type-label').click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','true');
+ await chart.locator('.type-row').nth(1).locator('.type-label').click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','false');
  await page.goto('/#/aircraft-design');await root(page).locator('[data-start]').click();await expect(root(page).locator('.record-bar').first()).toBeVisible();
  await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
