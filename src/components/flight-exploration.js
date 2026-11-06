@@ -60,9 +60,11 @@ export async function mountFlightExploration(container) {
     { label:'4.5', phase:'arrival', end:3, duration:2600, hold:700 },
     { label:'5', phase:'arrival', causes:true, end:3, hold:3800 },
     { label:'5.5', end:3, hold:0 },
+    { label:'6', end:3, hold:0, bridge:true },
   ];
   const scene = () => beats[revealStage];
-  const complete = () => revealStage===beats.length-1 && revealProgress>=phases.length;
+  const fullView = () => revealStage>=10 && revealProgress>=phases.length;
+  const complete = () => scene().bridge===true;
   const clamp = value => Math.max(0, Math.min(1, value));
   const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
   let revealStage = 0, revealProgress = 0, running = false, lastPaint = -Infinity, navigationKey = '', commentaryKey = '';
@@ -629,7 +631,7 @@ export async function mountFlightExploration(container) {
     return smooth(revealProgress-phases.indexOf(terminal));
   }
   function renderFlowProgress() {
-    const focus=selected==='all' && !complete() ? scene().phase : null;
+    const focus=selected==='all' && !fullView() ? scene().phase : null;
     for (const band of flowBands) {
       const progress = phaseProgress(band.terminal);
       band.progress = progress === 1 ? 1 : clamp((progress*band.routeLength-band.routeStart)/band.length);
@@ -657,7 +659,7 @@ export async function mountFlightExploration(container) {
     const counts = d3.rollup(rows,v => v.length,r => r.cause);
     const fullCounts = d3.rollup(groups[key],v => v.length,r => byId.get(r[0]).cause);
     const leaders = [...causeOrder].sort((a,b) => (fullCounts.get(b)||0)-(fullCounts.get(a)||0)).slice(0,2).map(cause => ({cause,count:counts.get(cause)||0}));
-    const exploring = selected !== 'all' || complete();
+    const exploring = selected !== 'all' || fullView();
     const causesVisible = selected !== 'all' || scene().causes;
     const phaseCopy = {
       departure:['Human factor and technical failures lead.','Together, they account for 396 of the 610 departure crashes.'],
@@ -677,7 +679,7 @@ export async function mountFlightExploration(container) {
         title='Then, in flight.';explanation=`About ${Math.round(groups.in_flight.length/records.length*100)}% were recorded in flight.`;
       } else if(revealStage===7 || revealStage===8) {
         title='Finally, arrival.';explanation=`About ${Math.round(groups.arrival.length/records.length*100)}% were recorded during descent, approach or landing.`;
-      } else if(complete()) {
+      } else if(fullView()) {
         label='The full view';title='Arrival accounts for over half.';
         explanation='1,527 of 2,792 recorded airborne-phase crashes were during arrival. The phase filters below show how their causes differ.';
       }
@@ -700,7 +702,7 @@ export async function mountFlightExploration(container) {
       el.selectAll('strong').data([d.count]).join('strong').text(format);
     });
     root.querySelector('.phase-commentary-total').textContent=causesVisible ? `${format(rows.length)} ${phaseLabels[key]?.toLowerCase() || 'selected'} crashes` : '';
-    const summary = selected==='all' && complete()
+    const summary = selected==='all' && fullView()
       ? phases.map(phase=>({phase,label:phaseLabels[phase],count:members(phase).length})) : [];
     d3.select(root.querySelector('.phase-summary')).selectAll('div').data(summary,d=>d.phase).join('div')
       .attr('class',d=>`phase-summary-row${d.phase==='arrival' ? ' is-emphasized' : ''}`)
@@ -709,25 +711,29 @@ export async function mountFlightExploration(container) {
         d3.select(this).selectAll('strong').data([d.count]).join('strong').text(format);
       });
     root.commentary={phase:key,recordIds:rows.map(r=>r.source_id),causeCounts:Object.fromEntries(counts),leaders};
-    root.dataset.attentionPhase=selected==='all' && !complete() ? scene().phase || '' : '';
+    root.dataset.attentionPhase=selected==='all' && !fullView() ? scene().phase || '' : '';
     root.querySelector('.flight-commentary').classList.toggle('is-visible',revealStage>0 || exploring);
   }
   function renderRevealControls() {
     root.dataset.revealStage=String(revealStage);root.dataset.revealProgress=String(revealProgress);
     root.dataset.storyBeat=scene().label;root.dataset.playback=playback.status;
+    const bridge=scene().bridge===true;
+    root.closest('section').classList.toggle('is-phase-bridge',bridge);
+    for(const node of root.querySelectorAll(':scope > :not(.flight-phase-bridge)')){node.inert=bridge;node.setAttribute('aria-hidden',String(bridge));}
+    root.querySelector('.flight-phase-bridge').setAttribute('aria-hidden',String(!bridge));
     root.classList.toggle('has-started',revealStage>0);
     root.classList.toggle('has-records',revealedIds.size>0);
     root.querySelector('.area-section').inert=revealedIds.size===0;
     root.querySelector('.selection-row').inert=revealedIds.size===0;
-    const ready=complete() || selected!=='all';
+    const ready=fullView() || selected!=='all';
     root.querySelector('.phase-controls').classList.toggle('is-ready',ready);
     root.querySelector('.phase-controls').inert=!ready;
     const status=playback.status;
     const key=`${revealStage}:${status}:${complete()}`;
     if(navigationKey!==key) {navigationKey=key;container.dispatchEvent(new CustomEvent('storybeat',{bubbles:true}));}
     const button=root.querySelector('[data-flight-pause]');
-    button.textContent=status==='running'||status==='waiting' ? 'Pause' : 'Resume';button.disabled=complete();
-    root.querySelector('[data-flight-show-all]').disabled=complete();
+    button.textContent=status==='running'||status==='waiting' ? 'Pause' : 'Resume';button.disabled=fullView();
+    root.querySelector('[data-flight-show-all]').disabled=fullView();
     root.querySelector('.flight-reveal-status').textContent=`${format(revealedIds.size)} / ${format(records.length)} records${status==='paused' ? ' · paused' : ''}`;
   }
   function renderReveal() {
@@ -753,9 +759,9 @@ export async function mountFlightExploration(container) {
     if(revealStage>=beats.length-1)return;
     revealStage++;renderReveal();playReveal();playback.settled();
   }
-  function showAll() {stopReveal();revealStage=beats.length-1;revealProgress=phases.length;rebuildMembership();renderReveal();}
+  function showAll() {stopReveal();revealStage=10;revealProgress=phases.length;rebuildMembership();renderReveal();}
   const playback=createBeatPlayback({
-    state:()=>({key:revealStage,running,complete:complete(),atBoundary:revealProgress>=scene().end,remainingMs:Math.max(0,scene().end-revealProgress)*(scene().duration||0),durationMs:scene().duration||0,terminal:revealStage===beats.length-1}),
+    state:()=>({key:revealStage,running,complete:fullView(),atBoundary:revealProgress>=scene().end,remainingMs:Math.max(0,scene().end-revealProgress)*(scene().duration||0),durationMs:scene().duration||0,terminal:revealStage>=10}),
     timeline:()=>beats.map(beat=>({duration:beat.duration||0,hold:beat.hold})),
     play:playReveal,pause:stopReveal,advance:advanceReveal,holdMs:()=>scene().hold,reduced,showAll,changed:renderRevealControls,
   });
@@ -874,8 +880,9 @@ export async function mountFlightExploration(container) {
     nextBeat() { if(complete())return false;playback.engage();advanceReveal();return true; },
     previousBeat() {
       if(revealStage===0)return false;
+      const leavingBridge=scene().bridge;
       playback.hold();revealStage--;revealProgress=scene().end;
-      selected='all'; cell=null; rebuildMembership(); renderReveal(); return true;
+      if(!leavingBridge){selected='all';cell=null;} rebuildMembership(); renderReveal(); return true;
     },
     setActive(value) {
       if (active===value) return;

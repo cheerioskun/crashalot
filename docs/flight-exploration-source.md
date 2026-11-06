@@ -99,3 +99,7 @@ Source completeness, reporting changes, event-level reconciliation, and exposure
 ## Reading-time adjustment — November 6, 2026
 
 The user requested more space between the second- and fifth-slide beats. Sankey text/reading holds are now 1,100 / 3,200 / 650 / 3,400 / 1,700 / 650 / 3,400 / 1,800 / 700 / 3,800 ms. Phase drawing durations remain 2,100 / 2,100 / 2,600 ms; the additional time is for orientation, percentages, and cause comparisons rather than slower path motion. Total Auto time rises from 19.55 to 27.2 seconds, then waits for explicit Next.
+
+## Transition to the flight-type comparison
+
+After the full phase view, an explicit Next reveals “But these are not all the same flights.” A second Next opens the annual frequency-trail comparison. This twelfth cue never opens automatically. Back restores the completed phase chart and its selected cohort/cell. Overview retains the completed chart preview.

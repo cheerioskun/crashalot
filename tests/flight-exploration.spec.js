@@ -94,11 +94,16 @@ test("keyboard chart controls do not advance Reveal; completed exploration retai
   expect(page.url()).toContain("#/flight-phase");
   await page.locator("#playback-toggle").click(); // Keep the destination at its first beat for the round trip.
   await page.locator("[data-story-next]").click();
+  await expect(page.locator('.flight-phase-bridge')).toBeVisible();
+  await page.locator("[data-story-next]").click();
   await expect(page).toHaveURL(/#\/flight-types$/);
   await page.locator("[data-story-back]").click();
   await expect(page).toHaveURL(/#\/flight-phase$/);
   expect((await state(page)).selection.cohort).toBe("later");
   expect((await state(page)).area.measure).toBe("percentage");
+  await expect(page.locator('.flight-phase-bridge')).toBeVisible();
+  await page.locator("[data-story-back]").click();
+  expect((await state(page)).selection.cohort).toBe("later");
   await page.locator('[data-measure="count"]').focus();
   await page.keyboard.press("Escape");
   expect((await state(page)).selection.recordIds).toHaveLength(2792);

@@ -66,6 +66,8 @@ test('reading keys scroll the exploration without advancing; explicit footer sti
     await expect(page).toHaveURL(/flight-phase$/);
   }
   await next(page).click();
+  await expect(page.locator('.flight-phase-bridge')).toBeVisible();
+  await next(page).click();
   await expect(page).toHaveURL(/flight-types$/);
 });
 
