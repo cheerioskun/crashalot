@@ -40,7 +40,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  const phases=await(await request.get('/data/flight-exploration.json')).json();
  await page.goto('/#/flight-types');
  await expect(page.locator('.comparison-types .type-row')).toHaveCount(7);
- expect(await page.locator('.slides>section').evaluateAll(ns=>ns.map(n=>n.id))).toEqual(['welcome','flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design']);
+ expect(await page.locator('.slides>section').evaluateAll(ns=>ns.map(n=>n.id))).toEqual(['welcome','flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design','conclusion']);
  await expect(page.locator('.storyboard-placeholder,#another-perspective,#the-whole-picture,#arrival')).toHaveCount(0);
  const initial=await page.locator('.comparison-types').evaluate(r=>r.comparisonState);
  expect(initial.filter.operation).toBe('all');
@@ -125,7 +125,7 @@ test('keyboard year controls allow an empty selection without stale records or s
  await expect(page).toHaveURL(/aircraft-design$/);
  await root(page).locator('[data-clear-maker]').click();
  expect((await state(page)).recordIds.length).toBeGreaterThan(0);
- await expect(page.locator('[data-story-next]')).toBeDisabled();
+ await expect(page.locator('[data-story-next]')).toBeEnabled();
 });
 
 

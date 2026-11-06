@@ -48,7 +48,7 @@ test('inspection text and scaffold fade together, then records pour in before th
  await expect(root).toHaveAttribute('data-playback','complete');await expect(root.locator('.comparison-age-annotation')).toHaveAttribute('opacity','1');
  await expect(root.locator('.comparison-age-annotation')).toContainText('become more spread out');
  const spread=await root.evaluate(r=>r.comparisonState.ageSpread);expect(spread.late.span).toBeGreaterThan(spread.early.span);
- await expect(root.locator('.comparison-age-histogram')).toHaveAttribute('opacity','1');await expect(next(page)).toBeDisabled();
+ await expect(root.locator('.comparison-age-histogram')).toHaveAttribute('opacity','1');await expect(next(page)).toBeEnabled();
  expect(await next(page).boundingBox()).toEqual(geometry);
  await page.locator('[data-story-back]').click();await expect(root).toHaveAttribute('data-beat','3');
  await root.locator('[data-comparison-replay]').click();await expect(root).toHaveAttribute('data-beat','0');
@@ -74,7 +74,7 @@ test('Auto finishes each comparison and waits for explicit Next; inactive and hi
  await page.evaluate(()=>location.hash='/aircraft-design');
  await page.locator('#playback-toggle').click();await page.clock.runFor(18000);
  await expect(aircraft(page)).toHaveAttribute('data-playback','complete');await expect(aircraft(page)).toHaveAttribute('data-beat','3.5');
- await page.clock.fastForward(60000);await expect(page.locator('#aircraft-design')).toHaveClass(/present/);await expect(next(page)).toBeDisabled();
+ await page.clock.fastForward(60000);await expect(page.locator('#aircraft-design')).toHaveClass(/present/);await expect(next(page)).toBeEnabled();
 });
 
 test('reduced motion opens a complete static comparison; native data interaction also opens exploration',async({page})=>{
@@ -90,7 +90,7 @@ test('reduced motion opens a complete static comparison; native data interaction
 
 test('year-field changes ease the outward histogram between old and new edges',async({page})=>{
  await frozen(page,'aircraft-design');
- while(await next(page).isEnabled())await next(page).click();
+ while(await aircraft(page).getAttribute('data-playback')!=='complete')await next(page).click();
  await page.clock.runFor(250);
  const bar=aircraft(page).locator('.age-bin-fatal').first();const original=Number(await bar.getAttribute('x'));
  await aircraft(page).locator('[data-end]').fill('1999');await aircraft(page).locator('[data-end]').press('Tab');

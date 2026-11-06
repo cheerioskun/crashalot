@@ -92,7 +92,7 @@ test('guided beats introduce each branch before its causes, preserving source id
   await expect(page.locator('[data-phase-takeaway]')).toHaveText('Arrival accounts for over half.');
   await expect(page.locator('.phase-controls')).toBeVisible();
   await expect(page.locator('.phase-summary-row strong')).toHaveText(['610','655','1,527']);
-  await expect(page.locator('[data-story-position]')).toHaveText('5 of 7 · Reveal 11 of 11');
+  await expect(page.locator('[data-story-position]')).toHaveText('5 of 8 · Reveal 11 of 11');
   await page.clock.fastForward(60000);await expect(page.locator('#flight-phase')).toHaveClass(/present/);
   await next(page).click();await expect(page.locator('#flight-types')).toHaveClass(/present/);
   expect(errors).toEqual([]);

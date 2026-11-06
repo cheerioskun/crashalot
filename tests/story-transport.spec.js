@@ -49,7 +49,7 @@ test('Next stays fixed while settling running and paused scale beats; routes pre
   expect(await scaleValues(page)).toEqual(totals);
   await page.locator('.scale-comparison__transport button', { hasText: 'Replay' }).click();
   expect(await scaleValues(page)).toEqual([0, 0]);
-  await expect(page.locator('[data-story-position]')).toHaveText('3 of 7 · Reveal 1 of 9');
+  await expect(page.locator('[data-story-position]')).toHaveText('3 of 8 · Reveal 1 of 9');
 });
 
 test('reading keys scroll the exploration without advancing; explicit footer still navigates', async ({ page }) => {

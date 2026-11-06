@@ -9,6 +9,7 @@ import './opening.css';
 import chapters from './views/chapters.html?raw';
 import './presentation.css';
 import './cover.css';
+import { mountConclusion } from './components/conclusion.js';
 import { mountDecadeTrend } from './components/decade-trend.js';
 import { mountScaleComparison } from './components/scale-comparison.js';
 import { createBeatPlayback } from './components/beat-playback.js';
@@ -37,6 +38,7 @@ mountChart('decade-trend-chart', mountDecadeTrend);
 mountChart('flight-exploration-chart', async host => (await import('./components/flight-exploration.js')).mountFlightExploration(host));
 mountChart('flight-types-chart', async host => (await import('./components/comparison-explorer.js')).mountFlightTypes(host));
 mountChart('aircraft-comparison-chart', async host => (await import('./components/comparison-explorer.js')).mountAircraftExplorer(host));
+mountChart('conclusion-scene', mountConclusion);
 
 const themeOptions = {
   default: { url: baselineUrl, mode: 'light' },
@@ -153,12 +155,12 @@ function updateNavigation() {
   let position = `${slidePosition} · ${slide.dataset.beat || 'The journey'}`;
   if (cover) position = `${slidePosition} · Welcome`;
   if (slide.id === 'flight-1282') position = `${slidePosition} · Reveal ${hookStep + 1} of ${hookBeatLabels.length}`;
-  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide.id)) position = state ? `${slidePosition} · Reveal ${state.step} of ${state.total}` : `${slidePosition} · Loading…`;
+  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design', 'conclusion'].includes(slide.id)) position = state ? `${slidePosition} · Reveal ${state.step} of ${state.total}` : `${slidePosition} · Loading…`;
   if (storyPosition.textContent !== position) storyPosition.textContent = position;
   storyBack.hidden = false;
   storyBack.disabled = cover;
   playbackToggle.hidden = false;
-  storyNext.disabled = (presentation.isLastSlide() && (!state || state.complete)) || (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide.id) && !chart);
+  storyNext.disabled = (presentation.isLastSlide() && (!state || state.complete)) || (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design', 'conclusion'].includes(slide.id) && !chart);
 }
 function previousBeat() {
   if(presentation.isOverview())return;
@@ -176,7 +178,7 @@ function nextBeat() {
   if (state?.running || state?.inProgress) { chart.finishBeat?.(); return; }
   if (chart?.nextBeat?.()) return;
   // Wait for the comparison to mount rather than skipping its opening beat.
-  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design'].includes(slide?.id) && !chart) return;
+  if (['change-over-time', 'counts-in-context', 'flight-phase', 'flight-types', 'aircraft-design', 'conclusion'].includes(slide?.id) && !chart) return;
   if (slide?.id === 'flight-1282') hookPlayback.engage();
   presentation.next();
 }
@@ -269,6 +271,7 @@ presentation.initialize({
     if(['ArrowUp','ArrowDown','PageUp','PageDown'].includes(event.key))return false;
     if(event.key===' '&&(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey))return false;
     const control=event.target.closest('button, a, input, select, textarea, summary, [role=button], [contenteditable=true]');
+    if(control?.matches('.conclusion-restart')&&event.key==='ArrowLeft')return true;
     return !control || event.key===' '&&control.matches('[data-story-back],[data-story-next]');
   },
   keyboard: { 32: toggleAutoPlayback, 33: null, 34: null, 38: null, 40: null, 39: nextBeat, 78: nextBeat, 37: previousBeat, 80: previousBeat },

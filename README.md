@@ -1,6 +1,6 @@
 # crashalot
 
-An aviation data presentation for the 6730 group project. Narrative, evidence, charts, interactions, and visual language are developed together, desktop first. The seven chapters combine a landing page, Flight 1282 opening, U.S. scheduled-service scale comparison, worldwide historical counts, a linked phase/cause explanation, flight-type comparisons, and aircraft-age brushing with model circle packing and schematics.
+An aviation data presentation for the 6730 group project. Narrative, evidence, charts, interactions, and visual language are developed together, desktop first. The eight chapters combine a landing page, Flight 1282 opening, U.S. scheduled-service scale comparison, worldwide historical counts, a linked phase/cause explanation, flight-type comparisons, aircraft-age brushing with model circle packing and schematics, and a narrated globe/Fin conclusion.
 
 ## Run locally
 
