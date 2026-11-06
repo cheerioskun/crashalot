@@ -57,9 +57,9 @@ test('Auto finishes each comparison and waits for explicit Next; inactive and hi
  await page.clock.runFor(10000);await expect(types(page)).toHaveAttribute('data-playback','complete');
  await page.clock.fastForward(60000);await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await next(page).click();await expect(aircraft(page)).toHaveAttribute('data-beat','0');
- await page.clock.runFor(3700);await expect(aircraft(page)).toHaveAttribute('data-beat','2');
+ await page.clock.runFor(1050);await expect(aircraft(page)).toHaveAttribute('data-beat','2');
  await expect(aircraft(page).locator('#comparison-points-reveal rect')).toHaveAttribute('width','0');
- await page.clock.runFor(1300);await expect(aircraft(page)).toHaveAttribute('data-beat','2.5');
+ await page.clock.runFor(1000);await expect(aircraft(page)).toHaveAttribute('data-beat','2.5');
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
  const held=await aircraft(page).getAttribute('data-reveal-progress');await page.clock.runFor(5000);await expect(aircraft(page)).toHaveAttribute('data-reveal-progress',held);
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});

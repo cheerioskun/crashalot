@@ -5,7 +5,7 @@ import {createBeatPlayback} from './beat-playback.js';
 export function createComparisonBeats({root,container,aircraft,paint}) {
   const labels=aircraft?['0','1','2','2.5','3']:['0','1','2','3'];
   const durations=aircraft?[0,0,0,2600,600]:[0,900,1500,0];
-  const holds=aircraft?[1100,2400,800,2200,0]:[900,2200,3500,0];
+  const holds=aircraft?[600,350,800,2200,0]:[900,2200,3500,0];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let stage=0,progress=1,clock,running=false,active=false,destroyed=false;
   const transport=document.createElement('div');transport.className='comparison-transport';
