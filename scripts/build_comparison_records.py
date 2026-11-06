@@ -32,7 +32,11 @@ prefixes = ['De Havilland Canada','De Havilland','McDonnell Douglas','British Ae
  'Rockwell','Lockheed','Learjet','Fokker','Pilatus','Mitsubishi','Embraer','Ilyushin','Grumman',
  'Swearingen','Tupolev','Convair','Let','BAe','Yakovlev','Curtiss','Canadair','Dornier','Avro',
  'Airbus','Casa','Fletcher','Dassault','Fairchild','Short','Partenavia','Vickers','Socata',
- 'Gulfstream','IAI','Sud-Aviation','Nord','GAF','Consolidated','Harbin','ATR','Saab','Sukhoi']
+ 'Gulfstream','IAI','Sud-Aviation','Nord','GAF','Consolidated','Harbin','ATR','Saab','Sukhoi',
+ 'NAMC','Noorduyn','BAc','Fairchild-Hiller','Hawker Siddeley','Hawker','PAC','Max Holste',
+ 'Raytheon','Transall','Martin','Casa-Nurtanio','GippsAero','Xian','Volpar',
+ 'Hindustan Aeronautics','Piaggio','Beriev','Lisunov','Bristol','Comp Air','Quest',
+ 'Aérospatiale','Armstrong Whitworth','North American','Howard','Shaanxi']
 prefixes.sort(key=len, reverse=True)
 rows = []
 excluded_phase = 0
@@ -46,6 +50,9 @@ for r in pl.read_parquet(raw_path).to_dicts():
         continue
     aircraft = r['aircraft'] or 'Aircraft not recorded'
     maker = next((p for p in prefixes if aircraft.casefold() == p.casefold() or aircraft.casefold().startswith(p.casefold()+' ')), 'Unclassified name')
+    # The retained labels use ATR42 / ATR72 without a space before the model.
+    if aircraft.startswith('ATR') and aircraft[3:4].isdigit():
+        maker = 'ATR'
     yom = r['yom']
     age = date.year-yom if yom is not None and 1903 <= yom <= date.year else None
     fatalities = r['total_fatalities']
@@ -63,7 +70,7 @@ payload = {
  'scope':{'years':[1970,2024],'phases':['departure','in_flight','arrival'],
           'age':'Calendar year at crash minus recorded manufacture year; only 1903 <= manufacture year <= crash year is usable',
           'manufacturer':'Literal leading aircraft-name labels from an explicit prefix list; no ownership inference',
-          'manufacturerPrefixes':prefixes,'operationLabels':operation_labels,
+          'manufacturerPrefixes':prefixes,'manufacturerDigitBoundaryPrefixes':['ATR'],'operationLabels':operation_labels,
           'operationMap':operation_map},
  'columns':['source_id','date','year','operation','raw_operation','aircraft','manufacturer','manufacture_year','age','fatalities','phase'],
  'rows':rows,
