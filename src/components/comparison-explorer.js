@@ -1,4 +1,4 @@
-import {axisBottom,axisLeft,bin,brushX,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
+import {axisBottom,axisLeft,bin,brushX,easeCubicInOut,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
 
@@ -83,7 +83,7 @@ async function mount(container,kind) {
   q('[data-operation]').append(option('all','All kinds of flying'),...Object.entries(labels).map(([value,label])=>option(value,label)));
   let active=false,destroyed=false,brushing=false,scatterKey='',selectionKey='',limit=8,currentSelected=[];
   const editingYears=new Set();
-  let scatter,points,x,y,brush,brushLayer,histogramLayer,cohortLayer,pointReveal,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
+  let scatter,points,pointYears,x,y,brush,brushLayer,histogramLayer,cohortLayer,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
   const ageCeiling=Math.max(10,Math.ceil((max(data.records,r=>r.age)||10)/5)*5+5);
   const ageBinner=bin().value(r=>r.age).domain([0,ageCeiling]).thresholds(range(5,ageCeiling,5));
   const eligible=data.records.filter(row=>!aircraft || row.age!==null);
@@ -188,8 +188,11 @@ async function mount(container,kind) {
       scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(42,0)`).call(axisLeft(y).ticks(5).tickSize(-(plotRight-42))).call(g=>g.select('.domain').remove());
       scatter.append('g').attr('class','comparison-axis').attr('transform',`translate(0,${height-45})`).call(axisBottom(x).ticks(utcYear.every(width<500?20:10)).tickFormat(date=>String(date.getUTCFullYear())));
       scatter.append('text').attr('class','comparison-axis-title').attr('x',(plotRight+42)/2).attr('y',height-5).attr('text-anchor','middle').text('Year of recorded crash');
-      pointReveal=scatter.append('defs').append('clipPath').attr('id','comparison-points-reveal').append('rect').attr('x',42).attr('y',12).attr('height',height-57);
-      points=scatter.append('g').attr('class','comparison-points').attr('clip-path','url(#comparison-points-reveal)').selectAll('circle').data(base,r=>r.source_id).join('circle')
+      // Fade successive year cohorts rather than wiping across already drawn marks.
+      // Every circle keeps its source identity for the linked selection views.
+      pointYears=scatter.append('g').attr('class','comparison-points').selectAll('g').data([...group(base,r=>r.year)].sort(([a],[b])=>a-b),d=>d[0]).join('g')
+        .attr('class','comparison-point-year').attr('data-year',d=>d[0]);
+      points=pointYears.selectAll('circle').data(([,records])=>records,r=>r.source_id).join('circle')
         .attr('data-record-id',r=>r.source_id).attr('cx',r=>x(new Date(r.time))).attr('cy',r=>y(r.age)).attr('r',2.5);
       brush=brushX().extent([[42,12],[plotRight,height-45]]).handleSize(12)
         .on('start',event=>{if(event.sourceEvent)brushing=true;})
@@ -326,23 +329,27 @@ async function mount(container,kind) {
   function paintNarrative({stage,progress,reduced}) {
     root.classList.toggle('is-exploring',stage===(aircraft?4:3));
     if(aircraft) {
-      root.closest('section').dataset.aircraftBeat=String(stage);
+      root.closest('section').dataset.aircraftBeat=['0','1','2','3','3.5'][stage];
       const intro=container.closest('main').querySelector('[data-aircraft-intro]');
       if(intro)intro.hidden=stage===0;
-      for(const selector of ['.comparison-toolbar','.comparison-scope','.comparison-outcome-key','.aircraft-comparison-grid','.comparison-model-grid','.comparison-selection','.comparison-source'])q(selector).hidden=stage<2;
-      const width=Math.max(260,q('.comparison-scatter').clientWidth);
-      const graphProgress=stage<3?0:stage===3?progress:1;
-      if(pointReveal)pointReveal.attr('width',(width-(width<500?56:92)-42)*graphProgress);
-      select(q('.aircraft-comparison-grid')).style('opacity',1);
+      const scaffoldOpacity=stage===0?0:stage===1?easeCubicInOut(progress):1;
+      if(intro)intro.style.opacity=String(scaffoldOpacity);
+      for(const selector of ['.comparison-toolbar','.comparison-scope','.comparison-outcome-key','.aircraft-comparison-grid','.comparison-model-grid','.comparison-selection','.comparison-source']) {
+        q(selector).hidden=stage<1;
+        q(selector).style.opacity=String(scaffoldOpacity);
+      }
+      const graphProgress=stage<2?0:stage===2?progress:1;
+      root.dataset.dataProgress=String(graphProgress);
+      pointYears?.attr('opacity',([year])=>Math.max(0,Math.min(1,(graphProgress*59-(year-1970))/5)));
       select(q('.aircraft-comparison-grid')).selectAll('.record-bar>strong').style('opacity',graphProgress);
-      q('.comparison-model-grid').hidden=stage<3;
-      q('.comparison-selection').hidden=stage<3;
+      q('.comparison-model-grid').hidden=stage<2;
+      q('.comparison-selection').hidden=stage<2;
       select(q('.aircraft-comparison-grid')).selectAll('.record-bar-track').style('transform',`scaleX(${graphProgress})`).style('transform-origin','left');
       cohortLayer?.attr('opacity',stage<4?0:progress);
-      histogramLayer?.attr('opacity',graphProgress).attr('aria-hidden',String(stage<3));
-      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<3||!b.length?-1:0);
-      q('.comparison-maker-controls').hidden=stage<2;
-      q('.comparison-brush-hint').textContent=stage<2?'': 'Drag across years. Age distributions face outward from the selection’s right edge. Click outside the brush to clear it.';
+      histogramLayer?.attr('opacity',graphProgress).attr('aria-hidden',String(stage<2));
+      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<2||!b.length?-1:0);
+      q('.comparison-maker-controls').hidden=stage<1;
+      q('.comparison-brush-hint').textContent=stage<1?'': 'Drag across years. Age distributions face outward from the selection’s right edge. Click outside the brush to clear it.';
     } else {
       if(typeRows) {
         const reveal=r=>stage===0?0:stage===1?(r.label==='scheduled'?progress:0):stage===2?(r.label==='scheduled'?1:progress):1;
@@ -359,7 +366,7 @@ async function mount(container,kind) {
     if(stage!==lastStoryStage){
       const story=aircraft?container.closest('main').querySelector('[data-aircraft-intro]'):q('.comparison-type-note');
       story.classList.remove('comparison-copy-enter');
-      if(!reduced&&(!aircraft||stage===1)){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
+      if(!reduced&&!aircraft){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
       lastStoryStage=stage;
     }
   }

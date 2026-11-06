@@ -6,7 +6,7 @@ test('Escape shows seven clickable previews and every selected chapter opens at 
  test.setTimeout(45000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/#/aircraft-design');await page.locator('.comparison-aircraft').waitFor({state:'attached'});
- const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','3'],[7,'.comparison-aircraft','3']];
+ const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','3'],[7,'.comparison-aircraft','3.5']];
  for(const [number,selector,beat]of choices){
   await page.keyboard.press('Escape');await expect(overview(page)).toBeVisible();
   await expect(page.getByRole('button',{name:/^Slide \d+:/})).toHaveCount(7);
@@ -32,7 +32,7 @@ test('overview pauses active reveals; Escape closes without completing and keybo
  await page.clock.runFor(20000);await expect(root).toHaveAttribute('data-beat','1');
  await page.keyboard.press('Escape');await expect(overview(page)).toHaveCount(0);await expect(root).toHaveAttribute('data-beat','1');
  await page.keyboard.press('Escape');await card(page,6).focus();await page.keyboard.press('ArrowRight');await expect(card(page,7)).toBeFocused();
- await page.keyboard.press('Enter');await expect(overview(page)).toHaveCount(0);await expect(root).toHaveAttribute('data-beat','3');
+ await page.keyboard.press('Enter');await expect(overview(page)).toHaveCount(0);await expect(root).toHaveAttribute('data-beat','3.5');
  await expect(page.locator('[data-story-next]')).toBeDisabled();
 });
 
@@ -44,7 +44,7 @@ test('mobile overview scrolls to every card and restores the selected full-size 
  expect(second.y).toBeGreaterThanOrEqual(first.y+first.height+12);
  expect(await card(page,1).evaluate(n=>getComputedStyle(n,'::after').display)).toBe('block');
  await card(page,7).scrollIntoViewIfNeeded();await card(page,7).click();
- await expect(overview(page)).toHaveCount(0);await expect(page.locator('.comparison-aircraft')).toHaveAttribute('data-beat','3');
+ await expect(overview(page)).toHaveCount(0);await expect(page.locator('.comparison-aircraft')).toHaveAttribute('data-beat','3.5');
  await expect.poll(()=>page.locator('#aircraft-design .view').evaluate(v=>v.scrollWidth<=v.clientWidth)).toBe(true);
  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Close overview',exact:true}).click();
  await expect(overview(page)).toHaveCount(0);await expect(page.locator('#aircraft-design')).toHaveClass(/present/);

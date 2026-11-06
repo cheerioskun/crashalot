@@ -113,7 +113,7 @@ button.record-bar { cursor:pointer; }
 
 .comparison-aircraft{min-height:1px}
 .comparison-aircraft [hidden],#aircraft-design [data-aircraft-intro][hidden]{display:none!important}
-#aircraft-design[data-aircraft-beat="0"] .evidence-heading,#aircraft-design[data-aircraft-beat="1"] .evidence-heading{border-bottom:0}
+#aircraft-design[data-aircraft-beat="0"] .evidence-heading{border-bottom:0}
 #aircraft-design [data-aircraft-intro]{max-width:64ch;font-size:clamp(16px,1.5vw,21px);line-height:1.6;margin-top:24px}
 .age-spread-bracket{fill:none;stroke:var(--bs-body-color);stroke-width:1.4;opacity:.75}
 .age-annotation-title{font-weight:650}
