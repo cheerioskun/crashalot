@@ -57,7 +57,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  s=await state(page);check(s,rows);
  const highlighted=await page.locator('.comparison-scatter circle[data-selected=true]').evaluateAll(ns=>ns.map(n=>n.dataset.recordId));
  expect(highlighted).toEqual(s.recordIds);
- for(let i=0;i<4;i++)await page.locator('[data-story-back]').click();
+ for(let i=0;i<5;i++)await page.locator('[data-story-back]').click();
  await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await expect(page.locator('.comparison-types [data-start]')).toHaveValue('2000');
  await expect(page.locator('.comparison-types [data-end]')).toHaveValue('2009');

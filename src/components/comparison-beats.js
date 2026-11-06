@@ -3,8 +3,9 @@ import {createBeatPlayback} from './beat-playback.js';
 
 // Reveals stay inside the current chapter. Only the presentation owns slide navigation.
 export function createComparisonBeats({root,container,aircraft,paint}) {
-  const durations=aircraft?[0,0,1500,600]:[0,900,1500,0];
-  const holds=aircraft?[1100,5400,3200,0]:[900,2200,3500,0];
+  const labels=aircraft?['0','1','2','2.5','3']:['0','1','2','3'];
+  const durations=aircraft?[0,0,0,2600,600]:[0,900,1500,0];
+  const holds=aircraft?[1100,2400,800,2200,0]:[900,2200,3500,0];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let stage=0,progress=1,clock,running=false,active=false,destroyed=false;
   const transport=document.createElement('div');transport.className='comparison-transport';
@@ -14,7 +15,7 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
   const complete=()=>stage===durations.length-1&&progress===1;
   const notify=()=>container.dispatchEvent(new CustomEvent('storybeat',{bubbles:true}));
   function render(){
-    root.dataset.beat=String(stage);root.dataset.revealProgress=String(progress);root.dataset.playback=playback.status;
+    root.dataset.beat=labels[stage];root.dataset.revealProgress=String(progress);root.dataset.playback=playback.status;
     const label=complete()||running||playback.status==='waiting'?'Pause':'Resume';
     if(pause.textContent!==label)pause.textContent=label;pause.disabled=complete();
     paint({stage,progress,reduced:reduced.matches});

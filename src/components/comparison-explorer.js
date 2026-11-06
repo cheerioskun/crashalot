@@ -324,20 +324,23 @@ async function mount(container,kind) {
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
   }
   function paintNarrative({stage,progress,reduced}) {
-    root.classList.toggle('is-exploring',stage===3);
+    root.classList.toggle('is-exploring',stage===(aircraft?4:3));
     if(aircraft) {
       root.closest('section').dataset.aircraftBeat=String(stage);
       const intro=container.closest('main').querySelector('[data-aircraft-intro]');
       if(intro)intro.hidden=stage===0;
       for(const selector of ['.comparison-toolbar','.comparison-scope','.comparison-outcome-key','.aircraft-comparison-grid','.comparison-model-grid','.comparison-selection','.comparison-source'])q(selector).hidden=stage<2;
       const width=Math.max(260,q('.comparison-scatter').clientWidth);
-      const graphProgress=stage<2?0:stage===2?progress:1;
+      const graphProgress=stage<3?0:stage===3?progress:1;
       if(pointReveal)pointReveal.attr('width',(width-(width<500?56:92)-42)*graphProgress);
-      select(q('.aircraft-comparison-grid')).style('opacity',stage===2?Math.min(1,progress*3):1);
+      select(q('.aircraft-comparison-grid')).style('opacity',1);
+      select(q('.aircraft-comparison-grid')).selectAll('.record-bar>strong').style('opacity',graphProgress);
+      q('.comparison-model-grid').hidden=stage<3;
+      q('.comparison-selection').hidden=stage<3;
       select(q('.aircraft-comparison-grid')).selectAll('.record-bar-track').style('transform',`scaleX(${graphProgress})`).style('transform-origin','left');
-      cohortLayer?.attr('opacity',stage<3?0:progress);
-      histogramLayer?.attr('opacity',graphProgress).attr('aria-hidden',String(stage<2));
-      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<2||!b.length?-1:0);
+      cohortLayer?.attr('opacity',stage<4?0:progress);
+      histogramLayer?.attr('opacity',graphProgress).attr('aria-hidden',String(stage<3));
+      histogramLayer?.selectAll('.age-bin').attr('tabindex',b=>stage<3||!b.length?-1:0);
       q('.comparison-maker-controls').hidden=stage<2;
       q('.comparison-brush-hint').textContent=stage<2?'': 'Drag across years. Age distributions face outward from the selection’s right edge. Click outside the brush to clear it.';
     } else {

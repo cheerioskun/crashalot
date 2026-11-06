@@ -10,7 +10,7 @@ async function frozen(page,id,auto=false){
  await page.evaluate(id=>location.hash=`/${id}`,id);await expect(page.locator(`#${id}`)).toHaveClass(/present/);
 }
 
-test('four aircraft beats separate the title, inspection explanation, graph and age-distribution annotation',async({page})=>{
+test('aircraft scaffold and text appear before the slower data reveal at beat 2.5',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await frozen(page,'aircraft-design');
  const root=aircraft(page),clip=root.locator('#comparison-points-reveal rect');
@@ -23,11 +23,19 @@ test('four aircraft beats separate the title, inspection explanation, graph and 
  await expect(root.locator('.aircraft-comparison-grid')).toBeHidden();
  await next(page).click();await expect(root).toHaveAttribute('data-beat','2');
  expect(await intro.evaluate(n=>getComputedStyle(n).opacity)).toBe('1');
- await page.clock.runFor(700);
+ await expect(root.locator('.aircraft-comparison-grid')).toBeVisible();
+ await expect(clip).toHaveAttribute('width','0');
+ await expect(root.locator('.comparison-age-histogram')).toHaveAttribute('opacity','0');
+ await expect(root.locator('.comparison-model-grid')).toBeHidden();
+ await expect(root.locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
+ await expect(root.locator('.comparison-manufacturer-bars .record-bar>strong').first()).toHaveCSS('opacity','0');
+ await page.clock.runFor(1000);await expect(clip).toHaveAttribute('width','0');
+ await next(page).click();await expect(root).toHaveAttribute('data-beat','2.5');
+ await page.clock.runFor(1000);
  const partial=Number(await clip.getAttribute('width'));expect(partial).toBeGreaterThan(0);
  await root.locator('[data-comparison-pause]').click();const held=await root.getAttribute('data-reveal-progress');
  await page.clock.runFor(3000);await expect(root).toHaveAttribute('data-reveal-progress',held);
- await root.locator('[data-comparison-pause]').click();await page.clock.runFor(900);
+ await root.locator('[data-comparison-pause]').click();await page.clock.runFor(1700);
  expect(Number(await clip.getAttribute('width'))).toBeGreaterThan(partial);
  await expect(root.locator('.comparison-age-annotation')).toHaveAttribute('opacity','0');
  await next(page).click();await expect(root).toHaveAttribute('data-beat','3');await page.clock.runFor(650);
@@ -36,7 +44,7 @@ test('four aircraft beats separate the title, inspection explanation, graph and 
  const spread=await root.evaluate(r=>r.comparisonState.ageSpread);expect(spread.late.span).toBeGreaterThan(spread.early.span);
  await expect(root.locator('.comparison-age-histogram')).toHaveAttribute('opacity','1');await expect(next(page)).toBeDisabled();
  expect(await next(page).boundingBox()).toEqual(geometry);
- await page.locator('[data-story-back]').click();await expect(root).toHaveAttribute('data-beat','2');
+ await page.locator('[data-story-back]').click();await expect(root).toHaveAttribute('data-beat','2.5');
  await root.locator('[data-comparison-replay]').click();await expect(root).toHaveAttribute('data-beat','0');
  await expect(root.locator('.aircraft-comparison-grid')).toBeHidden();expect(errors).toEqual([]);
 });
@@ -49,7 +57,9 @@ test('Auto finishes each comparison and waits for explicit Next; inactive and hi
  await page.clock.runFor(10000);await expect(types(page)).toHaveAttribute('data-playback','complete');
  await page.clock.fastForward(60000);await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await next(page).click();await expect(aircraft(page)).toHaveAttribute('data-beat','0');
- await page.clock.runFor(7200);await expect(aircraft(page)).toHaveAttribute('data-beat','2');
+ await page.clock.runFor(3700);await expect(aircraft(page)).toHaveAttribute('data-beat','2');
+ await expect(aircraft(page).locator('#comparison-points-reveal rect')).toHaveAttribute('width','0');
+ await page.clock.runFor(1300);await expect(aircraft(page)).toHaveAttribute('data-beat','2.5');
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
  const held=await aircraft(page).getAttribute('data-reveal-progress');await page.clock.runFor(5000);await expect(aircraft(page)).toHaveAttribute('data-reveal-progress',held);
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
@@ -73,7 +83,7 @@ test('reduced motion opens a complete static comparison; native data interaction
 
 test('year-field changes ease the outward histogram between old and new edges',async({page})=>{
  await frozen(page,'aircraft-design');
- for(let i=0;i<5;i++)await next(page).click();
+ for(let i=0;i<6;i++)await next(page).click();
  await page.clock.runFor(250);
  const bar=aircraft(page).locator('.age-bin-fatal').first();const original=Number(await bar.getAttribute('x'));
  await aircraft(page).locator('[data-end]').fill('1999');await aircraft(page).locator('[data-end]').press('Tab');
