@@ -114,9 +114,10 @@ test('keyboard year controls allow an empty selection without stale records or s
  await years(page,1970,1970);
  await root(page).locator('[data-manufacturer]').selectOption('Airbus');
  await expect(root(page)).toHaveAttribute('data-selection-count','0');
- await expect(root(page).locator('.comparison-record-caption')).toHaveText('No records match this selection.');
- await expect(root(page).locator('.comparison-record-list li')).toHaveCount(0);
- await expect(root(page).locator('[data-download]')).toBeDisabled();
+ await expect(root(page).locator('.model-packing-empty')).toHaveText('No models in this selection.');
+ await expect(root(page).locator('.model-circle')).toHaveCount(0);
+ await expect(root(page).getByRole('combobox',{name:'Aircraft model',exact:true})).toBeDisabled();
+ await expect(root(page).locator('.comparison-record-list,.comparison-records,[data-download]')).toHaveCount(0);
  await root(page).locator('[data-start]').focus();await page.keyboard.press('ArrowLeft');
  await expect(page).toHaveURL(/aircraft-design$/);
  await root(page).locator('[data-clear-maker]').click();

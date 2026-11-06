@@ -1,6 +1,7 @@
 import {axisBottom,axisLeft,bin,brushX,easeCubicInOut,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
+import {createAircraftModelPacking} from './aircraft-model-packing.js';
 
 let dataset;
 const shared={start:1970,end:2025,operation:'all',manufacturer:null};
@@ -62,10 +63,7 @@ async function mount(container,kind) {
         </aside>
       </div>
       <div class="comparison-selection" role="status" aria-live="polite"></div>
-      <div class="comparison-model-grid">
-        <div><h2 class="comparison-model-heading">Models in the selection</h2><div class="comparison-model-bars record-bars"></div></div>
-        <div class="comparison-records"><h2>Selected crash records</h2><p class="comparison-record-caption"></p><ol class="comparison-record-list"></ol><div class="comparison-record-actions"><button type="button" class="text-button" data-more>Show more records</button><button type="button" class="text-button" data-download>Download selection</button></div></div>
-      </div>` : `
+      <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
         <div><p class="comparison-measure">Recorded crashes by kind of flying</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crash counts by flight type. Choose a type for the aircraft comparison."></svg></div>
         <aside class="comparison-type-note"><p class="eyebrow">Different kinds of flying</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><div class="comparison-type-selection" role="status" aria-live="polite"></div><p class="comparison-type-carry">Your chosen flight type and years carry into the aircraft view.</p></aside>
@@ -75,13 +73,13 @@ async function mount(container,kind) {
       <p>Worldwide archive · 1970–2024 · recorded airborne phases. Counts describe records in this archive; they do not estimate accident probability per flight or rank operational or manufacturer safety. Fleet size, flight activity, mission and reporting coverage are not controlled here.</p>
       <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
       <p>Manufacturer labels come from a reviewed list of literal aircraft-name prefixes, with unmatched names kept unclassified. They do not resolve historical ownership or prove that a manufacturer caused an accident. Aircraft age uses the crash year minus the recorded manufacture year.</p>
-      <p>Original source IDs are preserved throughout brushing, grouping and record inspection. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
+      <p>Original source IDs are preserved throughout brushing, grouping and the downloadable source data. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
       <p><a href="${import.meta.env.BASE_URL}data/comparison-records.json" download>Download the retained comparison records</a></p>
     </details>`;
   const q=selector=>root.querySelector(selector);
   const option=(value,label)=>{const node=document.createElement('option');node.value=value;node.textContent=label;return node;};
   q('[data-operation]').append(option('all','All kinds of flying'),...Object.entries(labels).map(([value,label])=>option(value,label)));
-  let active=false,destroyed=false,brushing=false,scatterKey='',selectionKey='',limit=8,currentSelected=[];
+  let active=false,destroyed=false,brushing=false,scatterKey='',currentSelected=[];
   const editingYears=new Set();
   let scatter,points,pointYears,x,y,brush,brushLayer,histogramLayer,cohortLayer,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
   const ageCeiling=Math.max(10,Math.ceil((max(data.records,r=>r.age)||10)/5)*5+5);
@@ -113,13 +111,8 @@ async function mount(container,kind) {
   if(aircraft) {
     q('[data-manufacturer]').append(option('','All manufacturers'),...cells(eligible,'manufacturer').sort((a,b)=>a.label.localeCompare(b.label)).map(c=>option(c.label,c.label)));
     q('[data-manufacturer]').addEventListener('change',event=>change({manufacturer:event.target.value||null}));
-    q('[data-more]').addEventListener('click',()=>{limit+=8;renderRecords();});
-    q('[data-download]').addEventListener('click',()=>{
-      const payload={source:data.source,filter:{...shared,ageRequired:true,phases:data.scope.phases},recordIds:ids(currentSelected),records:currentSelected.map(({time,...r})=>r)};
-      const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
-      const link=document.createElement('a');link.href=url;link.download='crashalot-selection.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-    });
   }
+  const modelPacking=aircraft?createAircraftModelPacking({host:q('.comparison-model-grid'),tooltip:q('.comparison-tooltip'),onSelect:model=>{root.comparisonState.modelPacking.selectedModel=model;}}):null;
   function describeOutcome(cell,label=cell.label) {
     return `${label}: ${number(cell.fatalCount)} fatal crashes, ${number(cell.count-cell.fatalCount)} nonfatal crashes; ${number(cell.count)} total.`;
   }
@@ -274,21 +267,6 @@ async function mount(container,kind) {
     if(late.count>=10)cohortLayer.append('path').attr('class','cohort-connector').attr('d',`M${labelX+135},${labelY+40}L${x(new Date(Date.UTC(2015,0,1)))},${y(late.p90)-6}`);
     root.comparisonState.ageSpread={early:{years:[1970,1989],...early},late:{years:[2005,2024],...late},widened,annotation:lines.join(' ')};
   }
-  function renderRecords() {
-    if(!aircraft)return;
-    const shown=currentSelected.slice(0,limit);
-    q('.comparison-record-caption').textContent=currentSelected.length
-      ? `First ${number(shown.length)} of ${number(currentSelected.length)} selected records, ordered by date.`
-      : 'No records match this selection.';
-    const nodes=select(q('.comparison-record-list')).selectAll('li').data(shown,r=>r.source_id).join(enter=>{
-      const node=enter.append('li');node.append('span').attr('class','comparison-record-date');node.append('strong');node.append('span').attr('class','comparison-record-meta');return node;
-    });
-    nodes.select('.comparison-record-date').text(r=>r.date);
-    nodes.select('strong').text(r=>r.aircraft);
-    nodes.select('.comparison-record-meta').text(r=>`${r.age} years old · ${number(r.fatalities)} fatalities · Source ID ${r.source_id}`);
-    q('[data-more]').hidden=shown.length>=currentSelected.length;
-    q('[data-download]').disabled=!currentSelected.length;
-  }
   function render() {
     if(destroyed)return;
     if(!editingYears.has('start'))q('[data-start]').value=shared.start;
@@ -302,7 +280,6 @@ async function mount(container,kind) {
     const makers=cells(context,'manufacturer'),models=cells(currentSelected,'aircraft');
     const typeContext=data.records.filter(byYears).filter(byManufacturer);
     const typeCells=Object.keys(labels).map(label=>{const records=typeContext.filter(r=>r.operation===label);return {label,count:records.length,fatalCount:records.filter(r=>r.fatalities>0).length,recordIds:ids(records),fatalRecordIds:ids(records.filter(r=>r.fatalities>0))};});
-    const stateKey=JSON.stringify(shared);if(stateKey!==selectionKey){selectionKey=stateKey;limit=8;}
     root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(shared.start);root.dataset.endYear=String(shared.end-1);
     root.comparisonState={source:data.source,kind,filter:{...shared,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
     q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
@@ -314,9 +291,8 @@ async function mount(container,kind) {
       }
       q('.comparison-manufacturer-context').textContent='Click a choice to filter on it.';
       recordBars(q('.comparison-manufacturer-bars'),displayed,{interactive:true});
-      recordBars(q('.comparison-model-bars'),models.slice(0,7));
+      root.comparisonState.modelPacking=modelPacking.render(models);
       q('.comparison-selection').textContent=`${number(currentSelected.length)} selected records${shared.manufacturer?' · '+shared.manufacturer:''} · ${shared.operation==='all'?'All kinds of flying':labels[shared.operation]} · ${shared.start}–${shared.end-1}`;
-      renderRecords();
       if(active)drawScatter(eligible.filter(byOperation),selectedIds);
     } else {
       if(active)drawTypes(typeCells);
@@ -343,6 +319,7 @@ async function mount(container,kind) {
       pointYears?.attr('opacity',([year])=>Math.max(0,Math.min(1,(graphProgress*59-(year-1970))/5)));
       select(q('.aircraft-comparison-grid')).selectAll('.record-bar>strong').style('opacity',graphProgress);
       q('.comparison-model-grid').hidden=stage<2;
+      modelPacking.reveal(graphProgress);
       q('.comparison-selection').hidden=stage<2;
       select(q('.aircraft-comparison-grid')).selectAll('.record-bar-track').style('transform',`scaleX(${graphProgress})`).style('transform-origin','left');
       cohortLayer?.attr('opacity',stage<4?0:progress);
@@ -373,9 +350,9 @@ async function mount(container,kind) {
   narrative=createComparisonBeats({root,container,aircraft,paint:paintNarrative});
   // An intentional data interaction opens exploration immediately and suspends Auto.
   root.addEventListener('pointerdown',event=>{
-    if(event.target.closest('input,select,.type-row,.record-bar,.comparison-brush,[data-reset-years],[data-clear-maker]'))narrative.explore();
+    if(event.target.closest('input,select,.type-row,.record-bar,.model-circle,.comparison-brush,[data-reset-years],[data-clear-maker]'))narrative.explore();
   },true);
-  root.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)&&event.target.closest('.type-row,.record-bar'))narrative.explore();},true);
+  root.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)&&event.target.closest('.type-row,.record-bar,.model-circle'))narrative.explore();},true);
   root.addEventListener('input',event=>{if(event.target.matches('input,select'))narrative.explore();},true);
   root.addEventListener('change',event=>{if(event.target.matches('input,select'))narrative.explore();},true);
   const observer=new ResizeObserver(()=>{if(active)render();});observer.observe(root);

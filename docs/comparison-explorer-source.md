@@ -16,11 +16,21 @@ Manufacturer labels are explicit literal prefixes of the aircraft-name string, m
 
 All kinds of flying is selected by default. A shared year interval (inclusive start, exclusive end) and any explicit flight-type choice carry between the two chapters. The aircraft scatter plots one mark per usable-age source record at crash date × age. Horizontal D3 brushing snaps to calendar years; numeric year controls supply a keyboard alternative. Unknown ages are excluded from both the scatter and its linked selection views.
 
-All aircraft-linked manufacturer/model cells and record details are derived from selected original IDs, never from display labels or point array indices. A manufacturer choice narrows the highlighted scatter records and model/record views. Manufacturer bars retain the date/type context for comparison. The flight-type chapter retains age-unknown records and states that broader scope in source details; a shared time window is not a claim that its age-independent count equals the aircraft-only subset.
+All aircraft-linked manufacturer/model cells are derived from selected original IDs, never from display labels or point array indices. A manufacturer choice narrows the highlighted scatter records and model packing. Choosing a model selects its schematic without narrowing the crash-record cohort. Manufacturer bars retain the date/type context for comparison. The flight-type chapter retains age-unknown records and states that broader scope in source details; a shared time window is not a claim that its age-independent count equals the aircraft-only subset.
 
 ## Fatal-outcome emphasis
 
-Every flight-type, manufacturer and model bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.
+Every flight-type and manufacturer bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.
+
+## Packed aircraft models and schematics
+
+The model bars and selected-record list are replaced by a dense, single-level D3 circle packing. All model labels in the current known-age selection participate (479 labels across 12,293 records in the full view). This has an Apollonian-like appearance; it is a weighted packing, not a mathematical Apollonian gasket with prescribed radii. Circle **area**, rather than radius, is proportional to source record count. No decorative filler circles or top-N truncation are used. Circles partition the selected original IDs exactly.
+
+Yellow hue (HSL 46°) and lightness (62%) are fixed; HSL saturation equals `fatalCount / count`. The denominator is all recorded crashes for that model in the current selection, not all flights or aircraft in service. Hover/focus exposes the model, total, fatal count and percentage. These shares do not estimate model failure probabilities.
+
+Click or Enter/Space selects the schematic at right. Arrow keys move within the circles; a native model chooser supplies an alternative for tiny circles. The selected model persists when it remains in the filtered population; otherwise the largest remaining model is selected. An empty selection clears the old aircraft. Model selection never changes the time/manufacturer/type cohort.
+
+The Polaroid reuses the opening slide’s ivory frame, source credit and tilted entrance: 650 ms opacity fade and 850 ms translated/rotated rise. Reduced motion presents it immediately. Public schematic previews cover 23 of the fixed top 30 model labels by full-selection count; other models have an explicit placeholder. Family-level drawings are identified in captions. See [aircraft-schematic-coverage.md](aircraft-schematic-coverage.md) for the seven unmatched or paid-only variants and all source pages. The original retained dataset remains downloadable in Source, scope & selection.
 
 ## Brush-edge age distribution and cohort guide
 
