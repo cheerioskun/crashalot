@@ -107,7 +107,7 @@ async function mount(container,kind) {
   q('[data-reset-years]').addEventListener('click',()=>change({start:1970,end:2025}));
   q('[data-clear-maker]').addEventListener('click',()=>change({manufacturer:null}));
   root.addEventListener('keydown',event=>{
-    if(event.target.closest('button,input,select,summary,a,[role="button"]'))event.stopPropagation();
+    if(event.key!=='Escape'&&event.target.closest('button,input,select,summary,a,[role="button"]'))event.stopPropagation();
   });
   if(aircraft) {
     q('[data-manufacturer]').append(option('','All manufacturers'),...cells(eligible,'manufacturer').filter(c=>c.label!=='Unclassified name').sort((a,b)=>a.label.localeCompare(b.label)).map(c=>option(c.label,c.label)));

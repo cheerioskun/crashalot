@@ -49,3 +49,12 @@ test('mobile overview scrolls to every card and restores the selected full-size 
  await page.keyboard.press('Escape');await page.getByRole('button',{name:'Close overview',exact:true}).click();
  await expect(overview(page)).toHaveCount(0);await expect(page.locator('#aircraft-design')).toHaveClass(/present/);
 });
+
+
+test('Escape from an aircraft control opens the overview and reaches the conclusion',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/aircraft-design');
+ await page.locator('#aircraft-design .comparison-source summary').focus();await page.keyboard.press('Escape');
+ await expect(overview(page)).toBeVisible();await card(page,8).click();
+ await expect(page.locator('.conclusion-scene')).toHaveAttribute('data-beat','n');
+ await expect(page.getByRole('button',{name:'Back to the beginning'})).toBeVisible();
+});
