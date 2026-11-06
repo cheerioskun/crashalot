@@ -45,14 +45,18 @@ const themeOptions = {
 const themeToggle = document.querySelector('#theme-toggle');
 const playbackToggle = document.querySelector('#playback-toggle');
 let autoPlayback = true;
-playbackToggle.addEventListener('click', () => {
-  autoPlayback = !autoPlayback;
+function setAutoPlayback(value) {
+  autoPlayback = value;
   playbackToggle.setAttribute('aria-pressed', String(autoPlayback));
   playbackToggle.setAttribute('aria-label', 'Auto reveals');
-  playbackToggle.title = autoPlayback ? 'Auto reveals on · click for manual control' : 'Auto reveals off · click to turn on';
+  playbackToggle.title = autoPlayback ? 'Auto reveals on · click or press Space to turn off' : 'Auto reveals off · click or press Space to turn on';
   chartInstances.forEach(chart => chart.setPlaybackMode?.(autoPlayback));
   hookPlayback.setMode(autoPlayback);
-});
+}
+function toggleAutoPlayback(event) {
+  if (!event?.repeat) setAutoPlayback(!autoPlayback);
+}
+playbackToggle.addEventListener('click', toggleAutoPlayback);
 const status = document.querySelector('#presentation-theme-status');
 let currentTheme = 'default';
 
@@ -158,6 +162,7 @@ function updateNavigation() {
 }
 function previousBeat() {
   if(presentation.isOverview())return;
+  setAutoPlayback(false);
   if (presentation.getCurrentSlide()?.id === 'flight-1282') hookPlayback.hold();
   const chart = chartInstances.find(chart => chart.slide === presentation.getCurrentSlide());
   if (chart?.previousBeat?.()) return;
@@ -245,7 +250,10 @@ function finishOverviewSlide(slide){
 presentation.on('ready',()=>installPresentationOverview({presentation,charts:()=>chartInstances,finishSlide:finishOverviewSlide,
   suspendOpening:()=>hookPlayback.setActive(false),resume:updateChrome}));
 presentation.on('ready', updateChrome);
-presentation.on('slidechanged', updateChrome);
+presentation.on('slidechanged', event => {
+  if (event.previousSlide && presentation.getIndices(event.previousSlide).h > event.indexh) setAutoPlayback(false);
+  updateChrome();
+});
 presentation.initialize({
   disableLayout: true,
   center: false,
@@ -254,9 +262,16 @@ presentation.initialize({
   progress: true,
   slideNumber: false,
   showSlideNumber: 'all',
-  // Up/Down, Space and Page keys belong to reading, including focused headings.
-  keyboardCondition: event => event.key==='Escape'||!['ArrowUp', 'ArrowDown', ' ', 'PageUp', 'PageDown'].includes(event.key) && !event.target.closest('button, a, input, select, textarea, summary, [role=button], [contenteditable=true]'),
-  keyboard: { 32: null, 33: null, 34: null, 38: null, 40: null, 39: nextBeat, 78: nextBeat, 37: previousBeat, 80: previousBeat },
+  // Space controls Auto; focused controls keep their native keyboard actions.
+  // Up/Down and Page keys remain available for reading longer chapters.
+  keyboardCondition: event => {
+    if(event.key==='Escape')return true;
+    if(['ArrowUp','ArrowDown','PageUp','PageDown'].includes(event.key))return false;
+    if(event.key===' '&&(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey))return false;
+    const control=event.target.closest('button, a, input, select, textarea, summary, [role=button], [contenteditable=true]');
+    return !control || event.key===' '&&control.matches('[data-story-back],[data-story-next]');
+  },
+  keyboard: { 32: toggleAutoPlayback, 33: null, 34: null, 38: null, 40: null, 39: nextBeat, 78: nextBeat, 37: previousBeat, 80: previousBeat },
   // Touch gestures scroll chart pages; explicit navigation remains available.
   touch: false,
   navigationMode: 'linear',

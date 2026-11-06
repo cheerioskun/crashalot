@@ -71,7 +71,8 @@ test('Auto finishes each comparison and waits for explicit Next; inactive and hi
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
  await page.clock.runFor(200);expect(await aircraft(page).getAttribute('data-reveal-progress')).not.toBe(held);
  await page.evaluate(()=>location.hash='/welcome');const away=await aircraft(page).getAttribute('data-reveal-progress');await page.clock.runFor(5000);await expect(aircraft(page)).toHaveAttribute('data-reveal-progress',away);
- await page.evaluate(()=>location.hash='/aircraft-design');await page.clock.runFor(18000);
+ await page.evaluate(()=>location.hash='/aircraft-design');
+ await page.locator('#playback-toggle').click();await page.clock.runFor(18000);
  await expect(aircraft(page)).toHaveAttribute('data-playback','complete');await expect(aircraft(page)).toHaveAttribute('data-beat','3.5');
  await page.clock.fastForward(60000);await expect(page.locator('#aircraft-design')).toHaveClass(/present/);await expect(next(page)).toBeDisabled();
 });

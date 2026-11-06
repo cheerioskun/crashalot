@@ -5,7 +5,7 @@ const snapshot = p => p.locator('.flight-exploration').evaluate(r => ({
 }));
 async function openFrozen(page,auto=true) {
   await page.clock.install({time:new Date('2026-11-05T12:00:00Z')});
-  await page.goto('/#/flight-types');
+  await page.goto('/#/welcome');
   await page.locator('.flight-exploration').waitFor({state:'attached'});
   await page.clock.pauseAt(new Date('2026-11-05T12:01:00Z'));
   if(!auto)await page.locator('#playback-toggle').click();
@@ -117,6 +117,7 @@ test('natural Auto completion, Pause/Resume, Back and Replay retain linked data'
   await page.clock.runFor(10000);expect((await snapshot(page)).reveal.recordIds).toEqual(back.reveal.recordIds);
   await page.locator('[data-flight-replay]').click();
   await expect(root).toHaveAttribute('data-story-beat','0');
+  await page.locator('#playback-toggle').click();
   await page.clock.runFor(5200);
   const replay=await snapshot(page);verifyIdentity(replay,source);expect(replay.reveal.recordIds.length).toBeGreaterThan(0);expect(replay.reveal.recordIds.length).toBeLessThan(610);
 });

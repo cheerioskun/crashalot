@@ -3,12 +3,70 @@ import { test, expect } from '@playwright/test';
 const next = page => page.locator('[data-story-next]');
 async function frozen(page, id) {
   await page.clock.install({ time:new Date('2026-11-05T12:00:00Z') });
-  await page.goto('/#/flight-types');
+  await page.goto('/#/welcome');
   await page.locator('.decade-trend').waitFor({ state:'attached' });
   await page.clock.pauseAt(new Date('2026-11-05T12:01:00Z'));
   await page.evaluate(id => { location.hash = `/${id}`; }, id);
   await expect(page.locator(`#${id}`)).toHaveClass(/present/);
 }
+
+test('Space toggles Auto and its seatbelt light without skipping a beat or repeating while held', async ({page}) => {
+  await frozen(page,'aircraft-design');
+  const root=page.locator('.comparison-aircraft'),toggle=page.locator('#playback-toggle');
+  await expect(root).toHaveAttribute('data-beat','0');
+  await expect(toggle).toHaveAttribute('aria-keyshortcuts','Space');
+  await page.clock.runFor(2600);await expect(root).toHaveAttribute('data-beat','2');
+  // A focused reading heading still permits the global shortcut.
+  await page.locator('#aircraft-design h1').evaluate(n=>{n.tabIndex=-1;n.focus();});
+  await page.keyboard.press('Space');
+  await expect(toggle).toHaveAttribute('aria-pressed','false');
+  await expect(toggle.locator('svg')).toHaveCSS('filter','none');
+  const progress=await root.getAttribute('data-data-progress');
+  await page.clock.runFor(5000);await expect(root).toHaveAttribute('data-data-progress',progress);
+  await expect(root).toHaveAttribute('data-beat','2');
+  await page.keyboard.down('Space');await page.keyboard.down('Space');await page.keyboard.up('Space');
+  await expect(toggle).toHaveAttribute('aria-pressed','true');
+  await expect(toggle).toHaveAttribute('title',/Auto reveals on/);
+  await expect.poll(()=>toggle.locator('svg').evaluate(n=>getComputedStyle(n).filter)).not.toBe('none');
+  await page.clock.runFor(200);expect(await root.getAttribute('data-data-progress')).not.toBe(progress);
+  // Space on a focused button activates that button rather than the global shortcut.
+  await root.locator('[data-comparison-pause]').focus();await page.keyboard.press('Space');
+  await expect(root).toHaveAttribute('data-playback','paused');await expect(toggle).toHaveAttribute('aria-pressed','true');
+  await expect(page).toHaveURL(/aircraft-design$/);
+});
+
+test('Back turns off Auto across every chapter and backward slide navigation keeps the light off', async ({page}) => {
+  await frozen(page,'welcome');
+  const toggle=page.locator('#playback-toggle'),back=page.locator('[data-story-back]');
+  const ids=['flight-1282','change-over-time','counts-in-context','flight-phase','flight-types','aircraft-design'];
+  for(const [index,id] of ids.entries()) {
+    await page.evaluate(id=>location.hash=`/${id}`,id);
+    await expect(page.locator('[data-story-position]')).not.toContainText('Loading');
+    if(await toggle.getAttribute('aria-pressed')==='false')await toggle.click();
+    await next(page).click();
+    if(index%2===0)await back.click();
+    else {
+      await page.locator(`#${id} h1`).evaluate(n=>{n.tabIndex=-1;n.focus();});
+      await page.keyboard.press(index===5?'p':'ArrowLeft');
+    }
+    await expect(toggle).toHaveAttribute('aria-pressed','false');
+    await expect(toggle.locator('svg')).toHaveCSS('filter','none');
+    await expect(page.locator('[data-story-position]')).toContainText('Reveal 1 of');
+    if(index===0) {
+      await expect(back).toBeFocused();
+      await page.keyboard.press('Space');await expect(toggle).toHaveAttribute('aria-pressed','true');
+      await page.keyboard.press('Space');await expect(toggle).toHaveAttribute('aria-pressed','false');
+      await expect(page.locator('[data-story-position]')).toContainText('Reveal 1 of');
+    }
+    const position=await page.locator('[data-story-position]').textContent();
+    await page.clock.runFor(10000);await expect(page.locator('[data-story-position]')).toHaveText(position);
+  }
+  await toggle.click();await back.click();
+  await expect(page).toHaveURL(/flight-types$/);await expect(toggle).toHaveAttribute('aria-pressed','false');
+  await page.evaluate(()=>location.hash='/aircraft-design');await toggle.click();
+  await page.goBack();await expect(page).toHaveURL(/flight-types$/);
+  await expect(toggle).toHaveAttribute('aria-pressed','false');
+});
 
 // Actual animation frames run under a controlled clock; timers are not stubbed out.
 test('Auto defaults on, uses brief comparison holds and completes the scale without changing slides', async ({ page, request }) => {
@@ -106,6 +164,8 @@ test('leaving a slide or hiding a tab suspends decade motion and its pending cue
   const away=await root.getAttribute('data-progress');
   await page.clock.runFor(10000);await expect(root).toHaveAttribute('data-progress',away);
   await page.evaluate(()=>{location.hash='/counts-in-context';});
+  await expect(page.locator('#playback-toggle')).toHaveAttribute('aria-pressed','false');
+  await page.locator('#playback-toggle').click();
   await expect(root).toHaveAttribute('data-playback','running');
   const visibility=hidden=>page.evaluate(hidden=>{
     Object.defineProperty(document,'hidden',{configurable:true,get:()=>hidden});
@@ -153,6 +213,7 @@ test('reduced motion shows a complete static view and never changes slides', asy
   await expect(page.locator('.decade-trend')).toHaveAttribute('data-playback', 'complete');
   await expect(page).toHaveURL(/counts-in-context$/);
   await page.goto('/#/change-over-time');
+  await page.locator('#playback-toggle').click();
   await expect(page.locator('.scale-comparison')).toHaveAttribute('data-playback', 'complete');
   await expect(page.locator('.scale-comparison')).toHaveAttribute('data-beat', '5');
   await expect(page.locator('.scale-comparison')).toHaveAttribute('data-heads', '24');
@@ -161,6 +222,7 @@ test('reduced motion shows a complete static view and never changes slides', asy
   await expect(page.locator('.scale-comparison__question')).toBeVisible();
   await expect(page).toHaveURL(/change-over-time$/);
   await page.goto('/#/flight-1282');
+  await page.locator('#playback-toggle').click();
   await expect(page.locator('#flight-1282')).toHaveAttribute('data-hook-step', '9');
   await expect(page).toHaveURL(/flight-1282(?:\/\d+)?$/);
 });

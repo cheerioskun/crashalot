@@ -4,7 +4,7 @@ const root=p=>p.locator('.scale-comparison');
 const values=p=>root(p).locator('.scale-comparison__value').evaluateAll(ns=>ns.map(n=>Number(n.dataset.value)));
 async function frozen(page,auto=false) {
   await page.clock.install({time:new Date('2026-11-06T12:00:00Z')});
-  await page.goto('/#/flight-types');
+  await page.goto('/#/welcome');
   await page.locator('.decade-trend').waitFor({state:'attached'});
   await page.clock.pauseAt(new Date('2026-11-06T12:01:00Z'));
   if(!auto)await page.locator('#playback-toggle').click();
@@ -129,6 +129,8 @@ test('ongoing years suspend on Manual, inactive slides and hidden documents',asy
   const away=await root(page).getAttribute('data-year-elapsed');
   await page.clock.runFor(5000);expect(await root(page).getAttribute('data-year-elapsed')).toBe(away);
   await page.evaluate(()=>location.hash='/change-over-time');await expect(root(page)).toBeVisible();
+  await expect(page.locator('#playback-toggle')).toHaveAttribute('aria-pressed','false');
+  await page.locator('#playback-toggle').click();
   await page.clock.runFor(100);expect(await root(page).getAttribute('data-year-elapsed')).not.toBe(away);
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
   const hidden=await root(page).getAttribute('data-year-elapsed');

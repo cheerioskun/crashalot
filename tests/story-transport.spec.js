@@ -61,7 +61,7 @@ test('reading keys scroll the exploration without advancing; explicit footer sti
   await view.evaluate(el => el.scrollTop = 0);
   await page.keyboard.press('ArrowDown');
   await expect.poll(() => view.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
-  for (const key of ['ArrowUp', 'Space', 'PageDown', 'PageUp']) {
+  for (const key of ['ArrowUp', 'PageDown', 'PageUp']) {
     await page.keyboard.press(key);
     await expect(page).toHaveURL(/flight-phase$/);
   }
