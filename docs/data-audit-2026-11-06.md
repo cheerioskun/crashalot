@@ -51,3 +51,25 @@ Additional literal name prefixes verified in the previous unclassified cohort: N
 The main counts, displayed phase shares and current decline/coin comparisons reconcile. The warranted polish is better parsing, simpler named choices and concise scope cues where populations or denominators change. No blanket deletion of unusual aircraft, wholesale unknown-cause deletion, invented exposure data, or repeated warnings in the main narrative is justified by this audit.
 
 This independent review covers numeric payloads and their source identities, not exhaustive visual or interaction testing of every model/filter combination. Browser regression and sampled visual review are separate checks; passing the source audit does not substitute for those checks.
+
+## Final presentation review
+
+**Ready within reviewed scope · Complete for this bounded polish pass.** The inventory is six numerical components: the departure comparison, decade trend, linked phase/cause chapter, flight-type bars, age scatter/distribution, and model packing. Counts below describe those components, not a percentage certification of the underlying archive. The cover and opening incident were checked through existing presentation regressions, rather than re-researched as new historical evidence.
+
+| Presentation quality | Observed defects | Assessment |
+| --- | --- | --- |
+| Usefulness and completeness | 0 / 6 | All six retain their intended comparison or exploration. Per-flight or manufacturer risk rankings are not inferred from archive counts. |
+| Analytical clarity | 0 / 6 | U.S. scope and the worldwide handoff are explicit; the final five-year interval remains labeled. Generic categories are removed from audience choices, with retained membership explained in Source. |
+| Visual and interaction consistency | 0 / 6 | Desktop/narrow, light/dark and principal linked-selection paths are sampled. Existing regression coverage checks playback, brushing, model selection, theme and overview. Not every model/filter combination is visually inspected. |
+
+| Analytical correctness and robustness | Observed defects | Assessment |
+| --- | --- | --- |
+| Source authority and confidence | 0 / 6 | Payloads reconcile with retained sources and hashes. Archive coverage and original incident reports are not independently certified; the documented fatality-component inconsistencies remain a source limitation. |
+| Value accuracy | 0 / 6 | Independent raw-source calculations verify headline totals, annual/decade bins, phase partitions, source identities, operation mappings and valid ages. Browser tests check grouped model counts/shares and brush memberships. |
+| Within-chart agreement | 0 / 6 | Count labels, fatal subsets, denominators, area encoding and selected IDs agree in checked states. |
+| Complete source details | 0 / 6 | Source drawers preserve population, record grain and controlling denominator details. Extra excluded-cause counts are moved here from the main narrative. |
+| Cross-artifact consistency | 0 / 6 | Scheduled airborne IDs reconcile between phase and comparison chapters; differing U.S./worldwide populations are named rather than treated as one series. |
+| Data-quality controls | 0 / 6 | Original IDs remain stable; unusable ages are excluded; manufacturer boundary/name fixes preserve every occurrence and fatal total. |
+| Conclusion support | 0 / 6 | Decline, phase-share, coin and age-spread statements follow from their stated populations. Technology copy describes added protection without assigning the observed decline to a measured cause. |
+
+The principal fixes are the ATR/name parsing repair, simpler named comparison choices, and scope/claim wording. No new exposure data, invented source corrections, or outcome-driven exclusions were introduced. The limitations above remain visible in this audit and the relevant source drawers, rather than being repeated throughout the story.
