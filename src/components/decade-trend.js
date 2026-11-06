@@ -142,6 +142,7 @@ export async function mountDecadeTrend(container) {
   function showAll(lastStage=Math.max(stage,10)) {stop();stage=lastStage;progress=beats[stage].end;render();}
   const playback=createBeatPlayback({
     state:()=>({key:stage,running,complete:autoComplete(),atBoundary:progress>=beats[stage].end,remainingMs:Math.max(0,beats[stage].end-progress)*(beats[stage].unitMs||0),durationMs:Math.max(0,beats[stage].end-(beats[stage-1]?.end||0))*(beats[stage].unitMs||0),terminal:stage>=10}),
+    timeline:()=>beats.slice(0,11).map((beat,i)=>({duration:(beat.end-(beats[i-1]?.end||0))*(beat.unitMs||0),hold:beat.hold})),
     play,pause:stop,advance,holdMs:()=>beats[stage].hold,reduced,showAll,changed(){render();notify();},
   });
   function resize() {

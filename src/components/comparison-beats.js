@@ -36,6 +36,7 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
   }
   function showAll(){stop();stage=durations.length-1;progress=1;render();notify();}
   const playback=createBeatPlayback({state:()=>({key:stage,running,complete:complete(),atBoundary:progress===1,durationMs:durations[stage],remainingMs:(1-progress)*durations[stage],terminal:stage===durations.length-1}),
+    timeline:()=>durations.map((duration,i)=>({duration,hold:holds[i]})),
     play,pause:stop,advance,holdMs:()=>holds[stage],reduced,showAll,changed:render});
   pause.addEventListener('click',()=>playback.togglePause());
   transport.querySelector('[data-comparison-replay]').addEventListener('click',()=>{

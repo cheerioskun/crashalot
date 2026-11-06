@@ -756,6 +756,7 @@ export async function mountFlightExploration(container) {
   function showAll() {stopReveal();revealStage=beats.length-1;revealProgress=phases.length;rebuildMembership();renderReveal();}
   const playback=createBeatPlayback({
     state:()=>({key:revealStage,running,complete:complete(),atBoundary:revealProgress>=scene().end,remainingMs:Math.max(0,scene().end-revealProgress)*(scene().duration||0),durationMs:scene().duration||0,terminal:revealStage===beats.length-1}),
+    timeline:()=>beats.map(beat=>({duration:beat.duration||0,hold:beat.hold})),
     play:playReveal,pause:stopReveal,advance:advanceReveal,holdMs:()=>scene().hold,reduced,showAll,changed:renderRevealControls,
   });
   root.querySelector('[data-flight-pause]').addEventListener('click',()=>playback.togglePause());

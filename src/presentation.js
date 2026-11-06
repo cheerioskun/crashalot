@@ -209,6 +209,7 @@ const hookPlayback = createBeatPlayback({
   state: () => ({ key:Number(hook.dataset.hookStep || 0),running:false, complete:Number(hook.dataset.hookStep || 0) >= hookBeatLabels.length-1, atBoundary:true }),
   play() {}, pause() {},
   advance() { if (presentation.getCurrentSlide() === hook) presentation.nextFragment(); },
+  timeline:()=>[...hookHolds.map(hold=>({hold})),{hold:0}],
   holdMs: () => hookHolds[Number(hook.dataset.hookStep || 0)],
   reduced: reducedMotion,
   showAll() {

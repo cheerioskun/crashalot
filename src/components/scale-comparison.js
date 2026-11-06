@@ -314,6 +314,8 @@ export async function mountScaleComparison(container) {
     state:()=>({key:stage,running:(countBeat() || stage===7) && motionRunning,complete:autoComplete(),atBoundary:!(countBeat() || stage===7) || !motionIncomplete(),terminal:stage>=7,
       remainingMs:stage===1?(1-accidentProgress)*ACCIDENT_MS:stage===3?(1-departureProgress)*DEPARTURE_MS:stage>=7?Math.max(YEAR_END-yearElapsed,stage===7?COIN_END-coinElapsed:0):0,
       durationMs:stage===1?ACCIDENT_MS:stage===3?DEPARTURE_MS:stage>=7?Math.max(YEAR_END-(history[stage]?.yearElapsed||0),stage===7?COIN_END:0):0}),
+    timeline:()=>[...holds.map((hold,i)=>({hold,duration:i===1?ACCIDENT_MS:i===3?DEPARTURE_MS:0})),
+      {duration:Math.max(COIN_END,YEAR_END-holds[5]-holds[6]),hold:0}],
     play,pause:stop,advance:advanceStage,holdMs:()=>holds[stage],
     reduced:reducedMotion,showAll,changed:render,
   });
