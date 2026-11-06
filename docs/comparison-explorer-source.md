@@ -6,7 +6,7 @@ November 6, 2026. These chapters replace all three former placeholder slides. Th
 
 `public/data/comparison-records.json` projects the existing PlaneCrashData snapshot, revision and SHA-256 from `data/sources.json`. `scripts/build_comparison_records.py` reads that retained file only, checks its checksum, preserves original string IDs, and supports `--check`. No new data download or production-count-to-flight-exposure substitution is used.
 
-Scope: worldwide, 1970–2024, known airborne phase (departure, in flight, arrival), using the same phase mapping as the Sankey. There are 12,691 distinct aircraft-occurrence records across operations; 393 ground/unresolved-phase records are excluded. Scheduled Revenue Flight contributes the same 2,792 IDs as the preceding Sankey. The seven named flight types are shown as bars and filter choices. The 2,856 heterogeneous remaining missions and missing types stay in the JSON and the default All kinds of flying cohort, but are omitted as a combined bar; only 14 of these have no source flight type. They are not merged into scheduled revenue.
+Scope: worldwide, 1970–2024, known airborne phase (departure, in flight, arrival), using the same phase mapping as the Sankey. There are 12,691 distinct aircraft-occurrence records across operations; 393 ground/unresolved-phase records are excluded. Scheduled Revenue Flight contributes the same 2,792 IDs as the preceding Sankey. The seven named flight types are shown as annual frequency trails. The 2,856 heterogeneous remaining missions and missing types stay in the JSON and the default All kinds of flying cohort, but are omitted as a combined trail; only 14 of these have no source flight type. They are not merged into scheduled revenue.
 
 Aircraft age is calendar year of crash minus recorded manufacture year. Values missing or outside `1903 <= manufacture year <= crash year` are unusable. The user requested that these be skipped in the scatterplot and its linked breakdown: 398 records across the full comparison cohort. Flight-type counts retain them. Calendar-year age is approximate, not exact aircraft service time.
 
@@ -20,7 +20,7 @@ All aircraft-linked manufacturer/model cells are derived from selected original 
 
 ## Fatal-outcome emphasis
 
-Every flight-type and manufacturer bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.
+The flight-type chapter now uses the frequency trails described below. Each manufacturer bar uses a shared zero baseline for the solid fatal segment (`fatalities > 0`), followed by the pale nonfatal remainder. The two segments sum to the original total; the archive's source IDs are retained in both total and fatal membership. Direct labels emphasize fatal counts, with hover and keyboard-focus tooltips disclosing fatal, nonfatal and total counts. These are counts, not risk rates.
 
 ## Packed aircraft models and schematics
 
@@ -48,3 +48,15 @@ The maintenance explanation is explicitly U.S. context: FAA AC 120-84, Aging Air
 
 - FAA: https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf
 - U.S. Code: https://uscode.house.gov/us/usc/119-120/t49/s44717/
+
+## Annual flight-type frequency trails
+
+The bars in chapter 6 are replaced by seven trails for 1970–2024 (or the shared brush period when revisiting from the aircraft view). X is calendar year; height above each row’s baseline is the annual recorded crash count. Every row uses the same vertical count scale, set by the largest annual total in the displayed period. Monotone curves interpolate the reviewed annual observations; they are not kernel-density estimates. The pale total area is overlaid by the yellow fatal subset. Heights are never normalized separately by type.
+
+Each annual cell retains all original source IDs and its fatal subset. Zero-count years remain inspectable. Hover and focus expose exact year and period totals; Left/Right and Home/End inspect years. Click or Enter/Space chooses the operation for the aircraft chapter; choosing the active trail again restores all kinds. The old year/type filter row and selected-count paragraph are removed from this chapter. Aircraft filters remain on the aircraft chapter. An aircraft manufacturer choice does not silently filter the flight-type trails; the shared date window still carries between chapters.
+
+Four beats remain: introductory headline and scaffold; scheduled-service trail grows; remaining trails grow; final narration and exploration. Whole-trail amplitude animation uses the same real beat clock as the shared footer timer, and Pause/Back/reduced motion retain their existing behavior. Auto waits for Next after the last beat.
+
+The user's stronger narration, “A commercial airliner is really the safest bet,” is supported by separate exposure-based context, not by ranking these archive counts. The retained NTSB workbook, Table 1 (2024 U.S. aviation), reports scheduled Part 121 service at 0 fatal accidents per 100,000 flight hours and general aviation at 0.7213873622; the source disclosure rounds the latter to 0.72. This U.S. comparison is distinct from the worldwide archive. Source: [NTSB 2005–2024 Aviation Statistics](https://www.ntsb.gov/safety/Pages/research.aspx), retained in `data/reference/ntsb-aviation-statistics-2005-2024.xlsx`. The claim is contextual narration, with no risk-rate encoding added to the trails.
+
+The preceding phase chapter gains an explicit-Next bridge after the completed chart: “But these are not all the same flights.” Auto stops at the existing completed chart; Next shows the bridge, then Next opens chapter 6. Back from the bridge restores the prior phase exploration. Overview continues to open the full phase chart so its preview remains useful.

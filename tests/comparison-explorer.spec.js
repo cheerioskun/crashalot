@@ -64,9 +64,9 @@ test('new chapters replace every old placeholder; type choice and years carry be
  expect(highlighted).toEqual(s.recordIds);
  for(let i=0;i<5;i++)await page.locator('[data-story-back]').click();
  await expect(page.locator('#flight-types')).toHaveClass(/present/);
- await expect(page.locator('.comparison-types [data-start]')).toHaveValue('2000');
- await expect(page.locator('.comparison-types [data-end]')).toHaveValue('2009');
- await expect(page.locator('.comparison-types [data-operation]')).toHaveValue('private');
+ const returned=await page.locator('.comparison-types').evaluate(r=>r.comparisonState.filter);
+ expect(returned).toMatchObject({start:2000,end:2010,operation:'private',manufacturer:null});
+ await expect(page.locator('.comparison-types .comparison-toolbar')).toHaveCount(0);
  await page.locator('[data-story-next]').click();check(await state(page),rows);
  expect(errors).toEqual([]);
 });
@@ -129,30 +129,42 @@ test('keyboard year controls allow an empty selection without stale records or s
 });
 
 
-test('fatal stacks start at zero and disclose fatal, nonfatal and total outcomes on hover and focus',async({page,request})=>{
+test('frequency trails preserve annual source identities and expose counts on hover and keyboard focus',async({page,request})=>{
  const rows=projected(await(await request.get('/data/comparison-records.json')).json());
- await page.goto('/#/flight-types');
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/flight-types');
  const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(7);
- const cells=await chart.evaluate(r=>r.comparisonState.typeCells);
- for(const cell of cells){
-  const source=rows.filter(r=>r.operation===cell.label);
-  expect(cell.fatalCount).toBe(source.filter(r=>r.fatalities>0).length);
-  expect(cell.count).toBe(source.length);
+ const state=await chart.evaluate(r=>r.comparisonState),trails=state.typeTrails;
+ expect(trails.maximum).toBe(114);expect(trails.start).toBe(1970);expect(trails.end).toBe(2024);
+ for(const trail of trails.series){
+  const source=rows.filter(r=>r.operation===trail.label);
+  expect(trail.years).toHaveLength(55);expect(trail.recordIds).toEqual(source.map(r=>r.source_id));
+  expect(trail.years.reduce((sum,cell)=>sum+cell.count,0)).toBe(source.length);
+  expect(trail.years.reduce((sum,cell)=>sum+cell.fatalCount,0)).toBe(source.filter(r=>r.fatalities>0).length);
+  for(const cell of trail.years){
+   const expected=source.filter(r=>r.year===cell.year);
+   expect(cell.recordIds).toEqual(expected.map(r=>r.source_id));
+   expect(cell.fatalRecordIds).toEqual(expected.filter(r=>r.fatalities>0).map(r=>r.source_id));
+  }
  }
- await chart.locator('[data-start]').click(); // Open exploration before checking final stacked geometry.
- const first=chart.locator('.type-row').first();
- const fatal=first.locator('.outcome-fatal'),nonfatal=first.locator('.outcome-nonfatal');
- expect(Number(await fatal.getAttribute('x'))).toBe(0);
- expect(Number(await fatal.getAttribute('width'))).toBeGreaterThan(0);
- const totalWidth=Number(await fatal.getAttribute('width'))+Number(await nonfatal.getAttribute('width'));
- expect(Number(await fatal.getAttribute('width'))/totalWidth).toBeCloseTo(cells[0].fatalCount/cells[0].count,5);
- expect(Number(await nonfatal.getAttribute('x'))).toBeCloseTo(Number(await fatal.getAttribute('width')),5);
- await first.hover();await expect(chart.getByRole('tooltip')).toContainText('fatal');await expect(chart.getByRole('tooltip')).toContainText('nonfatal');await expect(chart.getByRole('tooltip')).toContainText('total');
- await first.focus();await expect(chart.getByRole('tooltip')).toBeVisible();
+ await expect(chart.locator('.comparison-toolbar,.type-bar,.type-value,.comparison-type-selection')).toHaveCount(0);
+ await expect(page.locator('#flight-types .comparison-deck')).toHaveText('Flying in a commercial plane is very different from flying in your private jet, or flying it yourself!');
+ await expect(chart.locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
+ const first=chart.locator('.type-row').first();await first.hover();await expect(chart.getByRole('tooltip')).toContainText('recorded crashes');await expect(chart.getByRole('tooltip')).toContainText('fatal');await expect(chart.getByRole('tooltip')).toContainText('nonfatal');
+ await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1970');
+ await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1971');
+ await expect(page).toHaveURL(/flight-types$/);
+ await page.setViewportSize({width:390,height:844});
+ await expect.poll(()=>page.locator('#flight-types .view').evaluate(v=>v.scrollWidth<=v.clientWidth)).toBe(true);
+ await chart.locator('.type-row').nth(1).click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','true');
+ await chart.locator('.type-row').nth(1).click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','false');
  await page.goto('/#/aircraft-design');await root(page).locator('[data-start]').click();await expect(root(page).locator('.record-bar').first()).toBeVisible();
  await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
  await maker.focus();await expect(root(page).getByRole('tooltip')).toContainText('total');
+ await years(page,1970,1970);await page.evaluate(()=>location.hash='/flight-types');
+ await expect(chart).toHaveAttribute('data-start-year','1970');
+ const oneYear=await chart.evaluate(r=>r.comparisonState.typeTrails);expect(oneYear.series[0].years).toHaveLength(1);
+ expect((await chart.locator('.trail-fatal').first().boundingBox()).width).toBeGreaterThan(100);
 });
 
 

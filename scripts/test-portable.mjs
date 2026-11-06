@@ -45,6 +45,22 @@ try {
     if(number===2){await expect(target).toBeAttached();assert.ok(await target.evaluate(image=>image.complete&&image.naturalWidth>0));}
     else await expect(target).toBeVisible();
     if(number>=3)assert.ok(await page.locator(`#${id} svg path, #${id} svg circle, #${id} svg rect`).count()>0,`${id} has chart marks`);
+    if(number===5){
+      await page.locator('[data-story-next]').click();
+      await expect(page.locator('.flight-phase-bridge')).toBeVisible();
+      await expect(page.locator('.flight-phase-bridge')).toHaveText('But these are not all the same flights.');
+      await page.locator('[data-story-back]').click();
+      await expect(page.locator('.flight-flow')).toBeVisible();
+    }
+    if(number===6){
+      await expect(page.locator('.type-row')).toHaveCount(7);
+      await expect(page.locator('.comparison-types .comparison-toolbar')).toHaveCount(0);
+      await page.locator('.type-row').nth(1).hover();
+      await expect(page.locator('.comparison-types [role="tooltip"]')).toContainText('recorded crashes');
+      await expect(page.locator('.comparison-types [role="tooltip"]')).toContainText('nonfatal');
+      await page.screenshot({path:join(output,'portable-flight-types-check.png')});
+      await page.mouse.move(1430,20);
+    }
     render.push(id);
   }
   const state=await page.locator('.comparison-aircraft').evaluate(node=>node.comparisonState);
@@ -109,7 +125,7 @@ try {
   await motion.close();
   assert.deepEqual(network,[],'No runtime HTTP(S) request should be needed');
   assert.deepEqual(errors,[],'No browser runtime error should occur');
-  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; live footer wick counts down and freezes on Space; Back disables Auto',conclusion:'Globe and Penflow handwriting load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
+  const result={passed:true,mode:'offline file://, standalone file copied into a path with spaces',browser:browser.version(),slides:render.length+1,selectedRecords:state.recordIds.length,models:state.modelPacking.circles.length,images:['opening photograph','Airbus A320','Boeing 737 MAX 8'],themes:['light','dark'],playback:'Auto advances opening beats; live footer wick counts down and freezes on Space; Back disables Auto',flightTypes:'Annual frequency trails, year/count tooltips and explicit phase transition work offline',conclusion:'Globe and Penflow handwriting load offline; restart appears at final beat',sourceDownload:'SHA-256 matches embedded JSON',httpRequests:network.length,consoleErrors:errors.length};
   await writeFile(join(output,'portable-verification.json'),JSON.stringify(result,null,2)+'\n');
   console.log(JSON.stringify(result,null,2));
 } finally { await browser.close();await rm(temporary,{recursive:true,force:true}); }

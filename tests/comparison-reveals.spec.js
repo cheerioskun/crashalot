@@ -58,8 +58,9 @@ test('inspection text and scaffold fade together, then records pour in before th
 test('Auto finishes each comparison and waits for explicit Next; inactive and hidden views suspend reveals',async({page})=>{
  await frozen(page,'flight-types',true);
  await page.clock.runFor(1300);await expect(types(page)).toHaveAttribute('data-beat','1');
- const scheduled=types(page).locator('.type-row').first().locator('.outcome-fatal');expect(Number(await scheduled.getAttribute('width'))).toBeGreaterThan(0);
- const privateBar=types(page).locator('.type-row').nth(1).locator('.outcome-fatal');await expect(privateBar).toHaveAttribute('width','0');
+ const scheduled=types(page).locator('.type-row').first();expect(Number(await scheduled.getAttribute('data-trail-progress'))).toBeGreaterThan(0);
+ await expect(scheduled.locator('.trail-fatal')).toHaveAttribute('d',/^M/);
+ const privateTrail=types(page).locator('.type-row').nth(1);await expect(privateTrail).toHaveAttribute('data-trail-progress','0');
  await page.clock.runFor(10000);await expect(types(page)).toHaveAttribute('data-playback','complete');
  await page.clock.fastForward(60000);await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await next(page).click();await expect(aircraft(page)).toHaveAttribute('data-beat','0');

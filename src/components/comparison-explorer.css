@@ -127,3 +127,25 @@ button.record-bar { cursor:pointer; }
 #aircraft-design [data-aircraft-intro]{max-width:64ch;font-size:clamp(16px,1.5vw,21px);line-height:1.6;margin-top:24px}
 .age-spread-bracket{fill:none;stroke:var(--bs-body-color);stroke-width:1.4;opacity:.75}
 .age-annotation-title{font-weight:650}
+
+/* Annual frequency trails keep the count scale and calendar axis shared. */
+.comparison-types .comparison-scope{margin:14px 0 22px}
+.comparison-types .comparison-measure{margin-bottom:2px}
+.comparison-types .comparison-outcome-key{margin-bottom:18px}
+.trail-grid line{stroke:var(--bs-border-color);stroke-width:.65;stroke-opacity:.55}
+.trail-baseline{stroke:var(--bs-border-color);stroke-width:.7}
+.trail-area,.trail-line{pointer-events:none}
+.trail-total{fill:var(--viz-series-1);fill-opacity:.18}
+.trail-total-line{fill:none;stroke:var(--viz-series-1);stroke-width:1.1;stroke-opacity:.45}
+.trail-fatal{fill:var(--comparison-fatal);fill-opacity:.66}
+.trail-fatal-line{fill:none;stroke:var(--comparison-fatal);stroke-width:1.5}
+.type-row.is-selected .type-label{font-weight:650}
+.type-row.is-selected .trail-fatal,.type-row.is-inspected .trail-fatal{fill-opacity:.85}
+.type-row.is-inspected .trail-total{fill-opacity:.3}
+.type-row.is-inspected .type-label{text-decoration:underline;text-underline-offset:4px}
+.trail-cursor line{stroke:var(--bs-body-color);stroke-width:.8;stroke-opacity:.35;stroke-dasharray:3 4}
+.trail-total-dot{fill:var(--viz-series-1);stroke:var(--bs-body-bg);stroke-width:1}
+.trail-fatal-dot{fill:var(--comparison-fatal);stroke:var(--bs-body-bg);stroke-width:1}
+.comparison-type-note .comparison-type-hint{font-size:11px!important;line-height:1.8!important;color:var(--bs-secondary-color);margin:22px 0 0!important}
+.comparison-types [hidden]{display:none!important}
+@media(max-width:720px){.comparison-types .type-comparison-grid{gap:18px}.comparison-types .type-row .type-label{font-size:11px}.comparison-types .comparison-type-note{margin-bottom:18px}}

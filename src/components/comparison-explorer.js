@@ -1,6 +1,7 @@
 import {axisBottom,axisLeft,bin,brushX,easeCubicInOut,format,group,max,quantileSorted,range,scaleLinear,scaleUtc,select,utcYear} from 'd3';
 import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
+import {createFlightTypeTrails} from './flight-type-trails.js';
 import {createAircraftModelPacking} from './aircraft-model-packing.js';
 
 let dataset;
@@ -37,7 +38,7 @@ async function mount(container,kind) {
   const root=document.createElement('div');root.className=`comparison-explorer comparison-${kind}`;
   container.replaceChildren(root);
   root.innerHTML=`
-    <div class="comparison-toolbar">
+    ${aircraft?`<div class="comparison-toolbar">
       <fieldset class="comparison-years"><legend>Years</legend>
         <label>From <input type="number" min="1970" max="2024" data-start aria-label="First year"></label>
         <span aria-hidden="true">—</span>
@@ -47,7 +48,7 @@ async function mount(container,kind) {
       <button type="button" class="text-button" data-reset-years>Reset years</button>
       <button type="button" class="text-button" data-clear-maker hidden></button>
     </div>
-    <p class="comparison-scope"></p><div class="comparison-outcome-key" aria-label="Crash outcomes"><span><i class="outcome-fatal"></i>Fatal crashes</span><span><i class="outcome-nonfatal"></i>Nonfatal crashes</span></div>
+    `:''}<p class="comparison-scope"></p><div class="comparison-outcome-key" aria-label="Crash outcomes"><span><i class="outcome-fatal"></i>Fatal crashes</span><span><i class="outcome-nonfatal"></i>Nonfatal crashes</span></div>
     ${aircraft ? `
       <div class="aircraft-comparison-grid">
         <div class="comparison-scatter-wrap">
@@ -66,12 +67,13 @@ async function mount(container,kind) {
       <div class="comparison-selection" role="status" aria-live="polite"></div>
       <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
-        <div><p class="comparison-measure">Recorded crashes by kind of flying · counts, not a safety ranking</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crash counts by flight type. Choose a type for the aircraft comparison."></svg></div>
-        <aside class="comparison-type-note"><p class="eyebrow">Different kinds of flying</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><div class="comparison-type-selection" role="status" aria-live="polite"></div><p class="comparison-type-carry">Your chosen flight type and years carry into the aircraft view.</p></aside>
+        <div><p class="comparison-measure">Recorded crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Recorded crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
+        <aside class="comparison-type-note"><p class="eyebrow">Beyond the airline headline</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><p class="comparison-type-hint">Hover to inspect a year.<br>Click a trail to choose a kind of flying.</p></aside>
       </div>`}
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
-      <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The flight-type bars compare seven named kinds of flying; other missions and missing types are left out of those bars, but remain in “All kinds of flying” and the aircraft view.</p>
+      <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The frequency trails compare annual counts for seven named kinds of flying, all on the same vertical count scale. Curves interpolate between the recorded yearly counts. Other missions and missing types are left out of those trails, but remain in “All kinds of flying” and the aircraft view.</p>
+      ${aircraft?'':'<p>Safety context: <a href="https://www.ntsb.gov/safety/Pages/research.aspx" target="_blank" rel="noreferrer">NTSB 2024 U.S. aviation statistics, Table 1</a>: scheduled airline service had 0 fatal accidents per 100,000 flight hours; general aviation had 0.72. That exposure-based comparison supports the narration. The trails above show annual worldwide archive counts.</p>'}
       <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
       <p>Manufacturer labels use aircraft-name prefixes, preserving historical names. Unclassified names are omitted from the manufacturer choices and bars, but remain in the full scatter and model view. Aircraft age is crash year minus manufacture year.</p>
       <p>Original source IDs are preserved throughout brushing, grouping and the downloadable source data. <a href="${data.source.url}" target="_blank" rel="noreferrer">MauroPello · PlaneCrashData</a> · CC BY 4.0 · retained revision ${data.source.revision.slice(0,12)}.</p>
@@ -79,10 +81,10 @@ async function mount(container,kind) {
     </details>`;
   const q=selector=>root.querySelector(selector);
   const option=(value,label)=>{const node=document.createElement('option');node.value=value;node.textContent=label;return node;};
-  q('[data-operation]').append(option('all','All kinds of flying'),...namedOperations.map(([value,label])=>option(value,label)));
+  q('[data-operation]')?.append(option('all','All kinds of flying'),...namedOperations.map(([value,label])=>option(value,label)));
   let active=false,destroyed=false,brushing=false,scatterKey='',currentSelected=[];
   const editingYears=new Set();
-  let scatter,points,pointYears,x,y,brush,brushLayer,histogramLayer,cohortLayer,typeRows,typeScale,narrative,lastStoryStage=-1,liveBrush=null;
+  let scatter,points,pointYears,x,y,brush,brushLayer,histogramLayer,cohortLayer,narrative,lastStoryStage=-1,liveBrush=null;
   const ageCeiling=Math.max(10,Math.ceil((max(data.records,r=>r.age)||10)/5)*5+5);
   const ageBinner=bin().value(r=>r.age).domain([0,ageCeiling]).thresholds(range(5,ageCeiling,5));
   const eligible=data.records.filter(row=>!aircraft || row.age!==null);
@@ -91,7 +93,7 @@ async function mount(container,kind) {
   q('.comparison-source-age').textContent=aircraft
     ? `${number(skipped)} records with missing or invalid manufacture years are omitted from both the scatterplot and its linked breakdown. ${number(eligible.length)} usable-age records remain across all flight types. The time and type choices carry between chapters; the preceding flight-type chart also includes unknown-age records.`
     : `All ${number(data.records.length)} airborne-phase records are eligible here, including records without usable aircraft ages. The following age scatterplot omits those records. No raw record is deleted from the retained source.`;
-  q('[data-operation]').addEventListener('change',event=>change({operation:event.target.value}));
+  q('[data-operation]')?.addEventListener('change',event=>change({operation:event.target.value}));
   function applyYears(which) {
     editingYears.delete(which);
     let start=Number(q('[data-start]').value),end=Number(q('[data-end]').value)+1;
@@ -100,12 +102,12 @@ async function mount(container,kind) {
     if(start>=end){if(which==='start')end=start+1;else start=end-1;}
     change({start,end});render();
   }
-  q('[data-start]').addEventListener('change',()=>applyYears('start'));
-  q('[data-end]').addEventListener('change',()=>applyYears('end'));
-  q('[data-start]').addEventListener('input',()=>editingYears.add('start'));
-  q('[data-end]').addEventListener('input',()=>editingYears.add('end'));
-  q('[data-reset-years]').addEventListener('click',()=>change({start:1970,end:2025}));
-  q('[data-clear-maker]').addEventListener('click',()=>change({manufacturer:null}));
+  q('[data-start]')?.addEventListener('change',()=>applyYears('start'));
+  q('[data-end]')?.addEventListener('change',()=>applyYears('end'));
+  q('[data-start]')?.addEventListener('input',()=>editingYears.add('start'));
+  q('[data-end]')?.addEventListener('input',()=>editingYears.add('end'));
+  q('[data-reset-years]')?.addEventListener('click',()=>change({start:1970,end:2025}));
+  q('[data-clear-maker]')?.addEventListener('click',()=>change({manufacturer:null}));
   root.addEventListener('keydown',event=>{
     if(event.key!=='Escape'&&event.target.closest('button,input,select,summary,a,[role="button"]'))event.stopPropagation();
   });
@@ -145,30 +147,7 @@ async function mount(container,kind) {
     if(interactive)nodes.attr('aria-pressed',r=>String(shared.manufacturer===r.label))
       .on('click',(_,r)=>change({manufacturer:shared.manufacturer===r.label?null:r.label}));
   }
-  function drawTypes(typeCells) {
-    const chart=select(q('.comparison-types-chart')),width=Math.max(260,q('.comparison-types-chart').clientWidth);
-    const rowHeight=59,scale=scaleLinear().domain([0,max(typeCells,r=>r.count)||1]).range([0,width-8]);
-    chart.attr('viewBox',`0 0 ${width} ${typeCells.length*rowHeight+12}`);
-    const rows=chart.selectAll('g.type-row').data(typeCells,r=>r.label).join(enter=>{
-      const row=enter.append('g').attr('class','type-row').attr('role','button').attr('tabindex',0);
-      row.append('rect').attr('class','type-hit').attr('fill','transparent');
-      row.append('text').attr('class','type-label');row.append('text').attr('class','type-value').attr('text-anchor','end');
-      row.append('rect').attr('class','type-bar outcome-nonfatal').attr('height',15);row.append('rect').attr('class','type-bar outcome-fatal').attr('height',15);return row;
-    });
-    rows.attr('transform',(_,i)=>`translate(0,${i*rowHeight+4})`).attr('aria-pressed',r=>String(shared.operation===r.label))
-      .attr('aria-label',r=>`${describeOutcome(r,labels[r.label])} Select this kind of flying.`)
-      .classed('is-selected',r=>shared.operation===r.label)
-      .on('pointerenter focus',(event,r)=>showOutcome(event,r,labels[r.label])).on('pointermove',(event,r)=>showOutcome(event,r,labels[r.label])).on('pointerleave blur',hideOutcome)
-      .on('click',(_,r)=>change({operation:r.label})).on('keydown',(event,r)=>{
-        if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();change({operation:r.label});}
-      });
-    rows.select('.type-hit').attr('width',width).attr('height',rowHeight-3);
-    rows.select('.type-label').attr('x',0).attr('y',17).text(r=>labels[r.label]);
-    rows.select('.type-value').attr('x',width-4).attr('y',17).text(r=>`${number(r.fatalCount)} fatal`);
-    rows.select('.outcome-fatal').attr('x',0).attr('y',27).attr('width',r=>scale(r.fatalCount));
-    rows.select('.outcome-nonfatal').attr('x',r=>scale(r.fatalCount)).attr('y',27).attr('width',r=>scale(r.count-r.fatalCount));
-    typeRows=rows;typeScale=scale;
-  }
+  const typeTrails=aircraft?null:createFlightTypeTrails({element:q('.comparison-types-chart'),tooltip:q('.comparison-tooltip'),labels,onSelect:operation=>change({operation})});
   function drawScatter(base,selectedIds) {
     const width=Math.max(260,q('.comparison-scatter').clientWidth),height=340;
     const gutter=width<500?56:92,plotRight=width-gutter;
@@ -270,19 +249,21 @@ async function mount(container,kind) {
   }
   function render() {
     if(destroyed)return;
+    if(aircraft){
     if(!editingYears.has('start'))q('[data-start]').value=shared.start;
     if(!editingYears.has('end'))q('[data-end]').value=shared.end-1;
     q('[data-operation]').value=shared.operation;
     q('[data-clear-maker]').hidden=!shared.manufacturer;
     q('[data-clear-maker]').textContent=shared.manufacturer?`${shared.manufacturer} ×`:'';
+    }
     const context=eligible.filter(byYears).filter(byOperation);
-    currentSelected=context.filter(byManufacturer);
+    currentSelected=aircraft?context.filter(byManufacturer):context;
     const selectedIds=new Set(ids(currentSelected));
     const makers=cells(context,'manufacturer'),models=cells(currentSelected,'aircraft');
-    const typeContext=data.records.filter(byYears).filter(byManufacturer);
+    const typeContext=data.records.filter(byYears);
     const typeCells=Object.keys(labels).map(label=>{const records=typeContext.filter(r=>r.operation===label);return {label,count:records.length,fatalCount:records.filter(r=>r.fatalities>0).length,recordIds:ids(records),fatalRecordIds:ids(records.filter(r=>r.fatalities>0))};});
     root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(shared.start);root.dataset.endYear=String(shared.end-1);
-    root.comparisonState={source:data.source,kind,filter:{...shared,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
+    root.comparisonState={source:data.source,kind,filter:{...shared,manufacturer:aircraft?shared.manufacturer:null,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
     q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
     if(aircraft) {
       q('[data-manufacturer]').value=shared.manufacturer||'';
@@ -296,9 +277,7 @@ async function mount(container,kind) {
       q('.comparison-selection').textContent=`${number(currentSelected.length)} selected records${shared.manufacturer?' · '+shared.manufacturer:''} · ${shared.operation==='all'?'All kinds of flying':labels[shared.operation]} · ${shared.start}–${shared.end-1}`;
       if(active)drawScatter(eligible.filter(byOperation),selectedIds);
     } else {
-      if(active)drawTypes(typeCells.filter(c=>c.label!=='other'));
-      const label=shared.operation==='all'?'All kinds of flying':labels[shared.operation];
-      q('.comparison-type-selection').textContent=shared.operation==='all' ? 'Choose a bar to filter, or continue with all kinds of flying.' : `${label} · ${number(currentSelected.length)} recorded crashes in ${shared.start}–${shared.end-1}`;
+      if(active)root.comparisonState.typeTrails=typeTrails.render(typeContext,shared);
     }
     if(narrative)paintNarrative(narrative.state);
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
@@ -329,14 +308,14 @@ async function mount(container,kind) {
       q('.comparison-maker-controls').hidden=stage<1;
       q('.comparison-brush-hint').textContent=stage<1?'': 'Drag across years. Age distributions face outward from the selection’s right edge. Click outside the brush to clear it.';
     } else {
-      if(typeRows) {
-        const reveal=r=>stage===0?0:stage===1?(r.label==='scheduled'?progress:0):stage===2?(r.label==='scheduled'?1:progress):1;
-        typeRows.select('.outcome-fatal').attr('width',r=>typeScale(r.fatalCount)*reveal(r));
-        typeRows.select('.outcome-nonfatal').attr('x',r=>typeScale(r.fatalCount)*reveal(r)).attr('width',r=>typeScale(r.count-r.fatalCount)*reveal(r));
-        typeRows.select('.type-value').attr('opacity',r=>reveal(r)>=1?1:0);
-      }
+      typeTrails.reveal({stage,progress});
       if(stage!==lastStoryStage){
-        const stories=[['Different kinds of flying','An airline, a private aircraft and a training flight share the archive. They operate in different settings.'],['Start with scheduled services.','Scheduled revenue services form one part of this worldwide archive.'],['The archive extends beyond airlines.','Private, charter, cargo and training flights also contribute to the crash records.'],['Which flights belong in your comparison?','Choose a kind of flying to carry into the aircraft view.']];
+        const stories=[
+          ['A commercial airliner is really the safest bet.','Professional crews. Scheduled maintenance. A whole system built around getting passengers there safely.'],
+          ['First, scheduled airlines.','These are the scheduled revenue flights we’ve followed so far.'],
+          ['Headlines cover much more.','Private, charter, cargo, business, training and military flights appear alongside airlines.'],
+          ['A commercial airliner is really the safest bet.','A crash headline can describe any one of these kinds of flying.'],
+        ];
         q('.comparison-type-note h2').textContent=stories[stage][0];
         q('.comparison-type-note>p:not(.eyebrow)').textContent=stories[stage][1];
       }
@@ -368,7 +347,7 @@ async function mount(container,kind) {
     nextBeat:()=>narrative.nextBeat(),
     previousBeat:()=>narrative.previousBeat(),
     showLastBeat:()=>narrative.showLastBeat(),
-    destroy(){destroyed=true;narrative.destroy();listeners.delete(render);observer.disconnect();root.remove();},
+    destroy(){destroyed=true;typeTrails?.hide();narrative.destroy();listeners.delete(render);observer.disconnect();root.remove();},
   };
 }
 export const mountFlightTypes=container=>mount(container,'types');
