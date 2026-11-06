@@ -33,15 +33,15 @@ test('inspection text and scaffold fade together, then records pour in before th
  await expect(root.locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  await expect(root.locator('.comparison-manufacturer-bars .record-bar>strong').first()).toHaveCSS('opacity','0');
  await next(page).click();await expect(root).toHaveAttribute('data-beat','2');
- await page.clock.runFor(1000);
+ await page.clock.runFor(500);
  const firstYears=await visibleYears();expect(firstYears.length).toBeGreaterThan(0);expect(firstYears.length).toBeLessThan(55);
  expect(Math.max(...firstYears)).toBeLessThan(2000);
  await root.locator('[data-comparison-pause]').click();const held=await root.getAttribute('data-reveal-progress');
  await page.clock.runFor(3000);await expect(root).toHaveAttribute('data-reveal-progress',held);
- await root.locator('[data-comparison-pause]').click();await page.clock.runFor(1000);
+ await root.locator('[data-comparison-pause]').click();await page.clock.runFor(500);
  expect((await visibleYears()).length).toBeGreaterThan(firstYears.length);
  await expect(root.locator('.comparison-age-annotation')).toHaveAttribute('opacity','0');
- await page.clock.runFor(1700);await expect(root).toHaveAttribute('data-data-progress','1');
+ await page.clock.runFor(850);await expect(root).toHaveAttribute('data-data-progress','1');
  await next(page).click();await expect(root).toHaveAttribute('data-beat','3');
  await expect(root.locator('.comparison-age-annotation')).toHaveAttribute('opacity','0');
  await next(page).click();await expect(root).toHaveAttribute('data-beat','3.5');await page.clock.runFor(650);
