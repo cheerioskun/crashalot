@@ -137,6 +137,9 @@ button.record-bar { cursor:pointer; }
 .trail-area{cursor:pointer;pointer-events:visiblePainted}
 .trail-line{pointer-events:none}
 .trail-fatal{fill:var(--comparison-fatal);fill-opacity:1}
+.trail-texture{pointer-events:none}
+.ridge-texture-pattern circle{fill:var(--bs-body-bg);opacity:.4}
+.ridge-texture-pattern path{stroke:var(--bs-body-bg);opacity:.4}
 .type-row:nth-child(1) .trail-fatal{fill:color-mix(in srgb,var(--comparison-fatal) 66%,var(--bs-body-bg))}
 .type-row:nth-child(2) .trail-fatal{fill:color-mix(in srgb,var(--comparison-fatal) 83%,var(--bs-body-bg))}
 .trail-fatal-line{fill:none;stroke:var(--bs-body-bg);stroke-width:2;stroke-linejoin:round}

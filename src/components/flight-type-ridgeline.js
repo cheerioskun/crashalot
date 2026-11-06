@@ -1,4 +1,4 @@
-import {area,axisBottom,curveMonotoneX,format,group,max,range,scaleBand,scaleLinear,select} from 'd3';
+import {area,axisBottom,curveMonotoneX,format,group,max,pointer,range,scaleBand,scaleLinear,select} from 'd3';
 
 const integer=format(',d');
 // Standard ridgeline structure: a category band scale plus one shared linear
@@ -6,9 +6,16 @@ const integer=format(',d');
 export function createFlightTypeRidgeline({element,tooltip,labels,onSelect}){
  const svg=select(element);let series=[],x,y,height,plotLeft,plotRight,chosen='all',start,end,focusedYear=null;
  let lastReveal={stage:0,progress:1};
- const operations=['scheduled','private','charter'],overlap=3.5;
+ // Largest recent tail at the back; scheduled service stays in the foreground.
+ const operations=['private','charter','scheduled'],overlap=3.5;
  const id=`type-trail-${element.closest('section').id}`;
- svg.append('defs').append('clipPath').attr('id',id).append('rect');
+ const defs=svg.append('defs');
+ defs.append('clipPath').attr('id',id).append('rect');
+ for(const operation of operations){
+  const pattern=defs.append('pattern').attr('id',`${id}-${operation}`).attr('patternUnits','userSpaceOnUse').attr('width',8).attr('height',8).attr('class','ridge-texture-pattern');
+  if(operation==='private')pattern.append('circle').attr('cx',4).attr('cy',4).attr('r',1.1);
+  else pattern.append('path').attr('d',operation==='charter'?'M-2,2 L2,-2 M0,8 L8,0 M6,10 L10,6':'M0,4 H8').attr('fill','none').attr('stroke-width',1);
+ }
  const grid=svg.append('g').attr('class','trail-grid');
  const marks=svg.append('g').attr('class','trail-marks');
  const cursor=svg.append('g').attr('class','trail-cursor').attr('pointer-events','none').attr('visibility','hidden');
@@ -33,7 +40,8 @@ export function createFlightTypeRidgeline({element,tooltip,labels,onSelect}){
    const node=document.createElement(tag);node.textContent=text;tooltip.append(node);
   }
   tooltip.hidden=false;
-  const box=element.getBoundingClientRect(),left=event.clientX||box.left+x(year),top=event.clientY||box.top+row.baseline;
+  const anchor=new DOMPoint(x(year),row.baseline+y(annual.fatalCount)).matrixTransform(element.getScreenCTM());
+  const left=event.clientX??anchor.x,top=event.clientY??anchor.y;
   tooltip.style.left=`${Math.max(12,Math.min(innerWidth-tooltip.offsetWidth-12,left+14))}px`;
   tooltip.style.top=`${Math.max(12,Math.min(innerHeight-tooltip.offsetHeight-12,top+16))}px`;
  }
@@ -68,13 +76,15 @@ export function createFlightTypeRidgeline({element,tooltip,labels,onSelect}){
     const row=enter.append('g').attr('class','type-row ridge').attr('role','button').attr('tabindex',0);
     row.append('line').attr('class','trail-baseline');
     const paths=row.append('g').attr('class','ridge-shape').attr('clip-path',`url(#${id})`);
-    paths.append('path').attr('class','trail-area trail-fatal');paths.append('path').attr('class','trail-line trail-fatal-line');
+    paths.append('path').attr('class','trail-area trail-fatal');
+    paths.append('path').attr('class','trail-texture').attr('fill',row=>`url(#${id}-${row.label})`);
+    paths.append('path').attr('class','trail-line trail-fatal-line');
     row.append('text').attr('class','type-label');row.append('rect').attr('class','type-hit').attr('fill','transparent');return row;
    });
-   rows.attr('transform',row=>`translate(0,${row.baseline})`).attr('aria-pressed',row=>String(chosen===row.label)).classed('is-selected',row=>chosen===row.label)
+   rows.order().attr('transform',row=>`translate(0,${row.baseline})`).attr('aria-pressed',row=>String(chosen===row.label)).classed('is-selected',row=>chosen===row.label)
     .attr('aria-label',row=>`${labels[row.label]}: ${integer(row.count)} fatal crashes, ${start}–${end}. Select this kind of flying.`)
     .on('pointerenter pointermove',(event,row)=>{
-     const box=element.getBoundingClientRect(),local=(event.clientX-box.left)*width/box.width;
+     const [local]=pointer(event,element);
      inspect(event,row,Math.max(start,Math.min(end,Math.round(x.invert(local)))));
     }).on('focus',(event,row)=>inspect(event,row,focusedYear??end)).on('pointerleave blur',hide)
     .on('click',(_,row)=>toggle(row)).on('keydown',(event,row)=>{
@@ -101,6 +111,7 @@ export function createFlightTypeRidgeline({element,tooltip,labels,onSelect}){
     const samples=row.years.length===1?[{...row.years[0],year:row.years[0].year-.5},row.years[0],{...row.years[0],year:row.years[0].year+.5}]:row.years;
     const areaGenerator=area().x(d=>x(d.year)).y0(0).y1(d=>y(d.count)*p).curve(curveMonotoneX);
     select(this).select('.trail-fatal').attr('d',areaGenerator(samples)).attr('opacity',p>0?1:0);
+    select(this).select('.trail-texture').attr('d',areaGenerator(samples)).attr('opacity',p>0?1:0);
     select(this).select('.trail-fatal-line').attr('d',areaGenerator.lineY1()(samples)).attr('opacity',p>0?1:0);
    });
   },

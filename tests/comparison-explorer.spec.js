@@ -134,7 +134,7 @@ test('ridgeline chart preserves annual source identities and expose counts on ho
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/flight-types');
  const chart=page.locator('.comparison-types');await expect(chart.locator('.type-row')).toHaveCount(3);
  const state=await chart.evaluate(r=>r.comparisonState),trails=state.typeTrails;
- expect(trails.outcome).toBe('fatal');expect(trails.series.map(row=>row.label)).toEqual(['scheduled','private','charter']);
+ expect(trails.outcome).toBe('fatal');expect(trails.series.map(row=>row.label)).toEqual(['private','charter','scheduled']);
  expect(trails.layout.type).toBe('ridgeline');
  expect(trails.layout.amplitude).toBeCloseTo(trails.layout.rowSpacing*trails.layout.overlap,5);
  await expect(chart.locator('.trail-fatal').first()).toHaveCSS('fill-opacity','1');
@@ -155,17 +155,31 @@ test('ridgeline chart preserves annual source identities and expose counts on ho
  await expect(chart.locator('.comparison-toolbar,.type-bar,.type-value,.comparison-type-selection')).toHaveCount(0);
  await expect(page.locator('#flight-types .comparison-deck')).toHaveText('Flying in a commercial plane is very different from flying in your private jet, or flying it yourself!');
  await expect(chart.locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
- const first=chart.locator('.type-row').first();await first.locator('.type-label').hover();await expect(chart.getByRole('tooltip')).toContainText('fatal crashes');await expect(chart.getByRole('tooltip')).not.toContainText('nonfatal');
+ const first=chart.getByRole('button',{name:/^Scheduled revenue:/});await first.locator('.type-label').hover();await expect(chart.getByRole('tooltip')).toContainText('fatal crashes');await expect(chart.getByRole('tooltip')).not.toContainText('nonfatal');
  await expect(chart.locator('.trail-marks')).toHaveClass(/has-inspection/);
  await expect(chart.locator('.ridge-count-guides text').first()).toBeVisible();
- await expect(chart.locator('.type-row').nth(1).locator('.ridge-shape')).toHaveCSS('opacity','0.12');
+ await expect(chart.getByRole('button',{name:/^Private:/}).locator('.ridge-shape')).toHaveCSS('opacity','0.12');
  await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1970');
  await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1971');
  await expect(page).toHaveURL(/flight-types$/);
+ // The frontmost recent tail is directly hoverable; textures distinguish all three ridges.
+ await page.mouse.move(0,0);
+ expect(new Set(await chart.locator('.trail-texture').evaluateAll(ns=>ns.map(n=>n.getAttribute('fill')))).size).toBe(3);
+ await expect(chart.locator('.comparison-types-chart')).toHaveCSS('transform','none');
+ const tail=await first.evaluate(row=>{
+  const svg=row.ownerSVGElement,root=row.closest('.comparison-types'),state=root.comparisonState.typeTrails;
+  const width=svg.viewBox.baseVal.width,year=2024,annual=row.__data__.years.find(d=>d.year===year);
+  const x=132+(year-state.start+.5)/(state.end-state.start+1)*(width-14-132);
+  const y=row.__data__.baseline-annual.count/state.maximum*state.layout.amplitude/2;
+  const point=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM());return {x:point.x,y:point.y};
+ });
+ await page.mouse.move(tail.x,tail.y);
+ await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 2024');
+ await expect(first).toHaveClass(/is-inspected/);
  await page.setViewportSize({width:390,height:844});
  await expect.poll(()=>page.locator('#flight-types .view').evaluate(v=>v.scrollWidth<=v.clientWidth)).toBe(true);
- await chart.locator('.type-row').nth(1).locator('.type-label').click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','true');
- await chart.locator('.type-row').nth(1).locator('.type-label').click();await expect(chart.locator('.type-row').nth(1)).toHaveAttribute('aria-pressed','false');
+ await chart.getByRole('button',{name:/^Private:/}).locator('.type-label').click();await expect(chart.getByRole('button',{name:/^Private:/})).toHaveAttribute('aria-pressed','true');
+ await chart.getByRole('button',{name:/^Private:/}).locator('.type-label').click();await expect(chart.getByRole('button',{name:/^Private:/})).toHaveAttribute('aria-pressed','false');
  await page.goto('/#/aircraft-design');await root(page).locator('[data-start]').click();await expect(root(page).locator('.record-bar').first()).toBeVisible();
  await expect(root(page).locator('.comparison-manufacturer-context')).toHaveText('Click a choice to filter on it.');
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
