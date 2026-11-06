@@ -1,0 +1,19 @@
+# Flight-type and aircraft comparison prototype
+
+November 6, 2026. These chapters replace all three former placeholder slides. The narrative explores whether perceptions transfer across different operations, then asks whether aircraft/model/age differences matter. The archive alone does not establish a per-flight risk ordering, a manufacturer safety ranking, or a measured effect on public perception.
+
+## Retained source and scope
+
+`public/data/comparison-records.json` projects the existing PlaneCrashData snapshot, revision and SHA-256 from `data/sources.json`. `scripts/build_comparison_records.py` reads that retained file only, checks its checksum, preserves original string IDs, and supports `--check`. No new data download or production-count-to-flight-exposure substitution is used.
+
+Scope: worldwide, 1970–2024, known airborne phase (departure, in flight, arrival), using the same phase mapping as the Sankey. There are 12,691 distinct aircraft-occurrence records across operations; 393 ground/unresolved-phase records are excluded. Scheduled Revenue Flight contributes the same 2,792 IDs as the preceding Sankey. Other source flight-type labels remain in Other / not recorded rather than being silently removed or merged into scheduled revenue.
+
+Aircraft age is calendar year of crash minus recorded manufacture year. Values missing or outside `1903 <= manufacture year <= crash year` are unusable. The user requested that these be skipped in the scatterplot and its linked breakdown: 398 records across the full comparison cohort. Flight-type counts retain them. Calendar-year age is approximate, not exact aircraft service time.
+
+Manufacturer labels are explicit literal prefixes of the aircraft-name string, matched longest-first. They are not a manufacturer source field or a corporate ownership history. Recognized source names remain separate (for example, Douglas is not reassigned to Boeing); 577 unmatched names remain Unclassified name. Raw aircraft strings and manufacture years remain inspectable. The aircraft-production dataset has no direct manufacturer join and its production counts are not flight exposure, so it is not joined into a risk calculation.
+
+## Selection contract
+
+A shared year interval (inclusive start, exclusive end) and flight-type choice carry between the two chapters. The aircraft scatter plots one mark per usable-age source record at crash date × age. Horizontal D3 brushing snaps to calendar years; numeric year controls supply a keyboard alternative. Unknown ages are excluded from both the scatter and its linked selection views.
+
+All aircraft-linked manufacturer/model cells and record details are derived from selected original IDs, never from display labels or point array indices. A manufacturer choice narrows the highlighted scatter records and model/record views. Manufacturer bars retain the date/type context for comparison. The flight-type chapter retains age-unknown records and states that broader scope in source details; a shared time window is not a claim that its age-independent count equals the aircraft-only subset.
