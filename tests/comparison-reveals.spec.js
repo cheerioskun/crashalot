@@ -21,7 +21,9 @@ test('four aircraft beats separate the title, inspection explanation, graph and 
  await next(page).click();await expect(root).toHaveAttribute('data-beat','1');
  await expect(intro).toHaveText('Aircraft have strict inspections at mandated intervals. They aren’t old in the way we think about old machines.');
  await expect(root.locator('.aircraft-comparison-grid')).toBeHidden();
- await next(page).click();await expect(root).toHaveAttribute('data-beat','2');await page.clock.runFor(700);
+ await next(page).click();await expect(root).toHaveAttribute('data-beat','2');
+ expect(await intro.evaluate(n=>getComputedStyle(n).opacity)).toBe('1');
+ await page.clock.runFor(700);
  const partial=Number(await clip.getAttribute('width'));expect(partial).toBeGreaterThan(0);
  await root.locator('[data-comparison-pause]').click();const held=await root.getAttribute('data-reveal-progress');
  await page.clock.runFor(3000);await expect(root).toHaveAttribute('data-reveal-progress',held);

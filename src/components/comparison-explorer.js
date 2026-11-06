@@ -356,7 +356,7 @@ async function mount(container,kind) {
     if(stage!==lastStoryStage){
       const story=aircraft?container.closest('main').querySelector('[data-aircraft-intro]'):q('.comparison-type-note');
       story.classList.remove('comparison-copy-enter');
-      if(!reduced){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
+      if(!reduced&&(!aircraft||stage===1)){void story.offsetWidth;story.classList.add('comparison-copy-enter');}
       lastStoryStage=stage;
     }
   }
