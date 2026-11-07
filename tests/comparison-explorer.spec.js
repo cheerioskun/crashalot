@@ -34,7 +34,7 @@ async function years(page,start,end) {
  await root(page).locator('[data-end]').fill(String(end));await root(page).locator('[data-end]').press('Tab');
 }
 
-test('new chapters replace every old placeholder; type choice and years carry between views',async({page,request})=>{
+test('recent flight-type comparison hands off scheduled service while aircraft years remain independent',async({page,request})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const data=await(await request.get('/data/comparison-records.json')).json(),rows=projected(data);
  const phases=await(await request.get('/data/flight-exploration.json')).json();
@@ -44,15 +44,23 @@ test('new chapters replace every old placeholder; type choice and years carry be
  await expect(page.locator('.storyboard-placeholder,#another-perspective,#the-whole-picture,#arrival')).toHaveCount(0);
  const initial=await page.locator('.comparison-types').evaluate(r=>r.comparisonState);
  expect(initial.filter.operation).toBe('all');
- expect(initial.recordIds).toEqual(rows.map(r=>r.source_id));
- expect(sorted(initial.typeCells.find(c=>c.label==='scheduled').recordIds)).toEqual(sorted(phases.rows.filter(r=>['departure','in_flight','arrival'].includes(r[1])).map(r=>r[0])));
- expect(initial.typeCells.reduce((n,c)=>n+c.count,0)).toBe(rows.length);
+ const recent=rows.filter(r=>r.year>=2005&&r.year<=2024);
+ expect(initial.recordIds).toEqual(recent.map(r=>r.source_id));
+ expect(initial.filter).toMatchObject({start:2005,end:2025});
+ const phaseIds=new Set(phases.rows.filter(r=>['departure','in_flight','arrival'].includes(r[1])).map(r=>r[0]));
+ const scheduled=initial.typeCells.find(c=>c.label==='scheduled').recordIds;
+ expect(sorted(scheduled)).toEqual(sorted(recent.filter(r=>r.operation==='scheduled').map(r=>r.source_id)));
+ expect(scheduled.every(id=>phaseIds.has(id))).toBe(true);
+ expect(initial.typeCells.reduce((n,c)=>n+c.count,0)).toBe(recent.length);
  await expect(page.locator('.comparison-types .type-row').filter({hasText:'Other / not recorded'})).toHaveCount(0);
  await expect(page.locator('.comparison-types [data-operation] option[value=other]')).toHaveCount(0);
  expect(initial.typeCells.find(c=>c.label==='other').count).toBeGreaterThan(0); // Canonical membership survives the display exclusion.
  await page.getByRole('button',{name:/^Private: /}).locator('.type-label').click();
+ await page.locator('[data-story-next]').click();
+ await expect(page.locator('.comparison-type-note h2')).toHaveText('Part of what made these commercial flights safer is stricter due diligence.');
+ await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await page.locator('[data-story-next]').click();await expect(root(page)).toBeVisible();
- await expect(root(page).locator('[data-operation]')).toHaveValue('private');
+ await expect(root(page).locator('[data-operation]')).toHaveValue('scheduled');
  await years(page,2000,2009);
  await expect(root(page).locator('[data-start]')).toHaveValue('2000');
  await expect(root(page).locator('[data-end]')).toHaveValue('2009');
@@ -65,7 +73,7 @@ test('new chapters replace every old placeholder; type choice and years carry be
  for(let i=0;i<5;i++)await page.locator('[data-story-back]').click();
  await expect(page.locator('#flight-types')).toHaveClass(/present/);
  const returned=await page.locator('.comparison-types').evaluate(r=>r.comparisonState.filter);
- expect(returned).toMatchObject({start:2000,end:2010,operation:'private',manufacturer:null});
+ expect(returned).toMatchObject({start:2005,end:2025,operation:'scheduled',manufacturer:null});
  await expect(page.locator('.comparison-types .comparison-toolbar')).toHaveCount(0);
  await page.locator('[data-story-next]').click();check(await state(page),rows);
  expect(errors).toEqual([]);
@@ -140,10 +148,11 @@ test('ridgeline chart preserves annual source identities and expose counts on ho
  await expect(chart.locator('.trail-fatal').first()).toHaveCSS('fill-opacity','1');
  await expect(chart.locator('.trail-total,.trail-total-line')).toHaveCount(0);
  await expect(chart.locator('.comparison-outcome-key')).not.toContainText('Nonfatal');
- expect(trails.maximum).toBe(59);expect(trails.start).toBe(1970);expect(trails.end).toBe(2024);
+ expect(trails.start).toBe(2005);expect(trails.end).toBe(2024);
+ expect(trails.maximum).toBe(Math.max(...trails.series.flatMap(row=>row.years.map(cell=>cell.count))));
  for(const trail of trails.series){
-  const source=rows.filter(r=>r.operation===trail.label&&r.fatalities>0);
-  expect(trail.years).toHaveLength(55);expect(trail.recordIds).toEqual(source.map(r=>r.source_id));
+  const source=rows.filter(r=>r.operation===trail.label&&r.fatalities>0&&r.year>=2005&&r.year<=2024);
+  expect(trail.years).toHaveLength(20);expect(trail.recordIds).toEqual(source.map(r=>r.source_id));
   expect(trail.years.reduce((sum,cell)=>sum+cell.count,0)).toBe(source.length);
   expect(trail.years.reduce((sum,cell)=>sum+cell.fatalCount,0)).toBe(source.filter(r=>r.fatalities>0).length);
   for(const cell of trail.years){
@@ -159,23 +168,45 @@ test('ridgeline chart preserves annual source identities and expose counts on ho
  await expect(chart.locator('.trail-marks')).toHaveClass(/has-inspection/);
  await expect(chart.locator('.ridge-count-guides text').first()).toBeVisible();
  await expect(chart.getByRole('button',{name:/^Private:/}).locator('.ridge-shape')).toHaveCSS('opacity','0.12');
- await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1970');
- await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 1971');
+ await first.focus();await page.keyboard.press('Home');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 2005');
+ await page.keyboard.press('ArrowRight');await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 2006');
  await expect(page).toHaveURL(/flight-types$/);
- // The frontmost recent tail is directly hoverable; textures distinguish all three ridges.
+ // Gradients replace textures. All rows share one count-based color scale.
  await page.mouse.move(0,0);
- expect(new Set(await chart.locator('.trail-texture').evaluateAll(ns=>ns.map(n=>n.getAttribute('fill')))).size).toBe(3);
+ await expect(chart.locator('.trail-texture,pattern')).toHaveCount(0);
+ const gradient=chart.locator('.ridge-height-gradient');
+ await expect(gradient).toHaveAttribute('gradientUnits','userSpaceOnUse');
+ expect(Number(await gradient.getAttribute('y2'))).toBe(-trails.layout.amplitude);
+ const fills=await chart.locator('.trail-fatal').evaluateAll(ns=>ns.map(n=>n.getAttribute('fill')));
+ expect(new Set(fills).size).toBe(1);expect(fills[0]).toContain('-height)');
  await expect(chart.locator('.comparison-types-chart')).toHaveCSS('transform','none');
  const tail=await first.evaluate(row=>{
   const svg=row.ownerSVGElement,root=row.closest('.comparison-types'),state=root.comparisonState.typeTrails;
   const width=svg.viewBox.baseVal.width,year=2024,annual=row.__data__.years.find(d=>d.year===year);
-  const x=132+(year-state.start+.5)/(state.end-state.start+1)*(width-14-132);
+  // Stay just inside the final area's vertical closing edge.
+  const x=36+(year-state.start+.5)/(state.end-state.start+1)*(width-144-36)-.5;
   const y=row.__data__.baseline-annual.count/state.maximum*state.layout.amplitude/2;
   const point=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM());return {x:point.x,y:point.y};
  });
  await page.mouse.move(tail.x,tail.y);
  await expect(chart.getByRole('tooltip')).toContainText('Scheduled revenue · 2024');
  await expect(first).toHaveClass(/is-inspected/);
+ await expect(chart.locator('.trail-inspect-area')).toHaveAttribute('d',await first.locator('.trail-fatal').getAttribute('d'));
+ const scheduledBaseline=trails.series.find(row=>row.label==='scheduled').baseline;
+ await expect(chart.locator('.trail-axis')).toHaveAttribute('transform',`translate(0,${scheduledBaseline})`);
+ const profile=await first.locator('.trail-fatal').getAttribute('d');
+ const stops=()=>gradient.locator('stop').evaluateAll(ns=>ns.map(n=>getComputedStyle(n).stopColor));
+ const lightStops=await stops();expect(new Set(lightStops).size).toBe(4);
+ await page.locator('#theme-toggle').click();
+ await expect(page.locator('html')).toHaveAttribute('data-bs-theme','dark');
+ expect(await stops()).not.toEqual(lightStops);
+ await expect(first.locator('.trail-fatal')).toHaveAttribute('d',profile);
+ await first.focus();await page.keyboard.press('Escape');
+ await expect(chart.getByRole('tooltip')).toBeHidden();
+ await expect(chart.locator('.trail-cursor')).toHaveAttribute('visibility','hidden');
+ await expect(chart.locator('.trail-marks')).not.toHaveClass(/has-inspection/);
+ await expect(page.locator('.reveal.overview')).toHaveCount(0);
+ await expect(chart.locator('.trail-axis')).not.toHaveAttribute('transform',`translate(0,${scheduledBaseline})`);
  await page.setViewportSize({width:390,height:844});
  await expect.poll(()=>page.locator('#flight-types .view').evaluate(v=>v.scrollWidth<=v.clientWidth)).toBe(true);
  await chart.getByRole('button',{name:/^Private:/}).locator('.type-label').click();await expect(chart.getByRole('button',{name:/^Private:/})).toHaveAttribute('aria-pressed','true');
@@ -185,9 +216,10 @@ test('ridgeline chart preserves annual source identities and expose counts on ho
  const maker=root(page).locator('.comparison-manufacturer-bars .record-bar').first();
  await maker.focus();await expect(root(page).getByRole('tooltip')).toContainText('total');
  await years(page,1970,1970);await page.evaluate(()=>location.hash='/flight-types');
- await expect(chart).toHaveAttribute('data-start-year','1970');
- const oneYear=await chart.evaluate(r=>r.comparisonState.typeTrails);expect(oneYear.series[0].years).toHaveLength(1);
- expect((await chart.locator('.trail-fatal').first().boundingBox()).width).toBeGreaterThan(100);
+ await expect(chart).toHaveAttribute('data-start-year','2005');
+ const returned=await chart.evaluate(r=>r.comparisonState.typeTrails);
+ expect(returned.series[0].years).toHaveLength(20);
+ expect(returned.series.map(row=>row.recordIds)).toEqual(trails.series.map(row=>row.recordIds));
 });
 
 

@@ -133,20 +133,19 @@ button.record-bar { cursor:pointer; }
 .comparison-types .comparison-measure{margin-bottom:2px}
 .comparison-types .comparison-outcome-key{margin-bottom:18px}
 .trail-grid line{stroke:var(--bs-border-color);stroke-width:.65;stroke-opacity:.18}
-.trail-baseline{stroke:none}
+.trail-baseline{stroke:var(--bs-body-color);stroke-width:.6;stroke-opacity:.12;pointer-events:none}
 .trail-area{cursor:pointer;pointer-events:visiblePainted}
 .trail-line{pointer-events:none}
-.trail-fatal{fill:var(--comparison-fatal);fill-opacity:1}
-.trail-texture{pointer-events:none}
-.ridge-texture-pattern circle{fill:var(--bs-body-bg);opacity:.4}
-.ridge-texture-pattern path{stroke:var(--bs-body-bg);opacity:.4}
-.type-row:nth-child(1) .trail-fatal{fill:color-mix(in srgb,var(--comparison-fatal) 66%,var(--bs-body-bg))}
-.type-row:nth-child(2) .trail-fatal{fill:color-mix(in srgb,var(--comparison-fatal) 83%,var(--bs-body-bg))}
-.trail-fatal-line{fill:none;stroke:var(--bs-body-bg);stroke-width:2;stroke-linejoin:round}
+.trail-fatal{fill-opacity:1}
+.ridge-height-stop-0{stop-color:var(--bs-body-bg)}
+.ridge-height-stop-1{stop-color:color-mix(in srgb,var(--comparison-fatal) 12%,var(--bs-body-bg))}
+.ridge-height-stop-2{stop-color:color-mix(in srgb,var(--comparison-fatal) 54%,var(--bs-body-bg))}
+.ridge-height-stop-3{stop-color:var(--comparison-fatal)}
+.trail-fatal-line{fill:none;stroke:var(--comparison-fatal);stroke-opacity:.26;stroke-width:.7;stroke-linejoin:round}
 .type-row.is-selected .type-label{font-weight:650}
 .type-row.is-inspected .type-label{text-decoration:underline;text-underline-offset:4px}
-.type-row.is-inspected .trail-fatal-line{stroke:var(--bs-body-color);stroke-width:1.5}
-.trail-inspect-profile{fill:none;stroke:var(--bs-body-color);stroke-width:1.5;stroke-opacity:.8}
+.type-row.is-inspected .trail-fatal-line{stroke-opacity:0}
+.trail-inspect-profile{fill:none;stroke:var(--comparison-fatal);stroke-width:1;stroke-opacity:.65}
 .trail-cursor line{stroke:var(--bs-body-color);stroke-width:.8;stroke-opacity:.35;stroke-dasharray:3 4}
 .trail-fatal-dot{fill:var(--comparison-fatal);stroke:var(--bs-body-bg);stroke-width:1}
 .comparison-type-note .comparison-type-hint{font-size:11px!important;line-height:1.8!important;color:var(--bs-secondary-color);margin:22px 0 0!important}
@@ -155,7 +154,8 @@ button.record-bar { cursor:pointer; }
 
 .ridge-shape{transition:opacity .2s ease}
 .trail-marks.has-inspection .type-row:not(.is-inspected) .ridge-shape{opacity:.12}
-.trail-marks.has-inspection .type-row:not(.is-inspected) .type-label{opacity:.4}
-.ridge-count-guides line{stroke:var(--bs-body-color);stroke-width:.7;stroke-opacity:.2}
+.trail-marks.has-inspection .type-row:not(.is-inspected) .type-label{opacity:.25}
+.trail-marks.has-inspection .type-row:not(.is-inspected) .trail-baseline{stroke-opacity:.04}
+.ridge-count-guides line{stroke:var(--bs-body-color);stroke-width:.7;stroke-opacity:.2;stroke-dasharray:none}
 .ridge-count-guides text{font:10px var(--bs-font-sans-serif);fill:var(--bs-body-color);paint-order:stroke;stroke:var(--bs-body-bg);stroke-width:3px;stroke-linejoin:round}
 @media(prefers-reduced-motion:reduce){.ridge-shape{transition:none}}

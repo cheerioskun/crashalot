@@ -27,12 +27,13 @@ function cells(rows,key) {
     .sort((a,b)=>b.fatalCount-a.fatalCount || b.count-a.count || a.label.localeCompare(b.label));
 }
 const ids=rows=>rows.map(row=>row.source_id);
-const byYears=row=>row.year>=shared.start && row.year<shared.end;
 const byOperation=row=>shared.operation==='all' || row.operation===shared.operation;
 const byManufacturer=row=>!shared.manufacturer || row.manufacturer===shared.manufacturer;
 
 async function mount(container,kind) {
   const data=await load(), aircraft=kind==='aircraft';
+  const latestYear=max(data.records,row=>row.year);
+  const recentPeriod={start:latestYear-19,end:latestYear+1};
   const labels=data.scope.operationLabels;
   const namedOperations=Object.entries(labels).filter(([key])=>key!=='other');
   const root=document.createElement('div');root.className=`comparison-explorer comparison-${kind}`;
@@ -68,11 +69,12 @@ async function mount(container,kind) {
       <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
         <div><p class="comparison-measure">Fatal crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Fatal crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
-        <aside class="comparison-type-note"><p class="eyebrow">Beyond the airline headline</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><p class="comparison-type-hint">Hover to inspect a year.<br>Click a trail to choose a kind of flying.</p></aside>
+        <aside class="comparison-type-note"><p class="eyebrow">Beyond the airline headline</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><p class="comparison-type-hint">Hover to inspect a year.</p></aside>
       </div>`}
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>
       <p>Worldwide archive · 1970–2024 · known airborne phases. Each record describes an aircraft involved in a crash; a collision may contribute two records. These counts have no flight-exposure denominator. The three overlapping trails show annual fatal crashes for Scheduled Revenue, Private and Charter/Taxi, all on the same vertical count scale. Opaque profiles overlap like layers in a landscape; the curves interpolate the yearly counts. Other flight types and nonfatal records are left out of those trails, but remain in “All kinds of flying” and the aircraft view.</p>
+      ${aircraft?'':`<p>The trails are limited to ${recentPeriod.start}–${latestYear}: the latest 20 years available in the retained dataset.</p>`}
       ${aircraft?'':'<p>Safety context: <a href="https://www.ntsb.gov/safety/Pages/research.aspx" target="_blank" rel="noreferrer">NTSB 2024 U.S. aviation statistics, Table 1</a>: scheduled airline service had 0 fatal accidents per 100,000 flight hours; general aviation had 0.72. That exposure-based comparison supports the narration. The trails above show annual fatal-crash counts in the worldwide archive.</p>'}
       <p class="comparison-source-age"></p><p class="comparison-age-evidence" hidden>The archive contains crashes, not all aircraft in service or all flights. It cannot isolate how age changes per-flight risk. Regulatory context: <a href="https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_120-84_CHG_1.pdf" target="_blank" rel="noreferrer">FAA · Aging Aircraft Inspections and Records Reviews</a>; <a href="https://uscode.house.gov/us/usc/119-120/t49/s44717/" target="_blank" rel="noreferrer">49 U.S.C. § 44717</a>. These U.S. requirements are context, not a worldwide measure of maintenance compliance.</p>
       <p>Manufacturer labels use aircraft-name prefixes, preserving historical names. Unclassified names are omitted from the manufacturer choices and bars, but remain in the full scatter and model view. Aircraft age is crash year minus manufacture year.</p>
@@ -91,8 +93,8 @@ async function mount(container,kind) {
   const skipped=data.records.length-eligible.length;
   q('.comparison-age-evidence').hidden=!aircraft;
   q('.comparison-source-age').textContent=aircraft
-    ? `${number(skipped)} records with missing or invalid manufacture years are omitted from both the scatterplot and its linked breakdown. ${number(eligible.length)} usable-age records remain across all flight types. The time and type choices carry between chapters; the preceding flight-type chart also includes unknown-age records.`
-    : `The retained source has ${number(data.records.length)} airborne-phase records, including unknown-age and nonfatal records. The three trails select fatal crashes in scheduled revenue, private and charter/taxi flying. Choosing a type carries that operation into the aircraft view, which includes both fatal and nonfatal crashes with a known aircraft age. No raw source record is deleted.`;
+    ? `${number(skipped)} records with missing or invalid manufacture years are omitted from both the scatterplot and its linked breakdown. ${number(eligible.length)} usable-age records remain across all flight types. This view offers the full 1970–2024 archive; the preceding flight-type chart shows the latest 20 years and also includes unknown-age records. Continuing that chapter opens this view with Scheduled Revenue selected.`
+    : `The retained source has ${number(data.records.length)} airborne-phase records, including unknown-age and nonfatal records. The three trails select fatal crashes in scheduled revenue, private and charter/taxi flying during ${recentPeriod.start}–${latestYear}. Continuing the story selects Scheduled Revenue for the aircraft view, which includes both fatal and nonfatal crashes with a known aircraft age. No raw source record is deleted.`;
   q('[data-operation]')?.addEventListener('change',event=>change({operation:event.target.value}));
   function applyYears(which) {
     editingYears.delete(which);
@@ -256,15 +258,17 @@ async function mount(container,kind) {
     q('[data-clear-maker]').hidden=!shared.manufacturer;
     q('[data-clear-maker]').textContent=shared.manufacturer?`${shared.manufacturer} ×`:'';
     }
-    const context=eligible.filter(byYears).filter(byOperation);
+    const filter=aircraft?shared:{...shared,...recentPeriod};
+    const inPeriod=row=>row.year>=filter.start&&row.year<filter.end;
+    const context=eligible.filter(inPeriod).filter(byOperation);
     currentSelected=aircraft?context.filter(byManufacturer):context;
     const selectedIds=new Set(ids(currentSelected));
     const makers=cells(context,'manufacturer'),models=cells(currentSelected,'aircraft');
-    const typeContext=data.records.filter(byYears);
+    const typeContext=data.records.filter(inPeriod);
     const typeCells=Object.keys(labels).map(label=>{const records=typeContext.filter(r=>r.operation===label);return {label,count:records.length,fatalCount:records.filter(r=>r.fatalities>0).length,recordIds:ids(records),fatalRecordIds:ids(records.filter(r=>r.fatalities>0))};});
-    root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(shared.start);root.dataset.endYear=String(shared.end-1);
-    root.comparisonState={source:data.source,kind,filter:{...shared,manufacturer:aircraft?shared.manufacturer:null,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
-    q('.comparison-scope').textContent=`${shared.start}–${shared.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
+    root.dataset.selectionCount=String(currentSelected.length);root.dataset.startYear=String(filter.start);root.dataset.endYear=String(filter.end-1);
+    root.comparisonState={source:data.source,kind,filter:{...filter,manufacturer:aircraft?shared.manufacturer:null,ageRequired:aircraft},recordIds:ids(currentSelected),recordKeys:currentSelected.map(r=>`${data.source.dataset}@${data.source.revision}:${r.source_id}`),contextRecordIds:ids(context),typeCells,manufacturerCells:makers,modelCells:models};
+    q('.comparison-scope').textContent=`${filter.start}–${filter.end-1} · Worldwide${aircraft?' · Known aircraft age':''}`;
     if(aircraft) {
       q('[data-manufacturer]').value=shared.manufacturer||'';
       const displayed=makers.filter(c=>c.label!=='Unclassified name').slice(0,7);
@@ -277,13 +281,13 @@ async function mount(container,kind) {
       q('.comparison-selection').textContent=`${number(currentSelected.length)} selected records${shared.manufacturer?' · '+shared.manufacturer:''} · ${shared.operation==='all'?'All kinds of flying':labels[shared.operation]} · ${shared.start}–${shared.end-1}`;
       if(active)drawScatter(eligible.filter(byOperation),selectedIds);
     } else {
-      if(active)root.comparisonState.typeTrails=typeTrails.render(typeContext,shared);
+      if(active)root.comparisonState.typeTrails=typeTrails.render(typeContext,filter);
     }
     if(narrative)paintNarrative(narrative.state);
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
   }
   function paintNarrative({stage,progress,reduced}) {
-    root.classList.toggle('is-exploring',stage===(aircraft?4:3));
+    root.classList.toggle('is-exploring',stage>=(aircraft?4:3));
     if(aircraft) {
       root.closest('section').dataset.aircraftBeat=['0','1','2','3','3.5'][stage];
       const intro=container.closest('main').querySelector('[data-aircraft-intro]');
@@ -312,12 +316,14 @@ async function mount(container,kind) {
       if(stage!==lastStoryStage){
         const stories=[
           ['A commercial airliner is really the safest bet.','Professional crews. Scheduled maintenance. A whole system built around getting passengers there safely.'],
-          ['First, scheduled airlines.','These are the scheduled revenue flights we’ve followed so far.'],
-          ['Private flying and charter flights.','Their fatal crashes appear in the same headlines as scheduled airlines.'],
+          ['First, scheduled airlines.',"These are the commercial airliners we've followed so far."],
+          ['Private flying and charter flights.','These headlines skew your perception of the frequency'],
           ['A commercial airliner is really the safest bet.','A crash headline can describe any one of these kinds of flying.'],
+          ['Part of what made these commercial flights safer is stricter due diligence.',''],
         ];
         q('.comparison-type-note h2').textContent=stories[stage][0];
         q('.comparison-type-note>p:not(.eyebrow)').textContent=stories[stage][1];
+        q('.comparison-type-note>p:not(.eyebrow)').hidden=stage===4;
       }
     }
     if(stage!==lastStoryStage){
@@ -327,7 +333,8 @@ async function mount(container,kind) {
       lastStoryStage=stage;
     }
   }
-  narrative=createComparisonBeats({root,container,aircraft,paint:paintNarrative});
+  narrative=createComparisonBeats({root,container,aircraft,paint:paintNarrative,
+    onContinue:()=>{if(!aircraft)change({operation:'scheduled',manufacturer:null});}});
   // An intentional data interaction opens exploration immediately and suspends Auto.
   root.addEventListener('pointerdown',event=>{
     if(event.target.closest('input,select,.type-row,.record-bar,.model-circle,.comparison-brush,[data-reset-years],[data-clear-maker]'))narrative.explore();

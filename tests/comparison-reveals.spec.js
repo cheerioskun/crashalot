@@ -58,12 +58,23 @@ test('inspection text and scaffold fade together, then records pour in before th
 test('Auto finishes each comparison and waits for explicit Next; inactive and hidden views suspend reveals',async({page})=>{
  await frozen(page,'flight-types',true);
  await page.clock.runFor(1300);await expect(types(page)).toHaveAttribute('data-beat','1');
+ await expect(types(page).locator('.comparison-type-note>p:not(.eyebrow)').first()).toHaveText("These are the commercial airliners we've followed so far.");
+ await expect(types(page).locator('.comparison-type-hint')).toHaveText('Hover to inspect a year.');
  const scheduled=types(page).getByRole('button',{name:/^Scheduled revenue:/});expect(Number(await scheduled.getAttribute('data-trail-progress'))).toBeGreaterThan(0);
  await expect(scheduled.locator('.trail-fatal')).toHaveAttribute('d',/^M/);
  const privateTrail=types(page).getByRole('button',{name:/^Private:/});await expect(privateTrail).toHaveAttribute('data-trail-progress','0');
+ await page.clock.runFor(5500);await expect(types(page)).toHaveAttribute('data-beat','2');
+ await expect(types(page).locator('.comparison-type-note>p:not(.eyebrow)').first()).toHaveText('These headlines skew your perception of the frequency');
  await page.clock.runFor(10000);await expect(types(page)).toHaveAttribute('data-playback','complete');
+ await expect(types(page)).toHaveAttribute('data-beat','3');
+ await expect(types(page).locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
+ await page.clock.fastForward(60000);await expect(page.locator('#flight-types')).toHaveClass(/present/);
+ await next(page).click();await expect(types(page)).toHaveAttribute('data-beat','4');
+ await expect(types(page).locator('.comparison-type-note h2')).toHaveText('Part of what made these commercial flights safer is stricter due diligence.');
+ await expect(types(page).locator('.comparison-type-note>p:not(.eyebrow)').first()).toBeHidden();
  await page.clock.fastForward(60000);await expect(page.locator('#flight-types')).toHaveClass(/present/);
  await next(page).click();await expect(aircraft(page)).toHaveAttribute('data-beat','0');
+ await expect(aircraft(page).locator('[data-operation]')).toHaveValue('scheduled');
  await page.clock.runFor(1050);await expect(aircraft(page)).toHaveAttribute('data-beat','1');
  await expect(aircraft(page)).toHaveAttribute('data-data-progress','0');
  await page.clock.runFor(1700);await expect(aircraft(page)).toHaveAttribute('data-beat','2');
@@ -79,7 +90,20 @@ test('Auto finishes each comparison and waits for explicit Next; inactive and hi
 });
 
 test('reduced motion opens a complete static comparison; native data interaction also opens exploration',async({page})=>{
- await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/aircraft-design');
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/#/flight-types');
+ await expect(types(page)).toHaveAttribute('data-beat','3');
+ await next(page).click();await expect(types(page)).toHaveAttribute('data-beat','4');
+ await page.locator('[data-story-back]').click();await expect(types(page)).toHaveAttribute('data-beat','3');
+ await expect(types(page).locator('.comparison-type-note h2')).toHaveText('A commercial airliner is really the safest bet.');
+ await expect(types(page).locator('.comparison-type-note>p:not(.eyebrow)').first()).toBeVisible();
+ await next(page).click();
+ await types(page).getByRole('button',{name:/^Private:/}).locator('.type-label').click();
+ await expect(types(page)).toHaveAttribute('data-beat','4');
+ await next(page).click();
+ await expect(aircraft(page).locator('[data-operation]')).toHaveValue('scheduled');
+ await expect(aircraft(page)).toHaveAttribute('data-beat','0');
+ // Back switched Auto off; reduced-motion Auto still completes the new view.
+ await page.locator('#playback-toggle').click();
  await expect(aircraft(page)).toHaveAttribute('data-playback','complete');await expect(aircraft(page)).toHaveAttribute('data-beat','3.5');
  await expect(aircraft(page).locator('.comparison-maker-controls')).toBeVisible();
  await page.emulateMedia({reducedMotion:'no-preference'});await aircraft(page).locator('[data-comparison-replay]').click();await expect(aircraft(page)).toHaveAttribute('data-beat','0');

@@ -2,10 +2,10 @@ import {timer} from 'd3';
 import {createBeatPlayback} from './beat-playback.js';
 
 // Reveals stay inside the current chapter. Only the presentation owns slide navigation.
-export function createComparisonBeats({root,container,aircraft,paint}) {
-  const labels=aircraft?['0','1','2','3','3.5']:['0','1','2','3'];
-  const durations=aircraft?[0,650,1800,0,600]:[0,900,1500,0];
-  const holds=aircraft?[600,950,0,650,0]:[900,2200,3500,0];
+export function createComparisonBeats({root,container,aircraft,paint,onContinue=()=>{}}) {
+  const labels=aircraft?['0','1','2','3','3.5']:['0','1','2','3','4'];
+  const durations=aircraft?[0,650,1800,0,600]:[0,900,1500,0,0];
+  const holds=aircraft?[600,950,0,650,0]:[900,2200,3500,0,0];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let stage=0,progress=1,clock,running=false,active=false,destroyed=false;
   const transport=document.createElement('div');transport.className='comparison-transport';
@@ -13,11 +13,14 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
   root.querySelector('.comparison-outcome-key').append(transport);
   const pause=transport.querySelector('[data-comparison-pause]');
   const complete=()=>stage===durations.length-1&&progress===1;
+  // Auto stops at the finished comparison. The transition to due diligence
+  // belongs to explicit Next, just like the preceding chapter's bridge.
+  const autoComplete=()=>stage>=(aircraft?durations.length-1:3)&&progress===1;
   const notify=()=>container.dispatchEvent(new CustomEvent('storybeat',{bubbles:true}));
   function render(){
     root.dataset.beat=labels[stage];root.dataset.revealProgress=String(progress);root.dataset.playback=playback.status;
-    const label=complete()||running||playback.status==='waiting'?'Pause':'Resume';
-    if(pause.textContent!==label)pause.textContent=label;pause.disabled=complete();
+    const label=autoComplete()||running||playback.status==='waiting'?'Pause':'Resume';
+    if(pause.textContent!==label)pause.textContent=label;pause.disabled=autoComplete();
     paint({stage,progress,reduced:reduced.matches});
   }
   function stop(){clock?.stop();running=false;}
@@ -34,8 +37,8 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
     if(complete())return;
     stop();stage++;progress=durations[stage]?0:1;render();play();playback.settled();notify();
   }
-  function showAll(){stop();stage=durations.length-1;progress=1;render();notify();}
-  const playback=createBeatPlayback({state:()=>({key:stage,running,complete:complete(),atBoundary:progress===1,durationMs:durations[stage],remainingMs:(1-progress)*durations[stage],terminal:stage===durations.length-1}),
+  function showAll(lastStage=Math.max(stage,aircraft?durations.length-1:3)){stop();stage=lastStage;progress=1;render();notify();}
+  const playback=createBeatPlayback({state:()=>({key:stage,running,complete:autoComplete(),atBoundary:progress===1,durationMs:durations[stage],remainingMs:(1-progress)*durations[stage],terminal:stage>=(aircraft?durations.length-1:3)}),
     timeline:()=>durations.map((duration,i)=>({duration,hold:holds[i]})),
     play,pause:stop,advance,holdMs:()=>holds[stage],reduced,showAll,changed:render});
   pause.addEventListener('click',()=>playback.togglePause());
@@ -50,9 +53,9 @@ export function createComparisonBeats({root,container,aircraft,paint}) {
     getPlaybackTiming:()=>playback.timing,
     getNavigationState(){return {step:stage+1,total:durations.length,running,inProgress:progress<1,complete:complete()};},
     finishBeat(){playback.engage();stop();progress=1;render();playback.settled();notify();},
-    nextBeat(){if(complete())return false;playback.engage();advance();return true;},
+    nextBeat(){if(complete()){onContinue();return false;}playback.engage();advance();return true;},
     previousBeat(){if(stage===0)return false;playback.hold();stop();stage--;progress=1;render();notify();return true;},
-    showLastBeat(){playback.hold();showAll();},
+    showLastBeat(){playback.hold();showAll(durations.length-1);},
     explore(){if(complete())return;playback.hold();showAll();},
     destroy(){destroyed=true;playback.destroy();transport.remove();},
   };

@@ -6,7 +6,7 @@ test('Escape shows eight clickable previews and every selected chapter opens at 
  test.setTimeout(45000);
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/#/aircraft-design');await page.locator('.comparison-aircraft').waitFor({state:'attached'});
- const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','3'],[7,'.comparison-aircraft','3.5'],[8,'.conclusion-scene','Thanks']];
+ const choices=[[4,'.decade-trend','6'],[3,'.scale-comparison','6'],[5,'.flight-exploration','5.5'],[6,'.comparison-types','4'],[7,'.comparison-aircraft','3.5'],[8,'.conclusion-scene','Thanks']];
  for(const [number,selector,beat]of choices){
   await page.keyboard.press('Escape');await expect(overview(page)).toBeVisible();
   await expect(page.getByRole('button',{name:/^Slide \d+:/})).toHaveCount(8);
