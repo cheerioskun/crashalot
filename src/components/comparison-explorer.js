@@ -68,8 +68,8 @@ async function mount(container,kind) {
       <div class="comparison-selection" role="status" aria-live="polite"></div>
       <div class="comparison-model-grid"></div>` : `
       <div class="type-comparison-grid">
-        <div><p class="comparison-measure">Fatal crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Fatal crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
         <aside class="comparison-type-note"><p class="eyebrow">Beyond the airline headline</p><h2>Which flights are in the picture?</h2><p>A scheduled airline, a private aircraft and a charter operate in different settings. Their records belong to different comparisons.</p><p class="comparison-type-hint">Hover to inspect a year.</p></aside>
+        <div><p class="comparison-measure">Fatal crashes per year</p><svg class="comparison-types-chart" role="group" aria-label="Fatal crashes per year by kind of flying. Hover for counts; click to choose a flight type."></svg></div>
       </div>`}
     <div class="comparison-tooltip" role="tooltip" hidden></div>
     <details class="evidence-source comparison-source"><summary>Source, scope & selection</summary>

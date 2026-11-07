@@ -12,7 +12,7 @@
 .comparison-scope,.comparison-measure,.comparison-brush-hint,.comparison-manufacturer-context { font-size:11px;line-height:1.6;color:var(--bs-secondary-color); }
 .comparison-scope { margin:0 0 22px; }
 .comparison-measure { margin:0 0 12px; }
-.type-comparison-grid { display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:60px;align-items:center; }
+.type-comparison-grid { display:grid;grid-template-columns:290px minmax(0,1fr);gap:60px;align-items:center; }
 .comparison-types-chart,.comparison-scatter { width:100%;display:block;overflow:visible; }
 .type-row { cursor:pointer; }
 .type-row .type-label,.type-row .type-value { font:13px var(--bs-font-sans-serif);fill:var(--bs-body-color); }
@@ -22,7 +22,8 @@
 .type-row.is-selected .type-label { font-weight:650; }
 .type-row:hover .type-bar,.type-row:focus .type-bar { opacity:.8; }
 .type-row:focus { outline:none; }.type-row:focus-visible .type-hit { stroke:var(--bs-body-color);stroke-width:1; }
-.comparison-type-note,.comparison-linked { border-left:2px solid var(--viz-series-1);padding-left:24px; }
+.comparison-linked { border-left:2px solid var(--viz-series-1);padding-left:24px; }
+.comparison-type-note { border-right:2px solid var(--viz-series-1);padding-right:24px; }
 .comparison-type-note h2,.comparison-linked h2,.comparison-model-grid h2 { font:400 27px/1.2 Georgia,serif;letter-spacing:-.025em;margin:0 0 16px; }
 .comparison-type-note>p:not(.eyebrow) { font-size:13px;line-height:1.65;margin:0 0 18px; }
 .comparison-type-note .eyebrow { color:var(--bs-secondary-color); }
@@ -70,12 +71,12 @@ button.record-bar { cursor:pointer; }
 @keyframes model-photo-enter{from{transform:translate(25px,40px) rotate(6deg) scale(.96)}to{transform:translate(0,0) rotate(-2deg) scale(1)}}
 @media(prefers-reduced-motion:reduce){.model-polaroid{animation:none}}
 .comparison-source { margin:26px 0 18px;max-width:100ch; }
-@media(max-width:1050px) { .type-comparison-grid{gap:30px;grid-template-columns:minmax(0,1fr) 240px}.aircraft-comparison-grid{gap:24px;grid-template-columns:minmax(0,1fr) 230px}.comparison-model-grid{gap:30px} }
+@media(max-width:1050px) { .type-comparison-grid{gap:30px;grid-template-columns:240px minmax(0,1fr)}.aircraft-comparison-grid{gap:24px;grid-template-columns:minmax(0,1fr) 230px}.comparison-model-grid{gap:30px} }
 @media(max-width:720px) {
  .comparison-view .evidence-heading h1{font-size:35px}.comparison-view .comparison-deck{font-size:14px}
  .comparison-toolbar{gap:14px 18px}.comparison-toolbar input,.comparison-toolbar select,.comparison-manufacturer select{min-height:44px}
  .type-comparison-grid,.aircraft-comparison-grid,.comparison-model-grid{grid-template-columns:1fr;gap:28px}
- .comparison-type-note,.comparison-linked{padding-left:18px}.comparison-type-note{margin:0 0 12px}
+ .comparison-linked{padding-left:18px}.comparison-type-note{padding-right:18px;margin:0 0 12px}
  .comparison-linked{max-width:none}.model-schematic-panel{padding:0}.model-polaroid-stage{max-width:420px;margin:auto}.model-schematic-panel select{min-height:44px}
 }
 
