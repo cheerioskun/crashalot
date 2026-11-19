@@ -267,6 +267,17 @@
 .flight-exploration .selection-row .selection-label {
   margin: 0;
 }
+.flight-exploration .jump-to-causes {
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 0;
+  color: var(--bs-body-color);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  white-space: nowrap;
+}
 .flight-exploration .area-reading {
   font-size: 11px;
   line-height: 1.5;
@@ -277,6 +288,9 @@
   .flight-exploration .selection-row {
     flex-wrap: wrap;
     gap: 8px;
+  }
+  .flight-exploration .jump-to-causes {
+    min-height: 44px;
   }
 }
 

@@ -115,7 +115,6 @@ test("themes, reduced motion, mobile layout and explicit cause jump", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.setViewportSize({width:1280,height:720});
   await chapter(page);
   await page.locator('[data-cohort="departure"]').click();
   if (screenshotDir)

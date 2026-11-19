@@ -130,7 +130,7 @@ body.presentation-cover .presentation-footer, body.presentation-hook .presentati
 [data-bs-theme="dark"] .presentation-utilities { --utility-on:#ffd790; --utility-glow:#edb350; }
 .utility-button { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:68px; height:52px; padding:5px 8px; border:0; border-radius:6px; background:transparent; color:var(--bs-secondary-color); cursor:pointer; }
 .utility-icon { display:block; flex-shrink:0; width:30px; height:26px; overflow:visible; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
-.utility-label { font:500 12px/14px var(--bs-font-sans-serif); white-space:nowrap; }
+.utility-label { font:400 11px/14px var(--bs-font-sans-serif); white-space:nowrap; }
 .belt-strap { fill:currentColor; stroke:none; }
 .utility-button[aria-pressed="true"] .utility-icon { color:var(--utility-on); filter:drop-shadow(0 0 3px color-mix(in srgb,var(--utility-glow) 32%,transparent)) drop-shadow(0 0 7px color-mix(in srgb,var(--utility-glow) 15%,transparent)); }
 .utility-button:hover { opacity:.75; }
