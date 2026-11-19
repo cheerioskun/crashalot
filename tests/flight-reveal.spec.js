@@ -127,25 +127,29 @@ test('natural Auto completion, Pause/Resume, Back and Replay retain linked data'
 });
 
 for (const [layout,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]) {
-  test(`${layout}: phase ribbons draw through consecutive paths at fixed thickness`,async ({page}) => {
+  test(`${layout}: each reveal draws the full incoming ribbon and both sides of the split`,async ({page}) => {
     await page.setViewportSize(viewport);
     await openFrozen(page,false);
     await next(page).click();await next(page).click();
     const paths = () => page.locator('path.flow-base').evaluateAll(nodes => nodes.map(n => ({
-      terminal:n.dataset.terminal,path:n.getAttribute('d'),width:n.getAttribute('stroke-width'),
+      terminal:n.dataset.terminal,source:n.__data__.link.source.id,target:n.__data__.link.target.id,
+      path:n.getAttribute('d'),width:n.getAttribute('stroke-width'),
       progress:Number(n.getAttribute('stroke-dasharray').split(' ')[0]),visibility:n.getAttribute('visibility'),
     })));
     await page.clock.runFor(400);
-    const early=await paths(),departure=early.filter(d => d.terminal==='departure');
-    expect(departure[0].progress).toBeGreaterThan(0);
-    expect(departure[0].progress).toBeLessThan(1);
-    expect(departure[1].progress).toBe(0);
-    expect(early.filter(d => d.terminal!=='departure').every(d => d.visibility==='hidden')).toBe(true);
+    const early=await paths(),incoming=early.filter(d => d.source==='all');
+    expect(incoming).toHaveLength(3);
+    expect(incoming.every(d => d.progress>0 && d.progress<1)).toBe(true);
+    expect(new Set(incoming.map(d => d.progress)).size).toBe(1);
+    expect(early.filter(d => d.source!=='all').every(d => d.visibility==='hidden')).toBe(true);
     await page.clock.runFor(600);
-    const middle=await paths(),route=middle.filter(d => d.terminal==='departure');
-    expect(route[0].progress).toBe(1);
-    expect(route[1].progress).toBeGreaterThan(0);
-    expect(route[1].progress).toBeLessThan(1);
+    const middle=await paths(),split=middle.filter(d => d.source==='ordered');
+    expect(middle.filter(d => d.source==='all').every(d => d.progress===1)).toBe(true);
+    expect(split.every(d => d.progress>0)).toBe(true);
+    expect(split.find(d => d.target==='crash').progress).toBeLessThan(1);
+    expect(split.filter(d => d.target==='later').map(d => d.terminal).sort()).toEqual(['arrival','in_flight']);
+    expect(new Set(split.filter(d => d.target==='later').map(d => d.progress)).size).toBe(1);
+    expect(middle.filter(d => ['later','arrival'].includes(d.source)).every(d => d.visibility==='hidden')).toBe(true);
     expect(middle.map(({terminal,path,width})=>({terminal,path,width}))).toEqual(early.map(({terminal,path,width})=>({terminal,path,width})));
     // The path's leading point advances on the reading axis, including the
     // top-to-bottom mobile route; a width-only fill cannot satisfy this.
@@ -156,11 +160,15 @@ for (const [layout,viewport] of [['desktop',{width:1440,height:1000}],['mobile',
     expect(layout==='desktop' ? front.dx : front.dy).toBeGreaterThan(20);
     await page.clock.runFor(2200);
     const later=await paths();
-    expect(later.filter(d=>d.terminal==='departure').every(d=>d.progress===1)).toBe(true);
+    expect(later.filter(d=>['all','ordered'].includes(d.source)).every(d=>d.progress===1)).toBe(true);
     expect(later.map(({terminal,path,width})=>({terminal,path,width}))).toEqual(early.map(({terminal,path,width})=>({terminal,path,width})));
-    expect(later.filter(d=>d.terminal==='arrival').every(d=>d.visibility==='hidden')).toBe(true);
+    expect(later.filter(d=>['later','arrival'].includes(d.source)).every(d=>d.visibility==='hidden')).toBe(true);
     await next(page).click();await next(page).click();await next(page).click();
     await page.clock.runFor(400);
+    const second=await paths();
+    expect(second.filter(d=>d.source==='later').every(d=>d.progress>0)).toBe(true);
+    expect(second.find(d=>d.source==='arrival').visibility).toBe('hidden');
+    expect(second.filter(d=>['all','ordered'].includes(d.source))).toEqual(later.filter(d=>['all','ordered'].includes(d.source)));
     await page.locator('[data-flight-pause]').click();
     const paused=await paths();await page.clock.runFor(3000);expect(await paths()).toEqual(paused);
   });

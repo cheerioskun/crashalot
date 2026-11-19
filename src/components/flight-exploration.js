@@ -6,6 +6,7 @@ import "./flight-exploration/style.css";
 import { createRoot } from "react-dom/client";
 import { AreaBump } from "@nivo/bump";
 import { createBeatPlayback } from "./beat-playback.js";
+import { createLinkedViewCue } from './linked-view-cue.js';
 export async function mountFlightExploration(container) {
   const response = await fetch(
     `${import.meta.env.BASE_URL}data/flight-exploration.json`,
@@ -63,6 +64,7 @@ export async function mountFlightExploration(container) {
     { label:'6', end:3, hold:0, bridge:true },
   ];
   const scene = () => beats[revealStage];
+  const scrollCue=createLinkedViewCue({view:root.closest('.view'),target:root.querySelector('#flight-causes-title'),section:root.querySelector('.area-section'),label:'Explore causes below',className:'jump-to-causes',ready:()=>revealProgress>0&&!scene().bridge});
   const fullView = () => revealStage>=10 && revealProgress>=phases.length;
   const complete = () => scene().bridge===true;
   const clamp = value => Math.max(0, Math.min(1, value));
@@ -571,13 +573,22 @@ export async function mountFlightExploration(container) {
       .attr('stroke-width',d => groups[d.terminal].length*unit)
       .attr('pathLength',1).attr('data-terminal',d => d.terminal);
     base.each(function(d) { d.length = this.getTotalLength(); });
-    // Each phase travels from the source through consecutive links to its sink.
-    // Normalized dashes follow the actual curved path, including the mobile layout.
-    for (const terminal of phases) {
-      const route = bands.filter(d => d.terminal === terminal).sort((a,b) => a.link.source.x0-b.link.source.x0);
-      const total = d3.sum(route,d => d.length);
-      let offset = 0;
-      for (const band of route) { band.routeStart=offset; band.routeLength=total; offset+=band.length; }
+    // Reveal a whole split, not a terminal cohort traced back through the chart.
+    // First bring the entire ribbon to departure; then draw both its crash branch
+    // and its continuation to in flight. Later beats extend the same frontier.
+    for (const link of links) {
+      link.revealPhase = link.source.id === 'later' ? 'in_flight' : link.source.id === 'arrival' ? 'arrival' : 'departure';
+      link.length = d3.max(bands.filter(d => d.link === link),d => d.length);
+    }
+    const incomingLength = links.find(link => link.source.id === 'all').length;
+    for (const phase of phases) {
+      const branches = links.filter(link => link.revealPhase === phase && link.source.id !== 'all');
+      const lead = phase === 'departure' ? incomingLength : 0;
+      const total = lead + d3.max(branches,link => link.length);
+      for (const link of links.filter(link => link.revealPhase === phase)) {
+        link.revealStart = link.source.id === 'all' ? 0 : lead;
+        link.revealLength = total;
+      }
     }
     flowBands = bands;
     overlay = svg.selectAll('path.flow-selected').data(bands,bandKey).join('path')
@@ -592,8 +603,8 @@ export async function mountFlightExploration(container) {
       .on('keydown',(e,l) => { if (members(l.key).length && ['Enter',' '].includes(e.key)) { e.preventDefault(); e.stopPropagation(); choose(l.key); } });
     const nodeBands = new Map();
     for (const band of bands) {
-      for (const [node,y,distance] of [[band.link.source,band.startY,band.routeStart],[band.link.target,band.endY,band.routeStart+band.length]]) {
-        nodeBands.set(node.id+':'+band.terminal,{node,terminal:band.terminal,y,distance,routeLength:band.routeLength});
+      for (const [node,y] of [[band.link.source,band.startY],[band.link.target,band.endY]]) {
+        nodeBands.set(node.id+':'+band.terminal,{node,terminal:band.terminal,y});
       }
     }
     svg.selectAll('rect.flow-node').data([...nodeBands.values()],d => d.node.id+':'+d.terminal).join('rect').attr('class','flow-node')
@@ -604,14 +615,14 @@ export async function mountFlightExploration(container) {
     const labels = [];
     const add = (key,x,y,text,second='',anchor='start') => labels.push({key,x,y,text,second,anchor});
     if (!vertical) {
-      add('all',16,22,'Crashes',format(revealedIds.size));
+      add('all',16,22,'Crashes',format(records.length));
       add('departure',xs[1],22,'Departure'); add('in_flight',xs[2],22,'In flight'); add('arrival',xs[3],22,'Arrival');
       add('dep-count',xs[1]+14,165,format(members('departure').length));
       add('flight-count',xs[2]+14,179,format(members('in_flight').length));
       add('arrival-count',width-18,116,format(members('arrival').length),'','end');
     } else {
       const tx = Math.min(width-142,130);
-      add('all',tx,47,'Crashes',format(revealedIds.size));
+      add('all',tx,47,'Crashes',format(records.length));
       add('departure',tx,167,'Departure',members('departure').length ? format(members('departure').length) : '');
       add('in_flight',tx,287,'In flight',members('in_flight').length ? format(members('in_flight').length) : '');
       add('arrival',tx,407,'Arrival',members('arrival').length ? format(members('arrival').length) : '');
@@ -632,15 +643,18 @@ export async function mountFlightExploration(container) {
   }
   function renderFlowProgress() {
     const focus=selected==='all' && !fullView() ? scene().phase : null;
+    const splitNode={departure:'ordered',in_flight:'later',arrival:'arrival'}[focus];
     for (const band of flowBands) {
-      const progress = phaseProgress(band.terminal);
-      band.progress = progress === 1 ? 1 : clamp((progress*band.routeLength-band.routeStart)/band.length);
+      const link=band.link,progress=phaseProgress(link.revealPhase);
+      // All bands within a link share a front; the two outgoing links start
+      // together at their fork, retaining the final proportional widths.
+      band.progress = progress === 1 ? 1 : clamp((progress*link.revealLength-link.revealStart)/link.length);
     }
     svg.selectAll('path.flow-base, path.flow-selected')
       .attr('stroke-dasharray',d => `${d.progress} 1`)
       .attr('visibility',d => d.progress > 0 ? 'visible' : 'hidden')
       .style('stroke-opacity',function(d) {
-        const emphasized=!focus || d.terminal===focus;
+        const emphasized=!focus || d.link.revealPhase===focus || d.link.target.id===splitNode;
         return this.classList.contains('flow-selected') ? emphasized ? .76 : .26 : emphasized ? .22 : .1;
       });
     svg.selectAll('text.flow-label').classed('is-current',d=>Boolean(focus && (d.key===focus || d.key==={departure:'dep-count',in_flight:'flight-count',arrival:'arrival-count'}[focus])))
@@ -650,7 +664,8 @@ export async function mountFlightExploration(container) {
       .attr('visibility',link => flowBands.filter(d => d.link===link).every(d => d.progress===1) ? 'visible' : 'hidden')
       .attr('tabindex',link => flowBands.filter(d => d.link===link).every(d => d.progress===1) ? 0 : -1)
       .attr('aria-hidden',link => String(!flowBands.filter(d => d.link===link).every(d => d.progress===1)));
-    svg.selectAll('rect.flow-node').attr('visibility',d => phaseProgress(d.terminal)>0 && phaseProgress(d.terminal)*d.routeLength>=d.distance-.01 ? 'visible' : 'hidden');
+    svg.selectAll('rect.flow-node').attr('visibility',d => flowBands.some(band => band.terminal===d.terminal &&
+      (band.link.source===d.node && band.progress>0 || band.link.target===d.node && band.progress===1)) ? 'visible' : 'hidden');
   }
 
   function renderCommentary() {
@@ -715,6 +730,7 @@ export async function mountFlightExploration(container) {
     root.querySelector('.flight-commentary').classList.toggle('is-visible',revealStage>0 || exploring);
   }
   function renderRevealControls() {
+    scrollCue.refresh();
     root.dataset.revealStage=String(revealStage);root.dataset.revealProgress=String(revealProgress);
     root.dataset.storyBeat=scene().label;root.dataset.playback=playback.status;
     const bridge=scene().bridge===true;
@@ -828,15 +844,6 @@ export async function mountFlightExploration(container) {
   root
     .querySelector("[data-clear-selection]")
     .addEventListener("click", clearSelection);
-  root.querySelector(".jump-to-causes").addEventListener("click", () => {
-    root.querySelector("#flight-causes-title").focus({ preventScroll: true });
-    root
-      .querySelector(".area-section")
-      .scrollIntoView({
-        behavior: reduced.matches ? "instant" : "smooth",
-        block: "start",
-      });
-  });
   function clearSelection() {
     playback.hold(); showAll();
     selected = "all";
@@ -886,11 +893,12 @@ export async function mountFlightExploration(container) {
     },
     setActive(value) {
       if (active===value) return;
-      active=value; playback.setActive(value);
+      active=value; scrollCue.setActive(value); playback.setActive(value);
       if (!active) { svg.selectAll('*').interrupt(); reactRoot.render(null); return; }
       hasRenderedArea=false; draw(); renderArea(); announce(false);
     },
     destroy() {
+      scrollCue.destroy();
       playback.destroy();
       destroyed = true;
       observer.disconnect();

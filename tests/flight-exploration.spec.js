@@ -86,6 +86,7 @@ test("keyboard chart controls do not advance Reveal; completed exploration retai
   expect((await state(page)).selection.cohort).toBe("later");
   expect(page.url()).toContain("#/flight-phase");
   const measure = page.locator('[data-measure="percentage"]');
+  await expect(measure).toBeVisible(); // The causes panel fades in after Show full view.
   await measure.focus();
   await page.keyboard.press("Space");
   expect((await state(page)).area.measure).toBe("percentage");
@@ -114,6 +115,7 @@ test("themes, reduced motion, mobile layout and explicit cause jump", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({width:1280,height:720});
   await chapter(page);
   await page.locator('[data-cohort="departure"]').click();
   if (screenshotDir)
