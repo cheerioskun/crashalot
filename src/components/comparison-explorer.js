@@ -3,6 +3,7 @@ import './comparison-explorer.css';
 import {createComparisonBeats} from './comparison-beats.js';
 import {createFlightTypeRidgeline} from './flight-type-ridgeline.js';
 import {createAircraftModelPacking} from './aircraft-model-packing.js';
+import {createLinkedViewCue} from './linked-view-cue.js';
 
 let dataset;
 const shared={start:1970,end:2025,operation:'all',manufacturer:null};
@@ -118,6 +119,7 @@ async function mount(container,kind) {
     q('[data-manufacturer]').addEventListener('change',event=>change({manufacturer:event.target.value||null}));
   }
   const modelPacking=aircraft?createAircraftModelPacking({host:q('.comparison-model-grid'),tooltip:q('.comparison-tooltip'),onSelect:model=>{root.comparisonState.modelPacking.selectedModel=model;}}):null;
+  const scrollCue=aircraft?createLinkedViewCue({view:root.closest('.view'),section:q('.comparison-model-grid'),target:q('.model-packing-head h2'),label:'Explore aircraft models below',ready:()=>Number(root.dataset.dataProgress)>0}):null;
   function describeOutcome(cell,label=cell.label) {
     return `${label}: ${number(cell.fatalCount)} fatal crashes, ${number(cell.count-cell.fatalCount)} nonfatal crashes; ${number(cell.count)} total.`;
   }
@@ -287,6 +289,7 @@ async function mount(container,kind) {
     root.dispatchEvent(new CustomEvent('crashalot:comparison-selection',{bubbles:true,detail:root.comparisonState}));
   }
   function paintNarrative({stage,progress,reduced}) {
+    scrollCue?.refresh();
     root.classList.toggle('is-exploring',stage>=(aircraft?4:3));
     if(aircraft) {
       root.closest('section').dataset.aircraftBeat=['0','1','2','3','3.5'][stage];
@@ -346,7 +349,7 @@ async function mount(container,kind) {
   listeners.add(render);render();
   return {
     resize(){if(active){scatterKey='';render();}},
-    setActive(value){active=value;narrative.setActive(value);if(active)render();},
+    setActive(value){active=value;scrollCue?.setActive(value);narrative.setActive(value);if(active)render();},
     setPlaybackMode:value=>narrative.setPlaybackMode(value),
     getNavigationState:()=>narrative.getNavigationState(),
     getPlaybackTiming:()=>narrative.getPlaybackTiming(),
@@ -354,7 +357,7 @@ async function mount(container,kind) {
     nextBeat:()=>narrative.nextBeat(),
     previousBeat:()=>narrative.previousBeat(),
     showLastBeat:()=>narrative.showLastBeat(),
-    destroy(){destroyed=true;typeTrails?.hide();narrative.destroy();listeners.delete(render);observer.disconnect();root.remove();},
+    destroy(){destroyed=true;scrollCue?.destroy();typeTrails?.hide();narrative.destroy();listeners.delete(render);observer.disconnect();root.remove();},
   };
 }
 export const mountFlightTypes=container=>mount(container,'types');

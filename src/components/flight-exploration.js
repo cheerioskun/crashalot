@@ -6,6 +6,7 @@ import "./flight-exploration/style.css";
 import { createRoot } from "react-dom/client";
 import { AreaBump } from "@nivo/bump";
 import { createBeatPlayback } from "./beat-playback.js";
+import { createLinkedViewCue } from './linked-view-cue.js';
 export async function mountFlightExploration(container) {
   const response = await fetch(
     `${import.meta.env.BASE_URL}data/flight-exploration.json`,
@@ -63,6 +64,7 @@ export async function mountFlightExploration(container) {
     { label:'6', end:3, hold:0, bridge:true },
   ];
   const scene = () => beats[revealStage];
+  const scrollCue=createLinkedViewCue({view:root.closest('.view'),section:root.querySelector('.area-section'),target:root.querySelector('#flight-causes-title'),label:'Explore causes below',className:'jump-to-causes',ready:()=>revealProgress>0&&!scene().bridge});
   const fullView = () => revealStage>=10 && revealProgress>=phases.length;
   const complete = () => scene().bridge===true;
   const clamp = value => Math.max(0, Math.min(1, value));
@@ -728,6 +730,7 @@ export async function mountFlightExploration(container) {
     root.querySelector('.flight-commentary').classList.toggle('is-visible',revealStage>0 || exploring);
   }
   function renderRevealControls() {
+    scrollCue.refresh();
     root.dataset.revealStage=String(revealStage);root.dataset.revealProgress=String(revealProgress);
     root.dataset.storyBeat=scene().label;root.dataset.playback=playback.status;
     const bridge=scene().bridge===true;
@@ -841,15 +844,6 @@ export async function mountFlightExploration(container) {
   root
     .querySelector("[data-clear-selection]")
     .addEventListener("click", clearSelection);
-  root.querySelector(".jump-to-causes").addEventListener("click", () => {
-    root.querySelector("#flight-causes-title").focus({ preventScroll: true });
-    root
-      .querySelector(".area-section")
-      .scrollIntoView({
-        behavior: reduced.matches ? "instant" : "smooth",
-        block: "start",
-      });
-  });
   function clearSelection() {
     playback.hold(); showAll();
     selected = "all";
@@ -899,11 +893,12 @@ export async function mountFlightExploration(container) {
     },
     setActive(value) {
       if (active===value) return;
-      active=value; playback.setActive(value);
+      active=value; scrollCue.setActive(value); playback.setActive(value);
       if (!active) { svg.selectAll('*').interrupt(); reactRoot.render(null); return; }
       hasRenderedArea=false; draw(); renderArea(); announce(false);
     },
     destroy() {
+      scrollCue.destroy();
       playback.destroy();
       destroyed = true;
       observer.disconnect();
