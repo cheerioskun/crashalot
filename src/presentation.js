@@ -52,7 +52,7 @@ let autoPlayback = true;
 function setAutoPlayback(value) {
   autoPlayback = value;
   playbackToggle.setAttribute('aria-pressed', String(autoPlayback));
-  playbackToggle.setAttribute('aria-label', 'Auto reveals');
+  playbackToggle.setAttribute('aria-label', 'Autoplay');
   playbackToggle.title = autoPlayback ? 'Auto reveals on · click or press Space to turn off' : 'Auto reveals off · click or press Space to turn on';
   chartInstances.forEach(chart => chart.setPlaybackMode?.(autoPlayback));
   hookPlayback.setMode(autoPlayback);

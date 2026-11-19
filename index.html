@@ -11,18 +11,20 @@
     <header class="presentation-header">
       <a class="presentation-brand" href="#/welcome">Eyecandy <span>/ Flying</span></a>
       <div class="presentation-utilities" role="group" aria-label="Overhead controls">
-        <button type="button" class="utility-button" id="playback-toggle" aria-label="Auto reveals" aria-keyshortcuts="Space" title="Auto reveals on · click or press Space to turn off" aria-pressed="true">
+        <button type="button" class="utility-button" id="playback-toggle" aria-label="Autoplay" aria-keyshortcuts="Space" title="Auto reveals on · click or press Space to turn off" aria-pressed="true">
           <svg class="utility-icon seatbelt-icon" viewBox="0 0 32 24" aria-hidden="true">
             <path class="belt-strap" d="M2 10h8v6H2zm21 0h7v6h-7z"/>
             <rect x="10" y="7" width="8" height="12" rx="1.5"/>
             <path d="M18 9h5v8h-5m-4-6v4"/>
           </svg>
+          <span class="utility-label">Autoplay</span>
         </button>
-        <button type="button" class="utility-button" id="theme-toggle" aria-label="Cabin light" title="Cabin light on · click for dark mode" aria-pressed="true">
+        <button type="button" class="utility-button" id="theme-toggle" aria-label="Theme" title="Cabin light on · click for dark mode" aria-pressed="true">
           <svg class="utility-icon reading-light-icon" viewBox="0 0 28 24" aria-hidden="true">
             <path d="M10 3h12m-6 0v4m-3 0 6 2-3 8-8-3 5-7Z"/>
             <path class="lamp-rays" d="m7 18-2 3m5-2-1 3m-4-7-3 1"/>
           </svg>
+          <span class="utility-label">Theme</span>
         </button>
         <span id="presentation-theme-status" class="visually-hidden" role="status"></span>
       </div>

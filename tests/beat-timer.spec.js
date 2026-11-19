@@ -9,7 +9,8 @@ const fraction=p=>wick(p).evaluate(node=>Number(node.style.getPropertyValue('--b
 test('one translucent wick spans the slide and resumes without resetting at beat boundaries',async({page})=>{
  await frozen(page);const button=page.locator('[data-story-next]'),geometry=await button.boundingBox();
  await expect(footer(page)).toHaveAttribute('data-timing-state','countdown');await expect(page.locator('.beat-timer-label')).toHaveText('Slide · 16.3s left');
- expect(await wick(page).evaluate(n=>Number(getComputedStyle(n).opacity))).toBeLessThan(.6);
+ expect(await wick(page).evaluate(n=>Number(getComputedStyle(n).opacity))).toBeGreaterThanOrEqual(.7);
+ expect(await wick(page).evaluate(n=>Number(getComputedStyle(n).opacity))).toBeLessThan(1);
  await page.clock.runFor(850);const partial=await fraction(page);expect(partial).toBeGreaterThan(.04);expect(partial).toBeLessThan(.07);
  await page.keyboard.press('Space');await page.clock.runFor(32);await expect(footer(page)).toHaveAttribute('data-timing-state','paused');
  const held=await fraction(page);await page.clock.fastForward(5000);expect(await fraction(page)).toBe(held);

@@ -229,8 +229,8 @@ test('reduced motion shows a complete static view and never changes slides', asy
 
 test('cover controls work before starting and keep their geometry across all four states', async ({ page }) => {
   await frozen(page, 'welcome');
-  const auto = page.getByRole('button', { name:'Auto reveals', exact:true });
-  const light = page.getByRole('button', { name:'Cabin light', exact:true });
+  const auto = page.getByRole('button', { name:'Autoplay', exact:true });
+  const light = page.getByRole('button', { name:'Theme', exact:true });
   await expect(light).toBeEnabled();
   await expect(light).toBeVisible();
   await expect(auto).toBeVisible();
